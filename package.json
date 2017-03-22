@@ -1,0 +1,20 @@
+{
+  "name": "tim",
+  "description": "A simple chat room experiment using pomelo framework and html5. The chat server currently runs on nodejs v0.8, and should run fine on the latest stable as well.It requires the following npm libraries: - pomelo - express - crc",
+  "version": "1.0.0",
+  "main": "game-server/app.js",
+  "devDependencies": {},
+  "scripts": {
+    "nodemon": "nodemon game-server/app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "xuezi",
+  "license": "ISC",
+  "dependencies": {
+    "@ym/rpc": "^0.5.6",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "mongodb": "^2.2.24",
+    "promise-redis": "^0.0.5"
+  }
+}

@@ -1,0 +1,61 @@
+'use strict';
+
+var pomelo = require('pomelo');
+var routeUtil = require('./app/util/routeUtil');
+/**
+ * Init app for client.
+ */
+var app = pomelo.createApp();
+app.set('name', 'chatofpomelo');
+
+const config = require('./config/config');
+
+
+const co = require('co');
+co(function*() {
+  const { ObjectID, db } = yield require('./libs/mongodb')(config.mongodb);
+
+  app.set('ObjectID', ObjectID, true);
+  app.set('db', db, true);
+
+  require('./libs/redis')(app, config.redis);
+
+  // app configure
+  app.configure('production|development', function() {
+    // route configures
+    app.route('chat', routeUtil.chat);
+    app.set('connectorConfig', {
+      connector: pomelo.connectors.sioconnector,
+      // 'websocket', 'polling-xhr', 'polling-jsonp', 'polling'
+      transports: ['websocket', 'polling'],
+      heartbeats: true,
+      closeTimeout: 60 * 1000,
+      heartbeatTimeout: 60 * 1000,
+      heartbeatInterval: 25 * 1000
+    });
+    // filter configures
+    app.filter(pomelo.timeout());
+  });
+
+  app.set('errorHandler', require('./libs/error.handler'));
+
+  // add express server component
+  if (app.getServerType() == 'express') {
+    var exp = require('./app/components/expressproxy');
+    app.load('expressproxy', exp(app));
+  }
+
+  if (app.getServerType() == 'rpc') {
+    var rpc = require('./app/components/rpcproxy');
+    app.load('rpc', rpc(app, config.rpc));
+  }
+
+  // start app
+  app.start();
+
+}).catch(e => {
+  throw e;
+});
+process.on('uncaughtException', function(err) {
+  console.error(' Caught exception: ' + err.stack);
+});

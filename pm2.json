@@ -1,0 +1,13 @@
+{
+  "apps": [{
+    "name": "tim",
+    "script": "game-server/app.js",
+    "args": [
+    ],
+    "node_args": [
+    ],
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }]
+}
