@@ -1,32 +1,23 @@
 'use strict';
-
 module.exports = function(app) {
   return new MessageRemote(app);
 };
 
 var MessageRemote = function(app) {
   this.app = app;
-  this.messageCollection = app.db.collection('message');
-  this.cacheMessageCollection = app.db.collection('message.offline');
   this.channelService = app.get('channelService');
+  this.Message = require('../../../models/message')(app);
+
 };
 
 const prototype = MessageRemote.prototype;
 
-/**
- * send offline msg
- */
-prototype.sendOfflineMessage = function(msg) {
-  let self = this;
-  return self.saveOfflineMessage(msg);
-};
-
 prototype.saveMessage = function(msg, cb) {
   let self = this;
-  msg.data_create = new Date;
 
-  self.messageCollection.insertOne(msg).then(result => {
-    cb(null, result);
+  new this.Message(msg).save().then(result => {
+    msg._id = result.insertedId;
+    cb(null, msg);
   }).catch(e => {
     console.error(e);
     cb(e);
@@ -34,19 +25,19 @@ prototype.saveMessage = function(msg, cb) {
 };
 
 prototype.saveOfflineMessage = function(msg, cb) {
-  let self = this;
-  msg.date_create = new Date;
-
-  return Promise.all([self.messageCollection.insertOne(msg), self.cacheMessageCollection.insertOne(msg)]).then(results => {
+  new this.Message(msg).saveOffline().then(results => {
     cb(null, results);
-  }).catch(cb);
+  }).catch(e => {
+    console.error(e);
+    cb(e);
+  });
 };
 
 prototype.getOfflineMessage = function(target, cb) {
-  let self = this;
-
-  self.cacheMessageCollection.find({ target }).then(results => {
-    if (!results || !results.length) return cb();
-    cb(null, results);
-  }).catch(cb);
+  this.Message.offlineMessageCount({ target }).then(result => {
+    cb(null, result);
+  }).catch(e => {
+    console.error(e);
+    cb(e);
+  });
 };

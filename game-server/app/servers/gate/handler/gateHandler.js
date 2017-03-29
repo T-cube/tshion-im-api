@@ -19,9 +19,8 @@ class Handler {
    *
    */
   queryEntry(msg, session, next) {
-    console.log('queryEntry msg===============', msg);
-    let { uid, pass } = msg;
-    if (!uid) {
+    let { username, pass } = msg;
+    if (!username) {
       next(null, {
         code: 500,
         message: 'username no found'
@@ -38,13 +37,13 @@ class Handler {
       return;
     }
     // 在这里向后台发送登陆服务请求
-    this.app.rpc.account.accountRemote.login(null, uid, pass, function(err, data) {
+    this.app.rpc.account.accountRemote.login(null, username, pass, function(err, data) {
       console.log('end rpc=======', data);
 
       if (err) return next(err);
 
       // select connector
-      var res = dispatcher.dispatch(uid, connectors);
+      var res = dispatcher.dispatch(username, connectors);
       next(null, {
         code: 200,
         host: res.host,

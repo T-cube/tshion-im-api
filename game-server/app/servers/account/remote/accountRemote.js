@@ -8,6 +8,7 @@ module.exports = function(app) {
 var AccountRemote = function(app) {
   this.app = app;
   this.roomMap = new Map();
+  this.channelService = app.get('channelService');
 };
 
 const prototype = AccountRemote.prototype;
@@ -26,6 +27,7 @@ prototype.login = function(username, password, cb) {
 
 
 prototype.bindChannel = function(uid, cid, cb) {
+
   this.app.onlineRedis.set(uid, cid).then(status => {
     cb(null, status);
   }).catch(cb);

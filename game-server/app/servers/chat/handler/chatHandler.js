@@ -29,30 +29,107 @@ prototype.joinRoom = function(msg, session, next) {
     if (err) return next(err);
 
     self.app.onlineRedis.get(target).then(cid => {
-      if (!cid) return next({ code: 404, error: 'user offline' });
-      let channel = self.channelService.getChannel(cid, false);
-      // roomid save 2 people channelid
-      self.app.roomMap.set(roomid, {
-        [username]: fcid,
-        [target]: cid
-      });
+      let msg = { code: 200, roomid };
+      if (!cid) msg.error = 'user offline';
+      else {
+
+        let channel = self.channelService.getChannel(cid, false);
+        // roomid save 2 people channelid
+        self.app.roomMap.set(roomid, {
+          [username]: fcid,
+          [target]: cid
+        });
 
 
-      param.roomid = roomid;
-      if (target == '*') {
-        channel.pushMessage(param);
-      } else {
-        let tuid = `${target}*${cid}`;
-        let member = channel.getMember(tuid);
-        let tsid = member['sid'];
-        self.channelService.pushMessageByUids(param, [{ uid: tuid, sid: tsid }]);
+        param.roomid = roomid;
+        if (target == '*') {
+          channel.pushMessage(param);
+        } else {
+          let tuid = `${target}*${cid}`;
+          let member = channel.getMember(tuid);
+          let tsid = member['sid'];
+          self.channelService.pushMessageByUids(param, [{ uid: tuid, sid: tsid }]);
+        }
       }
-      next(null, { code: 200, roomid });
+      next(null, msg);
     }).catch(e => {
       console.error('error redis.......', e);
       next(e);
     });
   });
+};
+
+/**
+ * init group
+ * @param {Object} msg
+ * @param {Array} msg.members
+ * @param {String} msg.group
+ * @param {Function} next
+ */
+prototype.initGroup = function(msg, session, next) {
+  let self = this;
+  let { members, group } = msg;
+
+  let [creator, cid] = session.uid.split('*');
+
+  let channel = self.channelService.getChannel(cid);
+  !channel.groupMap && (channel.groupMap = new Map());
+  let map = channel.groupMap;
+
+  let _members = map.get(group);
+
+  if (_members) return next(null, { code: 200, inited: true });
+
+  self.app.rpc.group.groupRemote.init(session, creator, group, members, function(err, result) {
+    if (err) return next(err);
+    map.set(group, members);
+    next(null, { code: 200, inited: true });
+  });
+};
+
+/**
+ * add members to group
+ * @param {Object} msg
+ * @param {Array} msg.members
+ * @param {String} msg.group
+ * @param {Function} next
+ */
+prototype.addGroupMember = function(msg, session, next) {
+  let self = this;
+
+  let { members, group } = msg;
+  let [creator, cid] = session.uid.split('*');
+
+  let channel = self.channelService.getChannel(cid);
+  let map = channel.groupMap;
+
+  self.app.rpc.group.groupRemote.insertMembers(session, creator, group, members, function(err, result) {
+    if (err) return next(err);
+
+    next(null, result);
+  });
+};
+
+/**
+ * remote members from group
+ */
+prototype.removeGroupMember = function(msg, session, next) {
+  let self = this;
+
+  let { members, group } = msg;
+
+  let [creator, cid] = session.uid.split('*');
+
+  let channel = self.channelService.getChannel(cid);
+
+  let map = channel.groupMap;
+
+  self.app.rpc.group.groupRemote.removeMembers(session, creator, group, members, function(err, result) {
+    if (err) return next(err);
+
+    next(null, result);
+  });
+
 };
 
 /**
@@ -66,18 +143,17 @@ prototype.joinRoom = function(msg, session, next) {
 prototype.send = function(msg, session, next) {
   let self = this;
   let { target, roomid } = msg;
-  let cid = self.app.roomMap.get(roomid)[target];
+  let room = self.app.roomMap.get(roomid);
+  let cid = room ? room[target] : null;
   var username = session.uid.split('*')[0];
   var param = Object.assign(msg, {
     route: 'onChat',
     roomid,
-    date_create: new Date,
     from: username,
-    target: msg.target
+    target
   });
 
-  let channel = self.channelService.getChannel(cid, false);
-  console.log(channel);
+  let channel = cid ? self.channelService.getChannel(cid, false) : null;
   if (!channel) {
     return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
       if (err) return next(err);

@@ -17,20 +17,11 @@ var handler = Handler.prototype;
  * @return {Void}
  */
 handler.enter = function(msg, session, next) {
-  var self = this;
+  let self = this;
   let { cid } = msg;
-  var uid = msg.username + '*' + cid;
-  var sessionService = self.app.get('sessionService');
+  let uid = msg.username + '*' + cid;
 
   //duplicate log in
-  if (!!sessionService.getByUid(uid)) {
-    next(null, {
-      code: 500,
-      error: true
-    });
-    return;
-  }
-
   session.bind(uid);
   session.set('cid', cid);
   session.push('cid', function(err) {
@@ -38,15 +29,16 @@ handler.enter = function(msg, session, next) {
       console.error('set cid for session service failed! error is : %j', err.stack);
     }
   });
-  session.on('closed', onUserLeave.bind(null, self.app));
-
+  session.on('closed', onUserLeave.bind(null, self.app, session));
   //put user into channel
-  self.app.rpc.chat.chatRemote.add(session, uid, self.app.get('serverId'), cid, true, function(users) {
+  self.app.rpc.chat.chatRemote.add(session, uid, self.app.get('serverId'), cid, true, function(result) {
+    let { users, members } = result;
     self.app.rpc.account.accountRemote.bindChannel(session, msg.username, cid, function(err, status) {
       if (err || !status) return next(err);
       next(null, {
-        cid: cid,
-        users: users
+        cid,
+        users,
+        members
       });
     });
   });

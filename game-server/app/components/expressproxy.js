@@ -10,6 +10,7 @@ module.exports = function(app, opts) {
 var ExpressProxy = function(app, opts) {
   this.opts = opts;
   this.exp = express();
+  this.app = app;
 
   // body-parser
   this.exp.use(bodyParser.urlencoded({
@@ -20,6 +21,26 @@ var ExpressProxy = function(app, opts) {
     'defaultCharset': 'utf-8'
   }));
 
+  const cors=require('cors');
+
+  const whitelist = ['http://cp.tlf.michael.local', 'https://cp.tlifang.com', 'https://cpapi.tlifang.com/oauth/token', 'http://cp.tlifang.com'];
+  let corsOptionsDelegate = function(url, callback) {
+    console.log('>>>>>>>>>>>>>>>:', url);
+    let corsOptions;
+    if (whitelist.indexOf(url) !== -1) {
+      corsOptions = {
+        origin: true
+      }; // reflect (enable) the requested origin in the CORS response
+    } else {
+      corsOptions = {
+        origin: false
+      }; // disable CORS for this request
+    }
+    callback(null, corsOptions); // callback expects two parameters: error and options
+  };
+  this.exp.use(cors({
+    origin: corsOptionsDelegate
+  }));
 
   // add app to req
   this.exp.use(function(req, res, next) {
@@ -27,12 +48,17 @@ var ExpressProxy = function(app, opts) {
     next();
   });
 
-  require('../express-proxy/route')(this.exp, app);
+  let self = this;
+  require('../express-proxy/route')(this.exp, this.app);
   // router
   this.exp.get('/', function(req, res) {
-    app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
+    self.app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
       res.json(data);
     });
+  });
+
+  this.start(function() {
+    console.log('express started');
   });
 };
 
