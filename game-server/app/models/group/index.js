@@ -19,7 +19,7 @@ module.exports = function(app) {
     }
 
     static exists(group) {
-      return groupCollection.findOne({ group }, { group: 1, date_create: 1 });
+      return groupCollection.findOne({ group }, { date_create: 1, roomid: 1 });
     }
 
     static insertMembers(query) {
@@ -27,7 +27,13 @@ module.exports = function(app) {
       return groupCollection.findOne({ creator, group }).then(doc => {
         if (!doc) throw new Error('only creator can add members');
 
-        return groupCollection.updateOne({ group }, { $addToSet: { members: { $each: members } } }, {}, { returnOriginal: true });
+        return groupCollection.findOneAndUpdate({ group }, { $addToSet: { members: { $each: members } } }, {
+          projection: { members: 1, group: 1 },
+          returnOriginal: false,
+          returnNewDocument: true
+        }).then(result => {
+          return result.value;
+        });
       });
     }
 
@@ -37,7 +43,13 @@ module.exports = function(app) {
       return groupCollection.findOne({ creator, group }).then(doc => {
         if (!doc) throw new Error('only creator can remove member');
 
-        return groupCollection.update({ group, creator }, { $pullAll: { members } }, {}, { returnOriginal: true });
+        return groupCollection.findOneAndUpdate({ group, creator }, { $pullAll: { members } }, {
+          projection: { members: 1, group: 1 },
+          returnOriginal: false,
+          returnNewDocument: true
+        }).then(result => {
+          return result.value;
+        });
       });
     }
   };

@@ -25,8 +25,8 @@ prototype.saveMessage = function(msg, cb) {
 };
 
 prototype.saveOfflineMessage = function(msg, cb) {
-  new this.Message(msg).saveOffline().then(results => {
-    cb(null, results);
+  new this.Message(msg).saveOffline().then(result => {
+    cb(null, result);
   }).catch(e => {
     console.error(e);
     cb(e);
@@ -37,6 +37,24 @@ prototype.getOfflineMessage = function(target, cb) {
   this.Message.offlineMessageCount({ target }).then(result => {
     cb(null, result);
   }).catch(e => {
+    console.error(e);
+    cb(e);
+  });
+};
+
+
+prototype.saveGroupMessage = function(msg, offlineMembers = [], cb) {
+  let self = this;
+
+  if (!offlineMembers.length) new self.Message(msg).save().then(result => {
+    cb(null, result);
+  }).catch(e => {
+    console.error(e);
+    cb(e);
+  });
+  else Promise.all([new self.Message(msg).save(), self.Message.saveMany(offlineMembers.map(target => {
+    return new self.Message(Object.assign(msg, { target }));
+  }), true)]).then(results => cb(null, results)).catch(e => {
     console.error(e);
     cb(e);
   });

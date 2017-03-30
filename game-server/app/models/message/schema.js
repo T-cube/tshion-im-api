@@ -5,6 +5,7 @@ module.exports = {
   target: { type: 'string' },
   roomid: { type: 'string' },
   route: { type: 'string' },
+  group: { type: 'string' },
   timestamp: { type: 'string|number', default: () => { return +new Date; } },
   type: { type: 'string', default: 'text' },
   __route__: { type: 'string' }
