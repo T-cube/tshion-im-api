@@ -89,7 +89,7 @@ on 'addMember' event receive data
 {
   route: 'addMember',
   group: String,
-  members: Array,   // the members who added this group
+  members: Array,   // the members who added to this group
   from: String
 }
 ```
@@ -113,7 +113,7 @@ on 'removeMember' event receive data
 {
   route: 'removeMember',
   group: String,
-  members: Array,   // the members who left this group
+  members: Array,   // the members who left from this group
   from: String
 }
 ```
