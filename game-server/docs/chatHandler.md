@@ -128,10 +128,12 @@ on 'leaveGroup' event receive data
 
 ## chat.chatHandler.sendGroup
 ```javascript
+{
   group: String,
   content: String,    // optional, if type text
   type: Enum,         // text, image, file
   url: String         // optional, if type is image or file
+}
 ```
 request return
 ```javascript
