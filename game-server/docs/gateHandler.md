@@ -1,6 +1,7 @@
 # gateHandler
 
 ## gate.gateHandler.queryEntry
+*user login*
 ```javascript
 {
   user: String,

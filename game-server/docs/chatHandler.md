@@ -1,5 +1,6 @@
 # ChatHandler
 ## chat.chatHandler.joinRoom
+*user join a room*
 ```javascript
 {
   target: String(ObjectID),  // the id of who you want to talk
@@ -22,6 +23,7 @@ on 'joinRoom' event receive data
 ```
 
 ## chat.chatHandler.send
+*user send a message for one by one*
 ```javascript
 {
   target: String,
@@ -50,6 +52,7 @@ on 'onChat' event receive data
 ```
 
 ## chat.chatHandler.initGroup
+*user init group before chat in group*
 ```javascript
 {
   members: Array,     // user_id array
@@ -72,6 +75,7 @@ on 'groupInit' event reveive data
 ```
 
 ## chat.chatHandler.addGroupMember
+*user add a member to group*
 ```javascript
 {
   group: String,
@@ -96,6 +100,7 @@ on 'addMember' event receive data
 
 
 ## chat.chatHandler.removeGroupMember
+*user remove a member from group*
 ```javascript
 {
   group: String,
@@ -127,6 +132,7 @@ on 'leaveGroup' event receive data
 ```
 
 ## chat.chatHandler.sendGroup
+*user send a message in group*
 ```javascript
 {
   group: String,

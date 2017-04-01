@@ -1,3 +1,4 @@
+'use strict';
 module.exports = function(app) {
   return new Handler(app);
 };
@@ -45,16 +46,27 @@ handler.enter = function(msg, session, next) {
 };
 
 /**
+ * User log out by self
+ */
+handler.kick = function(msg, session, next) {
+  let self = this;
+
+  self.onUserLeave(self.app, session, function() {
+    next(null, {});
+  });
+};
+
+/**
  * User log out handler
  *
  * @param {Object} app current application
  * @param {Object} session current session object
  *
  */
-var onUserLeave = function(app, session) {
+var onUserLeave = function(app, session, cb) {
   console.log('user leave=======');
   if (!session || !session.uid) {
     return;
   }
-  app.rpc.chat.chatRemote.kick(session, session.uid, app.get('serverId'), session.get('cid'), null);
+  app.rpc.chat.chatRemote.kick(session, session.uid, app.get('serverId'), session.get('cid'), cb || null);
 };
