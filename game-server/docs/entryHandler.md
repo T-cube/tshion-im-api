@@ -4,8 +4,8 @@
 *user entry connector*
 ```javascript
 {
+  init_token: String,
   cid: String,      // the id of user current company id
-  uid: String       // user id
 }
 ```
 request return

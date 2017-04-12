@@ -6,11 +6,20 @@ module.exports = {
   },
   redis: [
     { db: 7, prefix: 'online' },
-    { prefix: 'msg' }
+    { prefix: 'msg' },
+    { prefix: 'token' }
   ],
   rpc: {
     host: '127.0.0.1',
     port: '2001',
+    register: {
+      protocol: 'http',
+      hostname: '127.0.0.1',
+      // hostname: '192.168.1.22',
+      port: 3000,
+      appid: 'tim',
+      appsecret: 'S7B6881J8nRRqCjG',
+    },
     users: {
       'xuezi': {
         appsecret: '123456',

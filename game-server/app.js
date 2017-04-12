@@ -10,7 +10,6 @@ app.set('name', 'chatofpomelo');
 
 const config = require('./config/config');
 
-
 const co = require('co');
 co(function*() {
   const { ObjectID, db } = yield require('./libs/mongodb')(config.mongodb);

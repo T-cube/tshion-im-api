@@ -15,5 +15,6 @@ module.exports = function(app, config) {
 
     require('./rpc')(appid, handleSocket, app);
   });
+
   server.listen(config.port || 2001, config.host || '127.0.0.1');
 };

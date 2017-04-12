@@ -1,10 +1,12 @@
 'use strict';
+
 module.exports = function(app) {
   return new ChatRemote(app);
 };
 
 var ChatRemote = function(app) {
   this.app = app;
+  this.Room = require('../../../models/room')(app);
   this.channelService = app.get('channelService');
 };
 
@@ -38,12 +40,24 @@ ChatRemote.prototype.add = function(uid, sid, cid, flag, cb) {
   channel.add(uid, sid);
 
   let members = channel.getMembers();
-  console.log(members)
+  console.log(members);
   members = members.map(member => {
     return member.split('*')[0];
   });
-  this.app.rpc.account.accountRemote.login(null, uid, 123, function() {
-    cb({ users: self.get(cid, flag), members });
+  cb({ users: self.get(cid, flag), members });
+};
+
+/**
+ * Get user RoomMap
+ * @param {String} uid
+ * @param {Function} cb
+ */
+ChatRemote.prototype.roomInfo = function(uid, cb) {
+  this.Room.getUserRoomMap(uid).then(map => {
+    cb(null, map);
+  }).catch(e => {
+    console.error(e);
+    cb(e);
   });
 };
 

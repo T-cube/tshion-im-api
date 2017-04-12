@@ -1,11 +1,14 @@
 'use strict';
-var dispatcher = require('../../../util/dispatcher');
+const dispatcher = require('../../../util/dispatcher');
+const crypto = require('crypto');
+// const TOKEN_EXPIRE = 60 * 60 * 24;
+const TOKEN_EXPIRE = 60 * 30;
 
 module.exports = function(app) {
-  return new Handler(app);
+  return new gateHandler(app);
 };
 
-class Handler {
+class gateHandler {
   constructor(app) {
     this.app = app;
   }
@@ -19,16 +22,12 @@ class Handler {
    *
    */
   queryEntry(msg, session, next) {
-    let { username, pass } = msg;
-    if (!username) {
-      next(null, {
-        code: 500,
-        message: 'username no found'
-      });
-      return;
-    }
+    let self = this;
+    let { token, uid } = msg;
+
+    if (!token) return next(null, { code: 500, message: 'token can not be null' });
     // get all connectors
-    var connectors = this.app.getServersByType('connector');
+    let connectors = this.app.getServersByType('connector');
     if (!connectors || connectors.length === 0) {
       next(null, {
         code: 500,
@@ -37,19 +36,60 @@ class Handler {
       return;
     }
     // 在这里向后台发送登陆服务请求
-    this.app.rpc.account.accountRemote.login(null, username, pass, function(err, data) {
+    self.app.rpc.account.accountRemote.login(null, token, function(err, data) {
       console.log('end rpc=======', data);
 
       if (err) return next(err);
 
-      // select connector
-      var res = dispatcher.dispatch(username, connectors);
-      next(null, {
-        code: 200,
-        host: res.host,
-        port: res.clientPort
-      });
+
+      let { user_id } = data;
+      if (user_id == uid) {
+        const init_token = crypto.createHash('sha1').update(`${uid}:${+new Date}`).digest('hex');
+        // select connector
+        var res = dispatcher.dispatch(uid, connectors);
+
+        self.app.tokenRedis.setex(init_token, TOKEN_EXPIRE, JSON.stringify({
+          uid,
+          host: res.host,
+          port: res.clientPort
+        })).then(result => {
+          console.log(result);
+          next(null, {
+            code: 200,
+            host: res.host,
+            port: res.clientPort,
+            init_token
+          });
+        }).catch(e => {
+          console.error(e);
+          next({ error: 'server redis error' });
+        });
+      } else {
+        next({ error: 'token no worked for this user' });
+      }
     });
   };
 
+  tokenEntry(msg, session, next) {
+    let self = this;
+
+    let { init_token, uid } = msg;
+
+    self.app.tokenRedis.get(init_token).then(result => {
+      if (!result) return next({ error: 'init_token expired or no exists' });
+
+      const json = JSON.parse(result);
+
+      if (json.uid != uid) return next({ error: 'init_token no worked for this user' });
+
+      next(null, {
+        code: 200,
+        host: json.host,
+        port: json.port
+      });
+    }).catch(e => {
+      console.error(e);
+      next({ error: 'server redis error' });
+    });
+  }
 }

@@ -13,16 +13,13 @@ var AccountRemote = function(app) {
 
 const prototype = AccountRemote.prototype;
 
-prototype.login = function(username, password, cb) {
+prototype.login = function(token, cb) {
   // use when need
-  // let rpc = this.app.component.rpc;
-  // rpc.route('/account/login', { username, password }, data => {
-  //   if (data.status == 200) return cb(null, data.data);
-
-  //   console.error(data);
-  //   cb(data);
-  // });
-  cb(null, 'ok connected');
+  console.log(this.app.get('hello'));
+  this.app.rpc.tlifang.tlifangRemote.login(null, token, function(err, data) {
+    if (err) return cb(err);
+    cb(null, data);
+  });
 };
 
 
