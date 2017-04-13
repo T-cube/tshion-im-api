@@ -1,6 +1,6 @@
 # entryHandler
 
-## connector.entryHandler.entry
+## connector.entryHandler.enter
 *user entry connector*
 ```javascript
 {
