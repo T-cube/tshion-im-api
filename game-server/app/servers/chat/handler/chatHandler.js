@@ -19,36 +19,38 @@ var prototype = Handler.prototype;
 prototype.joinRoom = function(msg, session, next) {
   let self = this;
   let { target } = msg;
-  let [username, fcid] = session.uid.split('*');
+  let [uid, fcid] = session.uid.split('*');
   let param = {
     route: 'joinRoom',
-    from: username,
+    from: uid,
   };
 
-  self.app.rpc.account.accountRemote.bindRoom(session, username, target, function(err, roomid) {
-    if (err) return next(err);
+  if (!target) return next({ error: 'target can not be null' });
 
+  self.app.rpc.account.accountRemote.bindRoom(session, uid, target, fcid, function(err, room) {
+    if (err) return next(err);
+    console.log(target, '.............');
+    console.log(room);
     self.app.onlineRedis.get(target).then(cid => {
-      let msg = { code: 200, roomid };
+      console.log(cid);
+      let msg = room;
       if (!cid) msg.error = 'user offline';
       else {
-
         let channel = self.channelService.getChannel(cid, false);
         // roomid save 2 people channelid
-        self.app.roomMap.set(roomid, {
-          [username]: fcid,
+        self.app.roomMap.set(room.roomid, {
+          [uid]: fcid,
           [target]: cid
         });
 
 
-        param.roomid = roomid;
         if (target == '*') {
           channel.pushMessage(param);
         } else {
           let tuid = `${target}*${cid}`;
           let member = channel.getMember(tuid);
           let tsid = member['sid'];
-          self.channelService.pushMessageByUids(param, [{ uid: tuid, sid: tsid }]);
+          self.channelService.pushMessageByUids(Object.assign(param, room), [{ uid: tuid, sid: tsid }]);
         }
       }
       next(null, msg);

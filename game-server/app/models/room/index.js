@@ -14,7 +14,7 @@ module.exports = function(app) {
     save() {
       let self = this;
 
-      return RoomCollection.findOne({ roomid: self.roomid }).then(odc => {
+      return RoomCollection.findOne({ roomid: self.roomid }).then(doc => {
         if (doc) return doc;
 
         return RoomCollection.insertOne(self).then(result => {
@@ -24,16 +24,22 @@ module.exports = function(app) {
       });
     }
 
+    static upgradeActive(room) {
+      let { _id } = room;
+      return RoomCollection.findOneAndUpdate({ _id }, { $set: { last_active: +new Date } }, {
+        returnOriginal: false,
+        returnNewDocument: true
+      }).then(doc => doc.value);
+    }
+
 
     /**
      * get user room map
      * @param {String} uid
      * @return {Promise}
      */
-    static getUserRoomMap(uid) {
-      return RoomCollection.find({ members: uid }).toArray().then(docs => {
-        return docs;
-      });
+    static getUserRoomMap(uid, cid) {
+      return RoomCollection.find({ cid, members: uid }).toArray().then(docs => docs);
     }
   };
 };

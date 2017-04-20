@@ -8,6 +8,7 @@ module.exports = function(app) {
 var AccountRemote = function(app) {
   this.app = app;
   this.roomMap = new Map();
+  this.Room = require('../../../models/room')(app);
   this.channelService = app.get('channelService');
 };
 
@@ -36,9 +37,17 @@ prototype.unbindChannel = function(uid, cb) {
   }).catch(cb);
 };
 
-prototype.bindRoom = function(from, target, cb) {
-  const roomHash = crypto.createHash('sha1').update([from, target].sort().join('*')).digest('hex');
-  cb(null, roomHash);
+prototype.bindRoom = function(from, target, cid, cb) {
+  let self = this;
+  let members = [from, target].sort();
+  const roomHash = crypto.createHash('sha1').update(members.join('*')).digest('hex');
+
+  new self.Room({ roomid: roomHash, members, cid }).save()
+    .then(room =>
+      self.Room.upgradeActive(room)
+      .then(nextRoom => cb(null, nextRoom))
+      .catch(cb))
+    .catch(cb);
 };
 
 prototype.findFriends = function(uid) {

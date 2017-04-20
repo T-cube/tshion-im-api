@@ -24,6 +24,8 @@ ChatRemote.prototype.add = function(uid, sid, cid, flag, cb) {
   let channel = this.channelService.getChannel(cid, flag);
   let sessionService = self.app.get('sessionService');
   let username = uid.split('*')[0];
+
+  // 通知好友上线
   let param = {
     route: 'onAdd',
     user: username
@@ -39,12 +41,7 @@ ChatRemote.prototype.add = function(uid, sid, cid, flag, cb) {
   }
   channel.add(uid, sid);
 
-  let members = channel.getMembers();
-  console.log(members);
-  members = members.map(member => {
-    return member.split('*')[0];
-  });
-  cb({ users: self.get(cid, flag), members });
+  cb({ users: self.get(cid, flag), members: self.get(cid, flag) });
 };
 
 /**
@@ -52,8 +49,8 @@ ChatRemote.prototype.add = function(uid, sid, cid, flag, cb) {
  * @param {String} uid
  * @param {Function} cb
  */
-ChatRemote.prototype.roomInfo = function(uid, cb) {
-  this.Room.getUserRoomMap(uid).then(map => {
+ChatRemote.prototype.roomInfo = function(uid, cid, cb) {
+  this.Room.getUserRoomMap(uid, cid).then(map => {
     cb(null, map);
   }).catch(e => {
     console.error(e);
