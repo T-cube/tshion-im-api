@@ -87,19 +87,20 @@ ChatRemote.prototype.get = function(cid, flag) {
  * @param {String} name channel name
  *
  */
-ChatRemote.prototype.kick = function(uid, sid, cid, cb) {
+ChatRemote.prototype.kick = function(uid, sid, cb) {
+  var [user_id, cid] = uid.split('*')[0];
   var channel = this.channelService.getChannel(cid, false);
   // leave channel
   if (!!channel) {
     channel.leave(uid, sid);
   }
-  var username = uid.split('*')[0];
   var param = {
     route: 'onLeave',
-    user: username
+    user: user_id
   };
-  this.app.rpc.account.accountRemote.unbindChannel(null, username, function(err, status) {
+  this.app.rpc.account.accountRemote.unbindChannel(null, user_id, function(err, status) {
     channel.pushMessage(param);
-    cb();
+    err && console.error(err);
+    cb && cb();
   });
 };

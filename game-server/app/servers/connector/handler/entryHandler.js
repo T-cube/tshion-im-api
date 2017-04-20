@@ -84,5 +84,5 @@ var onUserLeave = function(app, session, cb) {
   if (!session || !session.uid) {
     return;
   }
-  app.rpc.chat.chatRemote.kick(session, session.uid, app.get('serverId'), session.get('cid'), cb || null);
+  app.rpc.chat.chatRemote.kick(session, session.uid, app.get('serverId'), cb || null);
 };
