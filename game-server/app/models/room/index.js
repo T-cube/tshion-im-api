@@ -32,6 +32,10 @@ module.exports = function(app) {
       }).then(doc => doc.value);
     }
 
+    static findRoom(query) {
+      return RoomCollection.findOne(query);
+    }
+
 
     /**
      * get user room map

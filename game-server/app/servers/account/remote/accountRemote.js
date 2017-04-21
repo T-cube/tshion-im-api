@@ -50,6 +50,13 @@ prototype.bindRoom = function(from, target, cid, cb) {
     .catch(cb);
 };
 
+prototype.activeRoom = function(roomid, cb) {
+  let self = this;
+  self.Room.findRoom({ roomid }).then(room => {
+    return self.Room.upgradeActive(room).then(nextRoom => cb(null, nextRoom));
+  }).catch(cb)
+};
+
 prototype.findFriends = function(uid) {
 
 };

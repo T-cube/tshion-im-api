@@ -273,4 +273,8 @@ prototype.send = function(msg, session, next) {
       route: param.route
     });
   });
+
+  self.app.rpc.account.accountRemote.activeRoom(roomid, function(err) {
+    err && console.log(err);
+  });
 };

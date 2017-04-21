@@ -66,7 +66,7 @@ class entryHandler {
   kick(msg, session, next) {
     let self = this;
 
-    self.onUserLeave(self.app, session, function() {
+    onUserLeave(self.app, session, function() {
       next(null, {});
     });
   };
