@@ -254,18 +254,25 @@ prototype.send = function(msg, session, next) {
   });
 
   let channel = cid ? self.channelService.getChannel(cid, false) : null;
-  if (!channel) {
-    return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-      if (err) return next(err);
-      next({ code: 404, error: 'user offline' });
-    });
-  }
+  // if (!channel) {
+  //   return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+  //     if (err) return next(err);
+  //     next({ code: 404, error: 'user offline' });
+  //   });
+  // }
 
   if (target == '*') {
     channel.pushMessage(param);
   } else {
     let uid = `${target}*${cid}`;
-    let sid = channel.getMember(uid)['sid'];
+    let member = channel.getMember(uid);
+
+    if (!member) return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+      if (err) return next(err);
+      next({ code: 404, error: 'user offline' });
+    });
+
+    let sid = member['sid'];
     self.channelService.pushMessageByUids(param, [{ uid, sid }]);
   }
   self.app.rpc.message.messageRemote.saveMessage(null, msg, function() {
