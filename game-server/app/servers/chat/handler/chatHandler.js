@@ -18,16 +18,16 @@ var prototype = Handler.prototype;
  */
 prototype.joinRoom = function(msg, session, next) {
   let self = this;
-  let { target } = msg;
+  let { target, target_cid } = msg;
   let [uid, fcid] = session.uid.split('*');
   let param = {
     route: 'joinRoom',
     from: uid,
   };
 
-  if (!target) return next({ error: 'target can not be null' });
+  if (!target || !target_cid) return next({ error: 'target can not be null,target_cid can not be null' });
 
-  self.app.rpc.account.accountRemote.bindRoom(session, uid, target, fcid, function(err, room) {
+  self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
     if (err) return next(err);
     console.log(target, '.............');
     console.log(room);
@@ -40,14 +40,14 @@ prototype.joinRoom = function(msg, session, next) {
         // roomid save 2 people channelid
         self.app.roomMap.set(room.roomid, {
           [uid]: fcid,
-          [target]: cid
+          [target]: target_cid
         });
 
 
         if (target == '*') {
           channel.pushMessage(param);
         } else {
-          let tuid = `${target}*${cid}`;
+          let tuid = `${target}*${target_cid}`;
           let member = channel.getMember(tuid);
           let tsid = member['sid'];
           self.channelService.pushMessageByUids(Object.assign(param, room), [{ uid: tuid, sid: tsid }]);
@@ -274,7 +274,7 @@ prototype.send = function(msg, session, next) {
     });
   });
 
-  self.app.rpc.account.accountRemote.activeRoom(roomid, function(err) {
+  self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
     err && console.log(err);
   });
 };

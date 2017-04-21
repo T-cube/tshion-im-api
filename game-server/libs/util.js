@@ -1,4 +1,5 @@
-module.exports = {
+const _ = new Object();
+module.exports = Object.assign(_, {
   /**
    * get data type
    * @param {*} data
@@ -153,4 +154,4 @@ module.exports = {
     });
     return object;
   },
-};
+});

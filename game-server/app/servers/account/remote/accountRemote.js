@@ -37,12 +37,16 @@ prototype.unbindChannel = function(uid, cb) {
   }).catch(cb);
 };
 
-prototype.bindRoom = function(from, target, cid, cb) {
+prototype.bindRoom = function({ uid, target, fcid, target_cid }, cb) {
   let self = this;
-  let members = [from, target].sort();
+  let members = [uid, target].sort();
   const roomHash = crypto.createHash('sha1').update(members.join('*')).digest('hex');
 
-  new self.Room({ roomid: roomHash, members, cid }).save()
+  let roomInner = {
+    [uid]: fcid,
+    [target]: target_cid
+  };
+  new self.Room({ roomid: roomHash, members, room: roomInner }).save()
     .then(room =>
       self.Room.upgradeActive(room)
       .then(nextRoom => cb(null, nextRoom))
@@ -54,7 +58,7 @@ prototype.activeRoom = function(roomid, cb) {
   let self = this;
   self.Room.findRoom({ roomid }).then(room => {
     return self.Room.upgradeActive(room).then(nextRoom => cb(null, nextRoom));
-  }).catch(cb)
+  }).catch(cb);
 };
 
 prototype.findFriends = function(uid) {

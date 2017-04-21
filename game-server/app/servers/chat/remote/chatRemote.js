@@ -51,6 +51,7 @@ ChatRemote.prototype.add = function(uid, sid, cid, flag, cb) {
  */
 ChatRemote.prototype.roomInfo = function(uid, cid, cb) {
   this.Room.getUserRoomMap(uid, cid).then(map => {
+    map.forEach(room => this.app.roomMap.set(room.roomid, room.room));
     cb(null, map);
   }).catch(e => {
     console.error(e);

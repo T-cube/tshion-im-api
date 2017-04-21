@@ -1,9 +1,10 @@
 'use strict';
 
-const _ = require('../../../libs/util'),
-  schema = require('./schema');
 
 module.exports = function(app) {
+  const _ = require('../../../libs/util'),
+    schema = require('./schema');
+
   const RoomCollection = app.db.collection('room');
 
   return class Room {
