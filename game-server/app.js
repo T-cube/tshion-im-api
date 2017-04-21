@@ -18,7 +18,7 @@ co(function*() {
   app.set('db', db, true);
 
   require('./libs/redis')(app, config.redis);
-
+  app.set('roomMap', new Map(), true);
   // app configure
   app.configure('production|development', function() {
     // route configures
