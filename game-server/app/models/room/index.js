@@ -44,7 +44,10 @@ module.exports = function(app) {
      * @return {Promise}
      */
     static getUserRoomMap(uid, cid) {
-      return RoomCollection.find({ cid, members: uid }).toArray().then(docs => docs);
+      return RoomCollection.find({
+        [`room.${uid}`]: cid,
+        members: uid
+      }).toArray().then(docs => docs);
     }
   };
 };
