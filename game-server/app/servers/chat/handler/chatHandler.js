@@ -8,7 +8,7 @@ module.exports = function(app) {
 var Handler = function(app) {
   this.app = app;
   this.channelService = app.get('channelService');
-  app.roomMap = new Map();
+  // app.roomMap = new Map();
 };
 
 var prototype = Handler.prototype;
