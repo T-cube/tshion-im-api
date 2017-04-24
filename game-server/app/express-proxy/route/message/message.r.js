@@ -38,17 +38,16 @@ module.exports = function(app) {
       }
     },
     delete: {
-      'offline/:roomid': {
+      'offline/:roomid/:target': {
         des: {
           name: '删除离线消息',
           params: [
-            { param: 'roomid', type: 'String' }
+            { param: 'roomid', type: 'String' },
+            { param: 'target', type: 'String' }
           ]
         },
         method(req, res, next) {
-          console.log(11212121212121212121, req.params);
           Message.deleteOfflineMessage(req.params).then(result => {
-            console.log(21212121212121212121212, result);
             res.json(result);
           }).catch(next);
         }

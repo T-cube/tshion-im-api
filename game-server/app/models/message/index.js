@@ -65,8 +65,8 @@ module.exports = function(app) {
     }
 
     static deleteOfflineMessage(query) {
-      let { roomid } = query;
-      return OfflineMessageCollection.remove({ roomid });
+      let { roomid, target } = query;
+      return OfflineMessageCollection.remove({ roomid, target });
     }
   };
 };
