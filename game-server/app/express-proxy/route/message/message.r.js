@@ -11,7 +11,7 @@ module.exports = function(app) {
           name: '获取聊天日志',
           params: [
             { param: 'roomid', type: 'String' },
-            { query: 'last', type: 'Number' },
+            { query: 'last', type: 'String' },
             { query: 'pagesize', type: 'Number' }
           ]
         },
@@ -46,9 +46,9 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          console.log(req.params);
+          console.log(11212121212121212121, req.params);
           Message.deleteOfflineMessage(req.params).then(result => {
-            console.log(result);
+            console.log(21212121212121212121212, result);
             res.json(result);
           }).catch(next);
         }
