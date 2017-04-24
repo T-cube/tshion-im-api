@@ -51,7 +51,7 @@ module.exports = function(app) {
 
     static offlineMessageCount(query) {
       let { target } = query;
-      return OfflineMessageCollection.group({ from: true }, { target }, { count: 0 }, function(curr, result) { result.count++; }, true);
+      return OfflineMessageCollection.group({ from: true, roomid: true }, { target }, { count: 0 }, function(curr, result) { result.count++; }, true);
 
     };
 
