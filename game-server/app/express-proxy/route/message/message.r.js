@@ -46,7 +46,9 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
+          console.log(req.params);
           Message.deleteOfflineMessage(req.params).then(result => {
+            console.log(result);
             res.json(result);
           }).catch(next);
         }
