@@ -63,5 +63,10 @@ module.exports = function(app) {
         return r;
       });
     }
+
+    static deleteOfflineMessage(query) {
+      let { roomid } = query;
+      return OfflineMessageCollection.remove({ roomid });
+    }
   };
 };

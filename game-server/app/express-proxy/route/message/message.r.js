@@ -36,6 +36,21 @@ module.exports = function(app) {
           }).catch(next);
         }
       }
+    },
+    delete: {
+      'offline/:roomid': {
+        des: {
+          name: '删除离线消息',
+          params: [
+            { param: 'roomid', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          Message.deleteOfflineMessage(req.params).then(result => {
+            res.json(result);
+          }).catch(next);
+        }
+      }
     }
   };
 };
