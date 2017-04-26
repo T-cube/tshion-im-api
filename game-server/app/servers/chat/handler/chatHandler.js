@@ -61,6 +61,17 @@ prototype.joinRoom = function(msg, session, next) {
   });
 };
 
+prototype.unActiveRoom = function(msg, session, next) {
+  let self = this;
+  let { roomid } = msg;
+  if (!roomid) return next({ error: 'roomid error' });
+
+  self.app.rpc.account.accountRemote.unActiveRoom(session, roomid, function(err, result) {
+    if (err) return next(err);
+    next(null, result);
+  });
+};
+
 /**
  * send an notify in group
  * @param {Object} options

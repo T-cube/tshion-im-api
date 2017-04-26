@@ -61,6 +61,11 @@ prototype.activeRoom = function(roomid, cb) {
   }).catch(cb);
 };
 
+prototype.unActiveRoom = function(roomid, cb) {
+  let self = this;
+  self.Room.unActive(roomid).then(result => cb(null, result)).catch(cb);
+};
+
 prototype.findFriends = function(uid) {
 
 };

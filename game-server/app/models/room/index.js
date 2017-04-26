@@ -27,7 +27,14 @@ module.exports = function(app) {
 
     static upgradeActive(room) {
       let { _id } = room;
-      return RoomCollection.findOneAndUpdate({ _id }, { $set: { last_active: +new Date } }, {
+      return RoomCollection.findOneAndUpdate({ _id }, { $set: { last_active: +new Date, actived: 1 } }, {
+        returnOriginal: false,
+        returnNewDocument: true
+      }).then(doc => doc.value);
+    }
+
+    unActive(roomid) {
+      return RoomCollection.findOneAndUpdate({ roomid }, { $set: { actived: 0 } }, {
         returnOriginal: false,
         returnNewDocument: true
       }).then(doc => doc.value);

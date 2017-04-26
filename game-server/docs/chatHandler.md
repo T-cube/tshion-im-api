@@ -22,6 +22,13 @@ on 'joinRoom' event receive data
 }
 ```
 
+## chat.chatHandler.unActiveRoom
+```javascript
+{
+  roomid: String
+}
+```
+
 ## chat.chatHandler.send
 *user send a message for one by one*
 ```javascript
