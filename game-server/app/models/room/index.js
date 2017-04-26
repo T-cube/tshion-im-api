@@ -33,7 +33,7 @@ module.exports = function(app) {
       }).then(doc => doc.value);
     }
 
-    unActive(roomid) {
+    static unActive(roomid) {
       return RoomCollection.findOneAndUpdate({ roomid }, { $set: { actived: false } }, {
         returnOriginal: false,
         returnNewDocument: true
