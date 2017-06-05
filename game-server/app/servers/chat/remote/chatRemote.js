@@ -72,10 +72,11 @@ ChatRemote.prototype.get = function(cid, flag) {
   var users = [];
   var channel = this.channelService.getChannel(cid, flag);
   if (!!channel) {
-    users = channel.getMembers();
-  }
-  for (var i = 0; i < users.length; i++) {
-    users[i] = users[i].split('*')[0];
+    let members = channel.getMembers();
+    for (let i = 0; i < members.length; i++) {
+      let mid = members[i].split('*')[0];
+      if (users.indexOf(mid) < 0) users[i] = mid;
+    }
   }
   return users;
 };
