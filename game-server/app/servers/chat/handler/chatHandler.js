@@ -283,7 +283,7 @@ prototype.send = function(msg, session, next) {
 
       if (!member) return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
         if (err) return next(err);
-        next({ route: param.route, mag: result, code: 404, error: 'user offline' });
+        next({ route: param.route, msg: result, code: 404, error: 'user offline' });
       });
 
       let sid = member['sid'];
