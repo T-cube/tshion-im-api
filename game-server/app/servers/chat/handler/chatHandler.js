@@ -274,6 +274,14 @@ prototype.send = function(msg, session, next) {
 
   self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
     if (err) return next(err);
+
+    if (!channel) {
+      next(null, { route: param.route, msg: result });
+      return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+        err && console.error(err);
+      });
+    }
+
     param = Object.assign(param, result);
     if (target == '*') {
       channel.pushMessage(param);
