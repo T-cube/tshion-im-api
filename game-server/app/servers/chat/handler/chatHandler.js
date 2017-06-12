@@ -315,7 +315,7 @@ prototype.send = function(msg, session, next) {
         clients.push({ uid: tuid, sid });
       }
 
-      if (!member) return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+      if (!clients.length) return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
         if (err) return next(err);
         next({ route: param.route, msg: result, code: 404, error: 'user offline' });
       });
