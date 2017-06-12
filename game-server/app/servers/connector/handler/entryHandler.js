@@ -22,8 +22,8 @@ class entryHandler {
    */
   enter(msg, session, next) {
     let self = this;
-    let { cid, init_token } = msg;
-
+    let { cid, init_token, client } = msg;
+    // console.log('msg',msg)
     self.app.tokenRedis.get(init_token).then(result => {
       if (!result) return next({ code: 404, error: 'init_token expired or no exists' });
 
@@ -31,7 +31,7 @@ class entryHandler {
       let { uid } = json;
 
       let tuid = `${uid}*${cid}`;
-
+      client && (tuid += `*${client}`);
       //duplicate log in
       session.bind(tuid);
       session.set('cid', cid);
@@ -40,19 +40,25 @@ class entryHandler {
           console.error('set cid for session service failed! error is : %j', err.stack);
         }
       });
-      session.on('closed', onUserLeave.bind(null, self.app, session));
+
+      !client && session.on('closed', onUserLeave.bind(null, self.app, session));
       //put user into channel
-      self.app.rpc.chat.chatRemote.add(session, tuid, self.app.get('serverId'), cid, true, function(result) {
-        let { users, members } = result;
-        self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, function(err, status) {
-          if (err || !status) return next(err);
-          next(null, {
-            cid,
-            users,
-            members
+      self.app.rpc.chat.chatRemote.add(session,
+        tuid,
+        self.app.get('serverId'),
+        cid,
+        true,
+        function(result) {
+          let { users, members } = result;
+          self.app.rpc.account.accountRemote.bindChannel(session, tuid, cid, function(err, status) {
+            if (err || !status) return next(err);
+            next(null, {
+              cid,
+              users,
+              members
+            });
           });
         });
-      });
 
     }).catch(e => {
       console.error(e);

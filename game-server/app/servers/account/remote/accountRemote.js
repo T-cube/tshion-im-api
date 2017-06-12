@@ -9,6 +9,7 @@ var AccountRemote = function(app) {
   this.app = app;
   this.roomMap = new Map();
   this.Room = require('../../../models/room')(app);
+  this.Account = require('../../../models/account')(app);
   this.channelService = app.get('channelService');
 };
 
@@ -25,10 +26,15 @@ prototype.login = function(token, cb) {
 
 
 prototype.bindChannel = function(uid, cid, cb) {
-
-  this.app.onlineRedis.set(uid, cid).then(status => {
-    cb(null, status);
-  }).catch(cb);
+  let self = this;
+  self.app.onlineRedis.get(uid).then(lastcid => {
+    if (lastcid && lastcid !== cid) {
+      self.rpc.chat.chatRemote.kick(null, `${uid}*${lastcid}`, app.get('serverId'), null);
+    }
+    this.app.onlineRedis.set(uid, cid).then(status => {
+      cb(null, status);
+    }).catch(cb);
+  });
 };
 
 prototype.unbindChannel = function(uid, cb) {
@@ -64,6 +70,11 @@ prototype.activeRoom = function(roomid, cb) {
 prototype.unActiveRoom = function(roomid, cb) {
   let self = this;
   self.Room.unActive(roomid).then(result => cb(null, result)).catch(cb);
+};
+
+prototype.saveDeviceToken = function(info, cb) {
+  let self = this;
+  new self.Account(info).saveAccount().then(value => cb(null, value)).catch(cb);
 };
 
 prototype.findFriends = function(uid) {

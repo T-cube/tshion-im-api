@@ -19,27 +19,35 @@ var ChatRemote = function(app) {
  * @param {boolean} flag channel parameter
  *
  */
-ChatRemote.prototype.add = function(uid, sid, cid, flag, cb) {
+ChatRemote.prototype.add = function(tuid, sid, cid, flag, cb) {
   let self = this;
   let channel = this.channelService.getChannel(cid, flag);
-  let sessionService = self.app.get('sessionService');
-  let username = uid.split('*')[0];
+  let { loginMap } = channel;
+
+  // let sessionService = self.app.get('sessionService');
+  let [user] = tuid.split('*');
+
+  let loginer = loginMap.get(user) || {};
+  // if (!loginer[tuid]) {
+  loginer[tuid] = sid;
+  loginMap.set(user, loginer);
+  // }
 
   // 通知好友上线
   let param = {
     route: 'onAdd',
-    user: username
+    user
   };
   channel.pushMessage(param);
 
   if (!!channel) {
-    let member = channel.getMember(uid);
+    let member = channel.getMember(tuid);
     if (member) {
       let sid = member['sid'];
-      channel.leave(uid, sid);
+      channel.leave(tuid, sid);
     }
   }
-  channel.add(uid, sid);
+  channel.add(tuid, sid);
 
   cb({ users: self.get(cid, flag), members: self.get(cid, flag) });
 };
@@ -90,17 +98,22 @@ ChatRemote.prototype.get = function(cid, flag) {
  *
  */
 ChatRemote.prototype.kick = function(uid, sid, cb) {
-  var [user_id, cid] = uid.split('*');
+  var [user, cid] = uid.split('*');
   var channel = this.channelService.getChannel(cid, false);
   // leave channel
   if (!!channel) {
+    let { loginMap } = channel;
+    let loginer = loginMap.get(user) || {};
+    if (loginer[uid]) {
+      delete loginer[uid];
+    }
     channel.leave(uid, sid);
   }
   var param = {
     route: 'onLeave',
-    user: user_id
+    user
   };
-  this.app.rpc.account.accountRemote.unbindChannel(null, user_id, function(err, status) {
+  this.app.rpc.account.accountRemote.unbindChannel(null, user, function(err, status) {
     channel.pushMessage(param);
     err && console.error(err);
     cb && cb();

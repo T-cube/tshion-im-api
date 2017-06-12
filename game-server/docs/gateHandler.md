@@ -4,6 +4,7 @@
 *user login*
 ```javascript
 {
+  client: Enum,     // ios, android, web, wcapp
   token: String, // access_token
   uid: String, // userid
 }

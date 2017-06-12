@@ -244,6 +244,25 @@ prototype.sendGroup = function(msg, session, next) {
 };
 
 /**
+ * Add deviceToken to session
+ * @param {Object} msg
+ * @param {String} msg.deviceToken
+ */
+prototype.deviceToken = function(msg, session, next) {
+  let self = this;
+  let [uid, cid, client] = session.uid.split('*'), { deviceToken } = msg;
+  if (client) {
+    session.set('deviceToken', deviceToken);
+    if (!deviceToken) return;
+    self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken }, function(err, value) {
+      if (err) console.error(err);
+      console.log('save device token:', value);
+      next(null, {});
+    });
+  }
+};
+
+/**
  * Send messages to users
  *
  * @param {Object} msg message from client
@@ -286,16 +305,24 @@ prototype.send = function(msg, session, next) {
     if (target == '*') {
       channel.pushMessage(param);
     } else {
-      let uid = `${target}*${cid}`;
-      let member = channel.getMember(uid);
+      // let uid = `${target}*${cid}`;
+      // let member = channel.getMember(uid);
+      let { loginMap } = channel;
+      let loginer = loginMap.get(target);
+      let clients = [];
+      for (let tuid in loginer) {
+        let sid = loginer[tuid];
+        clients.push({ uid: tuid, sid });
+      }
 
       if (!member) return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
         if (err) return next(err);
         next({ route: param.route, msg: result, code: 404, error: 'user offline' });
       });
 
-      let sid = member['sid'];
-      self.channelService.pushMessageByUids(param, [{ uid, sid }]);
+      // let sid = member['sid'];
+      // self.channelService.pushMessageByUids(param, [{ uid, sid }]);
+      self.channelService.pushMessageByUids(param, clients);
     }
     next(null, {
       route: param.route,

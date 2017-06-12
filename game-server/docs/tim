@@ -1,0 +1,82 @@
+###############################################################
+# gate-server:      im.tlifang.com
+# log-server:       tim.tlifang.com
+# connector-server: im0.tlifang.com
+#                   im1.tlifang.com
+#                   im2.tlifang.com
+###############################################################
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+upstream tim0 {
+    server 127.0.0.1:3050;
+}
+
+upstream tim1 {
+    server 127.0.0.1:3051;
+}
+
+upstream tim2 {
+    server 127.0.0.1:3052;
+}
+
+# gate-server
+server {
+    listen 443 ssl;
+#    server_name im.tlifang.com;
+    server_name im.xuezi.tlifang.cn;
+
+    ssl_certificate /usr/local/etc/nginx/tlifang.com.ssl.crt;
+    ssl_certificate_key /usr/local/etc/nginx/tlifang.com.ssl.key;
+    include /usr/local/etc/nginx/servers/ssl.conf;
+
+    location / {
+        proxy_pass http://127.0.0.1:3014;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_read_timeout 86400;
+    }
+}
+
+# connector-server
+server {
+    listen 443 ssl;
+#    server_name ~^im(?<n>\d)\.tlifang\.com$;
+    server_name ~^t(?<n>\d)\.xuezi\.tlifang\.cn$;
+
+    ssl_certificate /usr/local/etc/nginx/tlifang.com.ssl.crt;
+    ssl_certificate_key /usr/local/etc/nginx/tlifang.com.ssl.key;
+    include /usr/local/etc/nginx/servers/ssl.conf;
+
+    location / {
+#        proxy_pass http://127.0.0.1:305$n;
+        proxy_pass http://tim$n;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_read_timeout 86400;
+    }
+}
+
+# log-server
+server {
+    listen 443 ssl;
+    server_name tim.tlifang.com;
+
+    ssl_certificate
+    ssl_certificate_key
+
+    location / {
+        proxy_pass http://127.0.0.1:9999;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+    }
+}

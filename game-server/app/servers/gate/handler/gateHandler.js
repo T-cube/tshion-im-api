@@ -1,8 +1,8 @@
 'use strict';
 const dispatcher = require('../../../util/dispatcher');
 const crypto = require('crypto');
-// const TOKEN_EXPIRE = 60 * 60 * 24;
-const TOKEN_EXPIRE = 60 * 30;
+const TOKEN_EXPIRE = 60 * 60 * 24 * 7;
+// const TOKEN_EXPIRE = 60 * 30;
 
 module.exports = function(app) {
   return new gateHandler(app);
@@ -37,7 +37,7 @@ class gateHandler {
     }
     // 在这里向后台发送登陆服务请求
     self.app.rpc.account.accountRemote.login(null, token, function(err, data) {
-      console.log('end rpc=======', data);
+      // console.log('end rpc=======', data);
 
       if (err) return next(err);
 
@@ -47,15 +47,17 @@ class gateHandler {
         const init_token = crypto.createHash('sha1').update(`${uid}:${+new Date}`).digest('hex');
         // select connector
         var res = dispatcher.dispatch(uid, connectors);
-
+        // console.log(res);
         self.app.tokenRedis.setex(init_token, TOKEN_EXPIRE, JSON.stringify({
           uid,
+          hostname: res.hostname,
           host: res.host,
           port: res.clientPort
         })).then(result => {
           console.log(result);
           next(null, {
             code: 200,
+            hostname: res.hostname,
             host: res.host,
             port: res.clientPort,
             init_token

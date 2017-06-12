@@ -14,6 +14,7 @@ module.exports = {
     port: '2001',
     register: {
       protocol: 'http',
+      // hostname: 'tlifang.com',
       hostname: '127.0.0.1',
       // hostname: '192.168.1.22',
       port: 3000,
