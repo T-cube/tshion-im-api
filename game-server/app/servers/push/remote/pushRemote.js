@@ -74,6 +74,7 @@ prototype.pushMessageOne = function(msg, cb) {
 
     if (iosTokens.length) {
       let message = self.generatePushMessageIOS(msg);
+      console.log(message,iosTokens,'hihihihihihihihi');
       self.apnService.send(message, iosTokens).then(result => {
         console.log('sent:', result.sent.length);
         console.log('failed:', result.failed.length);
