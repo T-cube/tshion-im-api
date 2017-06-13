@@ -79,6 +79,7 @@ prototype.saveDeviceToken = function(info, cb) {
 
 prototype.getDeviceToken = function(info, cb) {
   let self = this;
+  console.log(info);
   self.Account.getDeviceToken(info).then(tokens => cb(null, tokens)).catch(cb);
 };
 

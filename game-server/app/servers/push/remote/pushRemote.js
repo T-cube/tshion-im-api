@@ -61,7 +61,7 @@ prototype.pushMessageOne = function(msg, cb) {
   let self = this;
   let { target: uid } = msg;
   self.app.rpc.account.accountRemote.getDeviceToken(null, { uid }, function(err, tokens = []) {
-    console.log(arguments, '........', tokens);
+    console.log(arguments, '........', tokens, msg);
     if (err || !tokens.length) return console.error(err);
 
     let iosTokens = [],
