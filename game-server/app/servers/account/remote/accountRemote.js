@@ -77,6 +77,11 @@ prototype.saveDeviceToken = function(info, cb) {
   new self.Account(info).saveAccount().then(value => cb(null, value)).catch(cb);
 };
 
+prototype.getDeviceToken = function(info, cb) {
+  let self = this;
+  self.Account.getDeviceToken(info).then(tokens => cb(null, tokens)).catch(cb);
+};
+
 prototype.findFriends = function(uid) {
 
 };

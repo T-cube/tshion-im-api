@@ -14,14 +14,18 @@ module.exports = function(app) {
 
     saveAccount() {
       console.log(this);
-      return accountCollection.findOneAndUpdate({ uid: this.uid, cid: this.cid }, { $set: this }, { upsert: true }, {
+      return accountCollection.findOneAndUpdate({ uid: this.uid }, { $set: this }, { upsert: true }, {
         returnOriginal: false,
         returnNewDocument: true
       }).then(result => result.value);
     }
 
-    delDeviceToken({ uid, cid }) {
-      return accountCollection.findOneAndUpdate({ uid, cid }, { $set: { deviceToken: '' } });
+    static delDeviceToken({ uid }) {
+      return accountCollection.findOneAndUpdate({ uid }, { $set: { deviceToken: '' } });
+    }
+
+    static getDeviceToken({ uid }) {
+      return accountCollection.find({ uid }).toArray();
     }
   };
 

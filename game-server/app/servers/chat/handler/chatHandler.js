@@ -253,6 +253,7 @@ prototype.deviceToken = function(msg, session, next) {
   let [uid, cid, client] = session.uid.split('*'), { deviceToken } = msg;
   if (client) {
     session.set('deviceToken', deviceToken);
+    console.log('.........', client, deviceToken, '.............');
     if (!deviceToken) return;
     self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken }, function(err, value) {
       if (err) console.error(err);
@@ -310,8 +311,10 @@ prototype.send = function(msg, session, next) {
       let { loginMap } = channel;
       let loginer = loginMap.get(target);
       let clients = [];
+      let mobile = false;
       for (let tuid in loginer) {
         let sid = loginer[tuid];
+        // (tuid.indexOf('ios') || tuid.indexOf('android')) && (mobile = true);
         clients.push({ uid: tuid, sid });
       }
 
@@ -323,7 +326,10 @@ prototype.send = function(msg, session, next) {
       // let sid = member['sid'];
       // self.channelService.pushMessageByUids(param, [{ uid, sid }]);
       self.channelService.pushMessageByUids(param, clients);
+      self.app.rpc.push.pushRemote.pushMessageOne(null, result, null);
+      // !mobile && self.app.rpc.push.pushRemote.pushMessageOne(null, result, null);
     }
+
     next(null, {
       route: param.route,
       msg: result

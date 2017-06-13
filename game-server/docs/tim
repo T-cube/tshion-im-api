@@ -4,6 +4,7 @@
 # connector-server: im0.tlifang.com
 #                   im1.tlifang.com
 #                   im2.tlifang.com
+# push-server       push.tlifang.com
 ###############################################################
 
 map $http_upgrade $connection_upgrade {

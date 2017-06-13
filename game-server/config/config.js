@@ -40,4 +40,8 @@ module.exports = {
       }
     }
   },
+  jpush: {
+    appkey: 'd7f9bbd0030efabfc39a1c45',
+    masterkey: '73da1312e0e007e9af403c4d'
+  }
 };
