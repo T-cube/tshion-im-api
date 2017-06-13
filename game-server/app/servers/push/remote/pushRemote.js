@@ -61,6 +61,7 @@ prototype.pushMessageOne = function(msg, cb) {
   let self = this;
   let { target: uid } = msg;
   self.app.rpc.account.accountRemote.getDeviceToken(null, { uid }, function(err, tokens = []) {
+    console.log(arguments, '........', tokens);
     if (err || !tokens.length) return console.error(err);
 
     let iosTokens = [],
@@ -74,7 +75,7 @@ prototype.pushMessageOne = function(msg, cb) {
 
     if (iosTokens.length) {
       let message = self.generatePushMessageIOS(msg);
-      console.log(message,iosTokens,'hihihihihihihihi');
+      console.log(message, iosTokens, 'hihihihihihihihi');
       self.apnService.send(message, iosTokens).then(result => {
         console.log('sent:', result.sent.length);
         console.log('failed:', result.failed.length);
@@ -84,7 +85,7 @@ prototype.pushMessageOne = function(msg, cb) {
 
     if (androidTokens.length) {
       let notification = self.generatePushMessageAndroid(msg);
-      console.log('.........',androidTokens,notification);
+      console.log('.........', androidTokens, notification);
 
       self.androidPush.push({
         platform: 'android',
