@@ -18,3 +18,4 @@ yarn.lock
 .DS_Store
 **/*.log.*
 # game-server/app.js
+game-server/config/
