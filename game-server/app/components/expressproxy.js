@@ -21,7 +21,7 @@ var ExpressProxy = function(app, opts) {
     'defaultCharset': 'utf-8'
   }));
 
-  const cors=require('cors');
+  const cors = require('cors');
 
   const whitelist = ['http://cp.tlf.michael.local', 'https://cp.tlifang.com', 'https://cpapi.tlifang.com/oauth/token', 'http://cp.tlifang.com'];
   let corsOptionsDelegate = function(url, callback) {
@@ -51,7 +51,8 @@ var ExpressProxy = function(app, opts) {
   let self = this;
   require('../express-proxy/route')(this.exp, this.app);
   // router
-  this.exp.get('/', function(req, res) {
+  this.exp.all('/api/123', function(req, res) {
+    console.log(req.body,'..........................1111');
     self.app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
       res.json(data);
     });

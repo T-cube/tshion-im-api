@@ -1,5 +1,6 @@
 'use strict';
-var chatRemote = require('../remote/chatRemote');
+const chatRemote = require('../remote/chatRemote');
+const _ = require('../../../../libs/util');
 
 module.exports = function(app) {
   return new Handler(app);
@@ -273,7 +274,10 @@ prototype.deviceToken = function(msg, session, next) {
  */
 prototype.send = function(msg, session, next) {
   let self = this;
-  let { target, roomid } = msg;
+  let { target, roomid, content } = msg;
+  content=content.replace(/&nbsp;/g,' ');
+  if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
+
   let room = self.app.roomMap.get(roomid);
   let cid = room ? room[target] : null;
   var username = session.uid.split('*')[0];

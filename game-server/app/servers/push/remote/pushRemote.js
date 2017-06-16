@@ -12,8 +12,8 @@ module.exports = function(app) {
 const PushRemote = function(app) {
   this.app = app;
   this.apnService = new apn.Provider({
-    cert: `${__dirname}/../../../../apn-cert.pem`,
-    key: `${__dirname}/../../../../apn-key.pem`,
+    cert: `${__dirname}/../../../../apn-dev-cert.pem`,
+    key: `${__dirname}/../../../../apn-dev-key.pem`,
     passphrase: '19491001'
   });
 
@@ -86,14 +86,19 @@ prototype.pushMessageOne = function(msg, cb) {
     if (androidTokens.length) {
       let notification = self.generatePushMessageAndroid(msg);
       console.log('.........', androidTokens, notification);
-
+      let message = {
+        msg_content: notification.alert,
+        title: notification.title,
+        content_type: 'text',
+        extras: notification.extras
+      };
       self.androidPush.push({
         platform: 'android',
         'audience': {
           'registration_id': androidTokens
         },
         notification,
-        // message: notification,
+        message,
         'options': {
           'time_to_live': 60,
           'apns_production': false

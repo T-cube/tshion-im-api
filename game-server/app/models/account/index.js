@@ -25,6 +25,7 @@ module.exports = function(app) {
     }
 
     static getDeviceToken({ uid }) {
+      console.log(123,uid);
       return accountCollection.find({ uid }).toArray();
     }
   };

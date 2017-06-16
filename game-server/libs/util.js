@@ -1,6 +1,15 @@
 const _ = new Object();
 module.exports = Object.assign(_, {
   /**
+   * chek param is blank
+   *
+   * @param {String} s
+   * @return {Boolean}
+   */
+  isBlank(s) {
+    return /^\s+$/.test(s) || !s;
+  },
+  /**
    * get data type
    * @param {*} data
    * @return {String}
