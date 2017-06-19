@@ -11,11 +11,19 @@ module.exports = function(app) {
 
 const PushRemote = function(app) {
   this.app = app;
-  this.apnService = new apn.Provider({
+  let { NODE_ENV } = process.env;
+
+  let provider = NODE_ENV === 'production' ? {
+    cert: `${__dirname}/../../../../apn-cert.pem`,
+    key: `${__dirname}/../../../../apn-key.pem`,
+    passphrase: '19491001'
+  } : {
     cert: `${__dirname}/../../../../apn-dev-cert.pem`,
     key: `${__dirname}/../../../../apn-dev-key.pem`,
     passphrase: '19491001'
-  });
+  };
+
+  this.apnService = new apn.Provider(provider);
 
   this.androidPush = new AndroidPush(config.jpush);
 };

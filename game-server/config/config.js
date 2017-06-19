@@ -11,11 +11,6 @@ module.exports = {
     { prefix: 'msg' },
     { prefix: 'token' }
   ],
-  apn: {
-    key: path.resolve(__dirname, '..', is_dev ? 'apn-dev-key.pem' : 'apn-key.pem'),
-    pem: path.resolve(__dirname, '..', is_dev ? 'apn-dev-cert.pem' : 'apn-cert.pem'),
-    passphrase: '19491001'
-  },
   rpc: {
     host: '127.0.0.1',
     port: '2001',

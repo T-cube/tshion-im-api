@@ -30,10 +30,10 @@ class entryHandler {
       const json = JSON.parse(result);
       let { uid } = json;
 
-      let tuid = `${uid}*${cid}`;
-      client && (tuid += `*${client}`);
+      uid += `*${cid}`;
+      client && (uid += `*${client}`);
       //duplicate log in
-      session.bind(tuid);
+      session.bind(uid);
       session.set('cid', cid);
       session.push('cid', function(err) {
         if (err) {
@@ -41,16 +41,16 @@ class entryHandler {
         }
       });
 
-      !client && session.on('closed', onUserLeave.bind(null, self.app, session));
+      session.on('closed', onUserLeave.bind(null, self.app, session));
       //put user into channel
       self.app.rpc.chat.chatRemote.add(session,
-        tuid,
+        uid,
         self.app.get('serverId'),
         cid,
         true,
         function(result) {
           let { users, members } = result;
-          self.app.rpc.account.accountRemote.bindChannel(session, tuid, cid, function(err, status) {
+          self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, function(err, status) {
             if (err || !status) return next(err);
             next(null, {
               cid,

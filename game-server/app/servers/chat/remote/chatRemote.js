@@ -10,6 +10,8 @@ var ChatRemote = function(app) {
   this.channelService = app.get('channelService');
 };
 
+let prototype = ChatRemote.prototype;
+
 /**
  * Add user into chat channel.
  *
@@ -19,17 +21,17 @@ var ChatRemote = function(app) {
  * @param {boolean} flag channel parameter
  *
  */
-ChatRemote.prototype.add = function(tuid, sid, cid, flag, cb) {
+prototype.add = function(uid, sid, cid, flag, cb) {
   let self = this;
   let channel = this.channelService.getChannel(cid, flag);
   let { loginMap } = channel;
 
   // let sessionService = self.app.get('sessionService');
-  let [user] = tuid.split('*');
+  let [user] = uid.split('*');
 
   let loginer = loginMap.get(user) || {};
-  // if (!loginer[tuid]) {
-  loginer[tuid] = sid;
+  // if (!loginer[uid]) {
+  loginer[uid] = sid;
   loginMap.set(user, loginer);
   // }
 
@@ -41,13 +43,13 @@ ChatRemote.prototype.add = function(tuid, sid, cid, flag, cb) {
   channel.pushMessage(param);
 
   if (!!channel) {
-    let member = channel.getMember(tuid);
+    let member = channel.getMember(uid);
     if (member) {
       let sid = member['sid'];
-      channel.leave(tuid, sid);
+      channel.leave(uid, sid);
     }
   }
-  channel.add(tuid, sid);
+  channel.add(uid, sid);
 
   cb({ users: self.get(cid, flag), members: self.get(cid, flag) });
 };
@@ -57,7 +59,7 @@ ChatRemote.prototype.add = function(tuid, sid, cid, flag, cb) {
  * @param {String} uid
  * @param {Function} cb
  */
-ChatRemote.prototype.roomInfo = function(uid, cid, cb) {
+prototype.roomInfo = function(uid, cid, cb) {
   this.Room.getUserRoomMap(uid, cid).then(map => {
     map.forEach(room => this.app.roomMap.set(room.roomid, room.room));
     cb(null, map);
@@ -76,7 +78,7 @@ ChatRemote.prototype.roomInfo = function(uid, cid, cb) {
  * @return {Array} users uids in channel
  *
  */
-ChatRemote.prototype.get = function(cid, flag) {
+prototype.get = function(cid, flag) {
   var users = [];
   var channel = this.channelService.getChannel(cid, flag);
   if (!!channel) {
@@ -97,7 +99,7 @@ ChatRemote.prototype.get = function(cid, flag) {
  * @param {String} name channel name
  *
  */
-ChatRemote.prototype.kick = function(uid, sid, cb) {
+prototype.kick = function(uid, sid, cb) {
   var [user, cid] = uid.split('*');
   var channel = this.channelService.getChannel(cid, false);
   // leave channel
@@ -113,6 +115,7 @@ ChatRemote.prototype.kick = function(uid, sid, cb) {
     route: 'onLeave',
     user
   };
+
   this.app.rpc.account.accountRemote.unbindChannel(null, user, function(err, status) {
     channel.pushMessage(param);
     err && console.error(err);
