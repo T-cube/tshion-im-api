@@ -25,7 +25,7 @@ module.exports = function(app) {
 
     saveOffline() {
       let self = this;
-      return Promise.all([MessageCollection.insertOne(self), OfflineMessageCollection.insertOne(self)]);
+      return OfflineMessageCollection.insertOne(self);
     }
 
     static getList(query) {

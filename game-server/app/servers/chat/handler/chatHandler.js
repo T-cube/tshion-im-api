@@ -275,16 +275,16 @@ prototype.deviceToken = function(msg, session, next) {
 prototype.send = function(msg, session, next) {
   let self = this;
   let { target, roomid, content } = msg;
-  content=content.replace(/&nbsp;/g,' ');
+  content = content.replace(/&nbsp;/g, ' ');
   if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
 
   let room = self.app.roomMap.get(roomid);
   let cid = room ? room[target] : null;
-  var username = session.uid.split('*')[0];
+  var [from] = session.uid.split('*');
   var param = Object.assign(msg, {
     route: 'onChat',
     roomid,
-    from: username,
+    from,
     target
   });
 
@@ -295,7 +295,7 @@ prototype.send = function(msg, session, next) {
   //     next({ code: 404, error: 'user offline' });
   //   });
   // }
-
+  console.log('save message', msg);
   self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
     if (err) return next(err);
 
