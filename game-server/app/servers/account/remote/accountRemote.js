@@ -83,6 +83,11 @@ prototype.getDeviceToken = function(info, cb) {
   self.Account.getDeviceToken(info).then(tokens => cb(null, tokens)).catch(cb);
 };
 
+prototype.revokeDeviceToken = function(info, cb) {
+  let self = this;
+  self.Account.delDeviceToken(info).then(result => cb(null, result)).catch(cb);
+};
+
 prototype.findFriends = function(uid) {
 
 };

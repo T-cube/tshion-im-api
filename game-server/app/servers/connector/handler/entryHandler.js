@@ -71,8 +71,14 @@ class entryHandler {
    */
   kick(msg, session, next) {
     let self = this;
-
+    let [uid, cid, client] = session.uid.split('*');
     onUserLeave(self.app, session, function() {
+      if (client) {
+        return self.app.rpc.account.accountRemote.revokeDeviceToken({ uid }, function() {
+          next(null, {});
+        });
+      }
+
       next(null, {});
     });
   };
