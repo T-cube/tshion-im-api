@@ -1,19 +1,12 @@
 'use strict';
-
 module.exports = function(app) {
   const Message = require('../../../models/message')(app);
-
-
   return {
     get: {
       ':roomid': {
         docs: {
           name: '获取聊天日志',
-          params: [
-            { param: 'roomid', type: 'String' },
-            { query: 'last', type: 'String' },
-            { query: 'pagesize', type: 'Number' }
-          ]
+          params: [{ param: 'roomid', type: 'String' }, { query: 'last', type: 'String' }, { query: 'pagesize', type: 'Number' }]
         },
         method(req, res, next) {
           Message.getList(Object.assign(req.params, req.query)).then(result => {
@@ -24,16 +17,22 @@ module.exports = function(app) {
       'offline/:target': {
         docs: {
           name: '获取离线消息统计',
-          params: [
-            { param: 'target', type: 'String' }
-          ]
+          params: [{ param: 'target', type: 'String' }]
         },
         method(req, res, next) {
           console.log(req.params);
-
           Message.offlineMessageCount(req.params).then(counts => {
             res.json(counts);
           }).catch(next);
+        }
+      },
+      ':roomid/newly': {
+        docs: {
+          name: '获取最新的聊天记录',
+          params: [{ param: 'roomid', type: 'String' }, { query: 'index', type: 'String' }],
+        },
+        method(req, res, next) {
+          Message.getNewLyList(Object.assign(req.params, req.query)).then(result => res.json(result)).catch(next);
         }
       }
     },
@@ -41,10 +40,7 @@ module.exports = function(app) {
       'offline/:roomid/:target': {
         des: {
           name: '删除离线消息',
-          params: [
-            { param: 'roomid', type: 'String' },
-            { param: 'target', type: 'String' }
-          ]
+          params: [{ param: 'roomid', type: 'String' }, { param: 'target', type: 'String' }]
         },
         method(req, res, next) {
           Message.deleteOfflineMessage(req.params).then(result => {
