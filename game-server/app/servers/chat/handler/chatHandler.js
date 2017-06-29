@@ -268,7 +268,9 @@ prototype.send = function(msg, session, next) {
       // let sid = member['sid'];
       // self.channelService.pushMessageByUids(param, [{ uid, sid }]);
       self.channelService.pushMessageByUids(param, clients);
-      self.app.rpc.push.pushRemote.pushMessageOne(null, result, null);
+      self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err,result){
+        if(err) console.warn(err);
+      });
       // !mobile && self.app.rpc.push.pushRemote.pushMessageOne(null, result, null);
     }
     next(null, {
