@@ -24,10 +24,7 @@ prototype.joinRoom = function(msg, session, next) {
   if (!target || !target_cid) return next({ error: 'target can not be null,target_cid can not be null' });
   self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
     if (err) return next(err);
-    console.log(target, '.............');
-    console.log(room);
     self.app.onlineRedis.get(target).then(cid => {
-      console.log(cid);
       let msg = room;
       if (!cid) msg.error = 'user offline';
       else {
@@ -48,7 +45,6 @@ prototype.joinRoom = function(msg, session, next) {
       }
       next(null, msg);
     }).catch(e => {
-      console.error('error redis.......', e);
       next(e);
     });
   });
@@ -238,13 +234,7 @@ prototype.send = function(msg, session, next) {
     target
   });
   let channel = cid ? self.channelService.getChannel(cid, false) : null;
-  // if (!channel) {
-  //   return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-  //     if (err) return next(err);
-  //     next({ code: 404, error: 'user offline' });
-  //   });
-  // }
-  console.log('save message', msg);
+
   self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
     if (err) return next(err);
     if (!channel) {
