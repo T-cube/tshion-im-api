@@ -54,7 +54,7 @@ module.exports = function(app) {
       return RoomCollection.find({
         [`room.${uid}`]: cid,
         members: uid
-      }).toArray().then(docs => docs);
+      }).sort({last_active: -1}).toArray().then(docs => docs);
     }
   };
 };

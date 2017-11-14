@@ -8,17 +8,36 @@ module.exports = function(app) {
     constructor(msg) {
       _.extend(msg, this, schema);
     }
+
+    /**
+     * 存储消息
+     */
     save() {
       return MessageCollection.insertOne(this);
     }
+
+    /**
+     * 存储多条消息
+     * @param {*} messages
+     * @param {*} offline
+     */
     static saveMany(messages, offline = false) {
       if (offline) return Promise.all([MessageCollection.insert(messages), OfflineMessageCollection.insert(messages)]);
       return MessageCollection.insert(messages);
     }
+
+    /**
+     * 存储离线消息
+     */
     saveOffline() {
       let self = this;
       return OfflineMessageCollection.insertOne(self);
     }
+
+    /**
+     * 获取消息列表
+     * @param {*} query
+     */
     static getList(query) {
       let { roomid, pagesize = 20, last } = query;
       return Promise.all([MessageCollection.find(last && {
@@ -28,8 +47,8 @@ module.exports = function(app) {
         }
       } || {
         roomid
-      }, {}).sort({ _id: -1 }).limit(pagesize).toArray().then(docs => {
-        console.log(docs);
+      }, {}).sort({ timestamp: -1, _id: -1 }).limit(pagesize).toArray().then(docs => {
+        // console.log(docs);
         return {
           list: docs.reverse(),
           last: docs.length && docs[docs.length - 1]._id || 0,
@@ -38,8 +57,10 @@ module.exports = function(app) {
         return results[0];
       });
     }
+
+
     static getNewLyList({ roomid, index }) {
-      console.log(index);
+      // console.log(index);
       if (!index) return Message.getList(roomid);
       return MessageCollection.find({ roomid, _id: { $gt: app.ObjectID(index) } }, {}).sort({ _id: -1 }).toArray().then(docs => docs.reverse());
     }
