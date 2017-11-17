@@ -9,6 +9,7 @@ module.exports = function(app) {
           params: [{ param: 'roomid', type: 'String' }, { query: 'last', type: 'String' }, { query: 'pagesize', type: 'Number' }]
         },
         method(req, res, next) {
+          console.log('123456789123456789', req.query);
           Message.getList(Object.assign(req.params, req.query)).then(result => {
             res.json(result);
           }).catch(next);
@@ -20,7 +21,6 @@ module.exports = function(app) {
           params: [{ param: 'target', type: 'String' }]
         },
         method(req, res, next) {
-          console.log(req.params);
           Message.offlineMessageCount(req.params).then(counts => {
             res.json(counts);
           }).catch(next);
