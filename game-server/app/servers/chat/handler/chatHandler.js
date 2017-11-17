@@ -226,7 +226,7 @@ prototype.send = function(msg, session, next) {
   if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
   let room = self.app.roomMap.get(roomid);
   let cid = room ? room[target] : null;
-  var [from] = session.uid.split('*');
+  var [from, fcid] = session.uid.split('*');
   var param = Object.assign(msg, {
     route: 'onChat',
     roomid,
@@ -234,6 +234,14 @@ prototype.send = function(msg, session, next) {
     target
   });
   let channel = cid ? self.channelService.getChannel(cid, false) : null;
+  // if (!room) {
+  //   next({route: param.route, code: 404, error: 'no room' });
+  // }
+  let room_info = {
+    [from]: [fcid],
+    [target]: [cid]
+  }
+  msg.room = room_info;
 
   self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
     if (err) return next(err);

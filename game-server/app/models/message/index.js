@@ -40,6 +40,7 @@ module.exports = function(app) {
      */
     static getList(query) {
       let { roomid, pagesize = 20, last } = query;
+      pagesize = parseInt(pagesize);
       return Promise.all([MessageCollection.find(last && {
         roomid,
         _id: {
@@ -51,7 +52,7 @@ module.exports = function(app) {
         // console.log(docs);
         return {
           list: docs.reverse(),
-          last: docs.length && docs[docs.length - 1]._id || 0,
+          last: docs.length && docs[0]._id || 0,
         };
       })]).then(results => {
         return results[0];
@@ -66,7 +67,17 @@ module.exports = function(app) {
     }
     static offlineMessageCount(query) {
       let { target } = query;
-      return OfflineMessageCollection.group({ from: true, roomid: true }, { target }, { count: 0 }, function(curr, result) { result.count++; }, true);
+      // return OfflineMessageCollection.aggregate({
+      //
+      // })
+      return OfflineMessageCollection.group({
+        from: true, roomid: true
+      }, {
+        target
+      }, {
+        count: 0
+      },
+      function(curr, result) { result.count++; }, true);
     };
     static getLastMessage(rooms) {
       return Promise.all(rooms.map(room => MessageCollection.find({ roomid: room.roomid }).limit(1).sort({ timestamp: -1 }).toArray())).then(results => {
