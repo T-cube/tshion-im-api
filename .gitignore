@@ -19,3 +19,6 @@ yarn.lock
 **/*.log.*
 # game-server/app.js
 game-server/config/
+
+
+package-lock.json

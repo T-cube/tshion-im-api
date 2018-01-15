@@ -71,13 +71,14 @@ module.exports = function(app) {
       //
       // })
       return OfflineMessageCollection.group({
-        from: true, roomid: true
+        from: true,
+        roomid: true
       }, {
         target
       }, {
         count: 0
       },
-      function(curr, result) { result.count++; }, true);
+        function(curr, result) { result.count++; }, true);
     };
     static getLastMessage(rooms) {
       return Promise.all(rooms.map(room => MessageCollection.find({ roomid: room.roomid }).limit(1).sort({ timestamp: -1 }).toArray())).then(results => {
@@ -89,7 +90,9 @@ module.exports = function(app) {
     }
     static deleteOfflineMessage(query) {
       let { roomid, target } = query;
-      return OfflineMessageCollection.remove({ roomid, target });
+      return OfflineMessageCollection.count({ roomid, target }).then(count => {
+        return OfflineMessageCollection.remove({ roomid, target }).then(() => count);
+      });
     }
   };
 };

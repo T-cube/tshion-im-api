@@ -1,6 +1,9 @@
 'use strict';
 const express = require('express');
 const bodyParser = require('body-parser');
+const connectMultiparty = require('connect-multiparty');
+
+const apiError = require('../express-proxy/libs/api-error');
 
 module.exports = function(app, opts) {
   opts = opts || {};
@@ -16,6 +19,11 @@ var ExpressProxy = function(app, opts) {
   this.exp.use(bodyParser.urlencoded({
     'extended': true
   }));
+
+  this.exp.use(connectMultiparty({
+    maxFilesSize: 15240000
+  }));
+
   this.exp.use(bodyParser.json());
   this.exp.use(bodyParser.text({
     'defaultCharset': 'utf-8'
@@ -42,6 +50,11 @@ var ExpressProxy = function(app, opts) {
     origin: corsOptionsDelegate
   }));
 
+  this.exp.use(function(req, res, next) {
+    req.apiError = apiError;
+    next();
+  });
+
   // add app to req
   this.exp.use(function(req, res, next) {
     req.pomelo = app;
@@ -52,7 +65,7 @@ var ExpressProxy = function(app, opts) {
   require('../express-proxy/route')(this.exp, this.app);
   // router
   this.exp.all('/api/123', function(req, res) {
-    console.log(req.body,'..........................1111');
+    console.log(req.body, '..........................1111');
     self.app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
       res.json(data);
     });

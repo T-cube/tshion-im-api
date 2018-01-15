@@ -1,6 +1,8 @@
 'use strict';
 module.exports = function(app) {
   const Message = require('../../../models/message')(app);
+  const Notification = require('../../../vendor/notification')(app);
+
   return {
     get: {
       ':roomid': {
@@ -43,8 +45,10 @@ module.exports = function(app) {
           params: [{ param: 'roomid', type: 'String' }, { param: 'target', type: 'String' }]
         },
         method(req, res, next) {
+          // Message.offlineMessageCount()
           Message.deleteOfflineMessage(req.params).then(result => {
-            res.json(result);
+            console.log(result,'dddsdfsdfsdfsdfsdf')
+            res.json({num: result});
           }).catch(next);
         }
       }

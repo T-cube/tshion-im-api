@@ -8,5 +8,9 @@ module.exports = {
   group: { type: 'string' },
   timestamp: { type: 'string|number', default: () => { return +new Date; } },
   type: { type: 'string', default: 'text' },
+  filename: { type: 'string' },
+  audio: { type: 'string' },
+  duration: { type: 'string|number' },
+  image: { type: 'string' },
   __route__: { type: 'string' }
 };

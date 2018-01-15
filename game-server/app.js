@@ -20,6 +20,7 @@ co(function*() {
 
   require('./libs/redis')(app, config.redis);
   app.set('roomMap', new Map(), true);
+  app.set('chatMap', new Map(), true);
   // app configure
   app.configure('production|development', function() {
     // route configures

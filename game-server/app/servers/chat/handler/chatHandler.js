@@ -221,9 +221,13 @@ prototype.deviceToken = function(msg, session, next) {
  */
 prototype.send = function(msg, session, next) {
   let self = this;
-  let { target, roomid, content } = msg;
-  content = content.replace(/&nbsp;/g, ' ');
-  if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
+  let { target, roomid, content, type } = msg;
+
+  if(type == 'text') {
+    content = content.replace(/&nbsp;/g, ' ');
+    if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
+  }
+
   let room = self.app.roomMap.get(roomid);
   let cid = room ? room[target] : null;
   var [from, fcid] = session.uid.split('*');
@@ -240,7 +244,7 @@ prototype.send = function(msg, session, next) {
   let room_info = {
     [from]: [fcid],
     [target]: [cid]
-  }
+  };
   msg.room = room_info;
 
   self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
@@ -266,13 +270,15 @@ prototype.send = function(msg, session, next) {
         // (tuid.indexOf('ios') || tuid.indexOf('android')) && (mobile = true);
         clients.push({ uid: tuid, sid });
       }
-      if (!clients.length) return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-        if (err) return next(err);
-        self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
-          if (err) console.warn(err);
+      if (!clients.length)
+        return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+          if (err) return next(err);
+
+          self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
+            if (err) console.warn(err);
+          });
+          next({ route: param.route, msg: result, code: 404, error: 'user offline' });
         });
-        next({ route: param.route, msg: result, code: 404, error: 'user offline' });
-      });
       // let sid = member['sid'];
       // self.channelService.pushMessageByUids(param, [{ uid, sid }]);
       self.channelService.pushMessageByUids(param, clients);

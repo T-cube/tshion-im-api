@@ -8,6 +8,7 @@ module.exports = function(app) {
 var AccountRemote = function(app) {
   this.app = app;
   this.roomMap = new Map();
+  this.chatMap = new Map();
   this.Room = require('../../../models/room')(app);
   this.Account = require('../../../models/account')(app);
   this.channelService = app.get('channelService');
