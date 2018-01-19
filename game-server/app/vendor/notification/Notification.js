@@ -4,6 +4,8 @@ const eventEmitter = require('events');
 const AndroidPush = require('@ym/android-push');
 const apn = require('apn');
 
+const { MiPush } = require('./Push');
+
 const jpushConfig = require('../../../config/config').jpush;
 let vendor;
 
@@ -119,7 +121,7 @@ module.exports = function(app) {
           let message = this._generateMessageIOS(notification);
 
           apnService.send(message, iosTokens).then(result => {
-            console.log('.................:',result);
+            console.log('.................:', result);
             console.log('sent:', result.sent.length);
             console.log('failed:', result.failed.length);
             console.log(result.failed);
@@ -130,7 +132,7 @@ module.exports = function(app) {
       new Promise((resolve, reject) => {
         if (androidTokens.length) {
           let ns = this._generateMessageAndroid(notification);
-          console.log('.......ns',ns);
+          console.log('.......ns', ns);
           let message = {
             msg_content: ns.alert,
             title: ns.title,
@@ -138,21 +140,23 @@ module.exports = function(app) {
             extras: ns.extras
           };
 
-          androidPush.push({
-            platform: 'android',
-            audience: {
-              registration_id: androidTokens
-            },
-            notification: ns,
-            message,
-            options: {
-              time_to_live: 60,
-              // apn_production: false
-            }
-          }).then(r => {
-            console.log('android sent:', r);
-            resolve(r);
-          }).catch(reject);
+          return MiPush.sendToRegId(androidTokens, ns)
+            //     androidPush.push({
+            //       platform: 'android',
+            //       audience: {
+            //         registration_id: androidTokens
+            //       },
+            //       notification: ns,
+            //       message,
+            //       options: {
+            //         time_to_live: 60,
+            //         // apn_production: false
+            //       }
+            //     })
+            .then(r => {
+              console.log('android sent:', r);
+              resolve(r);
+            }).catch(reject);
         } else resolve(null);
       })
     ]).then(() => {
@@ -194,6 +198,7 @@ module.exports = function(app) {
       alert: content,
       title: 'T立方',
       builder_id: 0,
+      priority: 2,
       extras: {
         sender: from,
         roomid,
