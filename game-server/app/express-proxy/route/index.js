@@ -18,7 +18,14 @@ function readRoute(dir, app, exp) {
         Object.keys(routes[method]).map(routePath => {
           let __routePath = '/api' + filepath.replace(__dirname, '').replace(filename, '') + routePath;
           console.log(routes[method][routePath]['method']);
-          exp[method](__routePath, routes[method][routePath]['method']);
+          let middleware = routes[method][routePath]['middleware'];
+          middleware ?
+            exp[method](__routePath,
+              Array.isArray(middleware) ? middleware : [middleware],
+              routes[method][routePath]['method']
+            ) : exp[method](__routePath,
+              routes[method][routePath]['method']
+            );
           console.log(method, '\t', __routePath);
         });
       });

@@ -10,8 +10,8 @@ class MiPushModule {
   _message(notification) {
     var message = new MiPush.Message();
     var { alert, title, extras = {} } = notification;
-    message.title = alert;
-    message.description = title;
+    message.title = title;
+    message.description = alert;
     message.restrictedPackageName = 'com.tlfapp';
     message.passThrough = 0;
     message.notifyType = -1;
@@ -28,7 +28,7 @@ class MiPushModule {
     var message = this._message(notification);
     return new Promise((resolve, reject) => {
       MiPushSender.sendToRegId(regId, message, function(err, result) {
-        console.log.apply(null, arguments);
+        // console.log.apply(null, arguments);
         if (err) return reject(err);
 
         resolve(result);

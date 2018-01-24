@@ -4,7 +4,10 @@ const path = require('path');
 const http = require('http');
 
 const config = require('../../../../config/config');
+const fileFilter = require('../../middleware/file-filter');
 module.exports = function(app) {
+
+  const fileHash = require('../../middleware/file-hash')(app);
 
   const File = require('../../../models/file')(app);
   const ObjectID = app.ObjectID;
@@ -16,79 +19,170 @@ module.exports = function(app) {
           name: '上传文件',
           params: [{ key: 'file', type: 'FormData' }]
         },
+        middleware: [fileFilter, fileHash],
         method(req, res, next) {
           var file = req.files.file;
           var body = req.body;
-          console.log(file,body);
-          if (!file) res.json({ error: 'null' });
 
-          if (!file.name.toLowerCase().match(config.file.allowTypes)) return next(req.apiError(400, 'file type is not allowed'));
-          if (file.size > (config.file.maxSize)) return next(req.apiError(400, 'file size is out of limit'));
+          var hash = file.hash;
+          var filename = file.name || file.filename;
 
           var mimeType = mime.getType(file.name);
           var extensions = path.extname(file.name).replace('.', '');
-          File.getFileHash(file.path).then(hash => {
-            var filename = file.name || file.filename;
 
-            return File.getStatic({ filename, hash }).then(staticFile => {
-              if (staticFile) return res.json(staticFile);
 
-              return File.hashGetFile(hash).then(doc => {
-                var options = {
-                  filename,
-                  hash: hash,
+          return File.hashGetFile(hash).then(doc => {
+            var options = {
+              filename,
+              hash: hash,
+              size: file.size,
+              mimeType,
+              extensions
+            };
+
+            for (let key in body) {
+              options[key] = body[key];
+            }
+
+            if (doc) {
+
+              options.url = doc.url;
+              options.copy = doc._id;
+              return new File(options).save().then(result => {
+                res.json(result);
+              });
+
+            } else {
+              var cdnData = {
+                filePath: file.path,
+                folder: [extensions]
+              };
+
+              return File.saveCdn(cdnData).then(data => {
+                var cache = {
+                  filename: `${data.uuid}.${extensions}`,
+                  hash,
                   size: file.size,
                   mimeType,
-                  extensions
+                  extensions,
+                  cdn: data.result,
+                  url: `${data.result.server_url}/${data.result.key}`
                 };
 
-                for (let key in body) {
-                  options[key] = body[key];
-                }
+                return new File(cache).saveCache().then(cacheFile => {
+                  options.url = cacheFile.url;
+                  options.copy = cacheFile._id;
 
-                if (doc) {
-
-                  options.url = doc.url;
-                  options.copy = doc._id;
-                  return new File(options).save().then(result => {
-                    res.json(result);
+                  return new File(options).save().then(newFile => {
+                    res.json(newFile);
                   });
-
-                } else {
-
-                  var cdnData = {
-                    filePath: file.path,
-                    folder: [extensions]
-                  };
-
-                  return File.saveCdn(cdnData).then(data => {
-                    var cache = {
-                      filename: `${data.uuid}.${extensions}`,
-                      hash,
-                      size: file.size,
-                      mimeType,
-                      extensions,
-                      cdn: data.result,
-                      url: `${data.result.server_url}/${data.result.key}`
-                    };
-
-                    return new File(cache).saveCache().then(cacheFile => {
-                      options.url = cacheFile.url;
-                      options.copy = cacheFile._id;
-
-                      return new File(options).save().then(newFile => {
-                        res.json(newFile);
-                      });
-                    });
-                  });
-                }
+                });
               });
-            });
+            }
+          }).catch(next);
+        }
+      },
+      'temporary': {
+        docs: {
+          name: '上传临时文件',
+          params: [{ key: 'file', type: 'FormData' }]
+        },
+        middleware: [fileFilter, fileHash],
+        method(req, res, next) {
+          var file = req.files.file;
+          var body = req.body;
+
+          var hash = file.hash;
+          var filename = file.name || file.filename;
+
+          var mimeType = mime.getType(file.name);
+          var extensions = path.extname(file.name).replace('.', '');
+
+
+          return File.hashGetFile(hash).then(doc => {
+            var options = {
+              filename,
+              hash: hash,
+              size: file.size,
+              mimeType,
+              extensions
+            };
+
+            for (let key in body) {
+              options[key] = body[key];
+            }
+
+            if (doc) {
+
+              options.url = doc.url;
+              options.copy = doc._id;
+              return new File(options).save().then(result => {
+                res.json(result);
+              });
+
+            } else {
+              var cdnData = {
+                filePath: file.path,
+                folder: [extensions]
+              };
+
+              return File.saveCdn(cdnData).then(data => {
+                var cache = {
+                  filename: `${data.uuid}.${extensions}`,
+                  hash,
+                  size: file.size,
+                  mimeType,
+                  extensions,
+                  cdn: data.result,
+                  url: `${data.result.server_url}/${data.result.key}`
+                };
+
+                File.setCdnLife({ key: data.result.key }).then(console.log).catch(console.error);
+
+                return new File(cache).saveCache().then(cacheFile => {
+                  options.url = cacheFile.url;
+                  options.copy = cacheFile._id;
+
+                  return new File(options).save().then(newFile => {
+                    res.json(newFile);
+                  });
+                });
+              });
+            }
           }).catch(next);
         }
       }
     },
     get: {
+      'image/thumbnail/:_id': {
+        docs: {
+          name: '获取缩小图片',
+          params: [
+            { param: '_id', type: 'String' },
+            { query: 'w', type: 'Number' },
+            { query: 'h', type: 'Number' },
+          ]
+        },
+        method(req, res, next) {
+          // /thumbnail/<Width>x<Height>>
+          console.log(req)
+          File.getFile({ _id: ObjectID(req.params._id) }).then(file => {
+            if (!file) return next(req.apiError(404, 'file not found'));
+
+            var copy = file.copy;
+
+            return File.getCacheFile(ObjectID(copy)).then(origin => {
+              var { w = 200, y = 300 } = req.query;
+              var key = `${origin.cdn.key}?imageMogr2/thumbnail/${w}x${y}`;
+              console.log(key)
+              return File.generateLink(key).then(link => {
+                console.log(link)
+                res.redirect(301, link);
+              });
+            });
+          }).catch(next);
+        }
+      },
       'image/view/:_id': {
         docs: {
           name: '查看图片',

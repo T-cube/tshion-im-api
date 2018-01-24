@@ -154,7 +154,7 @@ module.exports = function(app) {
             //       }
             //     })
             .then(r => {
-              console.log('android sent:', r);
+              // console.log('android sent:', r);
               resolve(r);
             }).catch(reject);
         } else resolve(null);

@@ -43,15 +43,15 @@ module.exports = function(app) {
       return this._save(fileCacheCollection);
     }
 
-    static getFile(options){
+    static getFile(options) {
       return fileCollection.findOne(options);
     }
 
-    static getCacheFile(_id){
+    static getCacheFile(_id) {
       return fileCacheCollection.findOne(_id);
     }
 
-    static generateLink(key, rename){
+    static generateLink(key, rename) {
       return qiniu.makeLink.apply(qiniu, arguments);
     }
 
@@ -69,6 +69,16 @@ module.exports = function(app) {
         result,
         uuid: savekey
       }));
+    }
+
+    /**
+     * set cdn file life circle
+     * @param {{}} param0
+     * @param {String} param0.key
+     * @param {Number} param0.days
+     */
+    static setCdnLife({ key, days = 7 }) {
+      return qiniu.deleteAfterDays({ key, days });
     }
 
     /**

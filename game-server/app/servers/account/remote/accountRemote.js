@@ -75,7 +75,7 @@ prototype.unActiveRoom = function(roomid, cb) {
 
 prototype.saveDeviceToken = function(info, cb) {
   let self = this;
-  new self.Account(info).saveAccount().then(value => cb(null, value)).catch(cb);
+  new self.Account(info).saveDeviceToken().then(value => cb(null, value)).catch(cb);
 };
 
 prototype.getDeviceToken = function(info, cb) {
