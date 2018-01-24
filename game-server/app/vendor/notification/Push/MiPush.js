@@ -1,6 +1,6 @@
 'use strict';
 
-const MiPush = require('mipush');
+const MiPush = require('../../mipush');
 
 const MiPushSender = new MiPush.Sender({
   appSecret: 'bf6pJcMhaLXxLOlYgzosyg=='
