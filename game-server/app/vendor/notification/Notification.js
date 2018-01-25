@@ -186,7 +186,7 @@ module.exports = function(app) {
 
     if (!isNaN(badge)) data.badge = badge;
     let notification = new apn.Notification(data);
-    data.topic = 'com.tlfapp';
+    notification.topic = 'com.tlfapp';
 
     return notification;
   };
