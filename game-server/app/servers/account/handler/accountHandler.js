@@ -17,11 +17,12 @@ class accountHandler {
       if (err) return next(err);
       console.log('room data..........', data);
       self.app.rpc.message.messageRemote.getLastMessage(session, data, function(err, res) {
-
+        console.log('...............', res, '00000000');
         if (err) return next(err);
 
 
-        next(null, res);
+        let list = (res || []).filter(room => room.message);
+        next(null, list);
       });
 
     });
