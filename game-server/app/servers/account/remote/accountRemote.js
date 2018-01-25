@@ -64,6 +64,7 @@ prototype.bindRoom = function({ uid, target, fcid, target_cid }, cb) {
 prototype.activeRoom = function(roomid, cb) {
   let self = this;
   self.Room.findRoom({ roomid }).then(room => {
+    if (!room) return cb(null);
     return self.Room.upgradeActive(room).then(nextRoom => cb(null, nextRoom));
   }).catch(cb);
 };

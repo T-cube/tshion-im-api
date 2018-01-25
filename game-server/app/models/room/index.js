@@ -51,10 +51,11 @@ module.exports = function(app) {
      * @return {Promise}
      */
     static getUserRoomMap(uid, cid) {
-      return RoomCollection.find({
-        [`room.${uid}`]: cid,
-        members: uid
-      }).sort({last_active: -1}).toArray().then(docs => docs);
+      let query = { members: uid };
+      if (cid) {
+        query[`room.${uid}`] = cid;
+      }
+      return RoomCollection.find(query).sort({ last_active: -1 }).toArray().then(docs => docs);
     }
   };
 };
