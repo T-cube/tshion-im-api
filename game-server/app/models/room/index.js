@@ -15,8 +15,12 @@ module.exports = function(app) {
     save() {
       let self = this;
 
-      return RoomCollection.findOne({ roomid: self.roomid }).then(doc => {
-        if (doc) return doc;
+      return RoomCollection.findOneAndUpdate({ roomid: self.roomid }, { $set: self }, {
+        returnOriginal: false,
+        returnNewDocument: true
+      }).then(doc => {
+        console.log(121233333344,doc)
+        if (doc&&doc.value) return doc.value;
 
         return RoomCollection.insertOne(self).then(result => {
           self._id = result.insertedId;

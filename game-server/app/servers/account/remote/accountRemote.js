@@ -18,7 +18,6 @@ const prototype = AccountRemote.prototype;
 
 prototype.login = function(token, cb) {
   // use when need
-  console.log(this.app.get('hello'));
   this.app.rpc.tlifang.tlifangRemote.login(null, token, function(err, data) {
     if (err) return cb(err);
     cb(null, data);
@@ -29,7 +28,7 @@ prototype.login = function(token, cb) {
 prototype.bindChannel = function(uid, cid, cb) {
   let self = this;
   self.app.onlineRedis.get(uid).then(lastcid => {
-    if (lastcid && lastcid !== cid) {
+    if (lastcid && (lastcid !== cid)) {
       self.rpc.chat.chatRemote.kick(null, `${uid}*${lastcid}`, app.get('serverId'), null);
     }
     this.app.onlineRedis.set(uid, cid).then(status => {
@@ -81,7 +80,6 @@ prototype.saveDeviceToken = function(info, cb) {
 
 prototype.getDeviceToken = function(info, cb) {
   let self = this;
-  console.log(info);
   self.Account.getDeviceToken(info).then(tokens => cb(null, tokens)).catch(cb);
 };
 
@@ -95,6 +93,5 @@ prototype.findFriends = function(uid) {
 };
 
 prototype.express = function(a, b, cb) {
-  console.log('reveive:', a, b);
   cb(null, { a, b });
 };

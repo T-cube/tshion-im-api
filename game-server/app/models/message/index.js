@@ -40,6 +40,7 @@ module.exports = function(app) {
      */
     static getList(query) {
       let { roomid, pagesize = 20, last } = query;
+      console.log(roomid,11111)
       pagesize = parseInt(pagesize);
       return Promise.all([MessageCollection.find(last && {
         roomid,

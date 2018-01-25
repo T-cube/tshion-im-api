@@ -41,7 +41,7 @@ class entryHandler {
         }
       });
 
-      session.on('closed', onUserLeave.bind(null, self.app, session));
+      session.on('closed', onUserLeave.bind(null, self.app, session, userLeaveCallback.bind(self, client, uid, next)));
       //put user into channel
       self.app.rpc.chat.chatRemote.add(session,
         uid,
@@ -72,17 +72,19 @@ class entryHandler {
   kick(msg, session, next) {
     let self = this;
     let [uid, cid, client] = session.uid.split('*');
-    onUserLeave(self.app, session, function() {
-      if (client) {
-        return self.app.rpc.account.accountRemote.revokeDeviceToken({ uid }, function() {
-          next(null, {});
-        });
-      }
-
-      next(null, {});
-    });
+    onUserLeave(self.app, session, userLeaveCallback.bind(self, client, uid, next));
   };
 }
+
+var userLeaveCallback = function(client, uid, next) {
+  if (client) {
+    return this.app.rpc.account.accountRemote.revokeDeviceToken(null, { uid }, function() {
+      next(null, {});
+    });
+  }
+
+  next(null, {});
+};
 
 /**
  * User log out handler

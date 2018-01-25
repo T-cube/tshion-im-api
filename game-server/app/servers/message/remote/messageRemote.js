@@ -64,7 +64,6 @@ prototype.getLastMessage = function(rooms, cb) {
   let self = this;
 
   self.Message.getLastMessage(rooms).then(results => {
-    console.log(results);
     cb(null, results);
   }).catch(e => {
     console.error(e);

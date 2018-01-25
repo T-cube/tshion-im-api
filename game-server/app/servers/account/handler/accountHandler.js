@@ -15,9 +15,7 @@ class accountHandler {
     let [uid, cid] = session.uid.split('*');
     self.app.rpc.chat.chatRemote.roomInfo(session, uid, null, function(err, data) {
       if (err) return next(err);
-      console.log('room data..........', data);
       self.app.rpc.message.messageRemote.getLastMessage(session, data, function(err, res) {
-        console.log('...............', res, '00000000');
         if (err) return next(err);
 
 
