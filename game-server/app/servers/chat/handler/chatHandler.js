@@ -284,6 +284,7 @@ prototype.send = function(msg, session, next) {
           // (tuid.indexOf('ios') || tuid.indexOf('android')) && (mobile = true);
           clients.push({ uid: tuid, sid });
         }
+        console.log(clients,111222111222,roomid,param)
         if (!clients.length)
           return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
             if (err) return next(err);

@@ -34,7 +34,10 @@ module.exports = function(app) {
           params: [{ param: 'roomid', type: 'String' }, { query: 'index', type: 'String' }],
         },
         method(req, res, next) {
-          Message.getNewLyList(Object.assign(req.params, req.query)).then(result => res.json(result)).catch(next);
+          Message.getNewLyList(Object.assign(req.params, req.query)).then(result => {
+            console.log(result)
+            res.json(result);
+          }).catch(next);
         }
       }
     },
@@ -47,8 +50,8 @@ module.exports = function(app) {
         method(req, res, next) {
           // Message.offlineMessageCount()
           Message.deleteOfflineMessage(req.params).then(result => {
-            console.log(result,'dddsdfsdfsdfsdfsdf')
-            res.json({num: result});
+            console.log(result, 'dddsdfsdfsdfsdfsdf')
+            res.json({ num: result });
           }).catch(next);
         }
       }

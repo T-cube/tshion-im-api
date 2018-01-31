@@ -89,6 +89,7 @@ module.exports = function(app) {
         },
         middleware: [fileFilter, fileHash],
         method(req, res, next) {
+          console.log(req.body, req.files.file)
           var file = req.files.file;
           var body = req.body;
 
@@ -233,6 +234,30 @@ module.exports = function(app) {
               });
             });
           }).catch(next);
+        }
+      },
+      'file/:_id': {
+        docs: {
+          name: '下载文件',
+          params: [
+            { param: '_id', type: 'String' },
+            { query: 'rename', type: 'String' }
+          ],
+          method(req, res, next) {
+            File.getFile({ _id: ObjectID(req.params._id) }).then(file => {
+              if (!file) return next(req.apiError(404, 'file not found'));
+
+              var copy = file.copy;
+
+              return File.getCacheFile(ObjectID(copy)).then(origin => {
+                let cdn = origin.cdn;
+
+                return File.generateLink(cdn.key, req.query.rename).then(link => {
+                  res.redirect(301, link);
+                });
+              });
+            }).catch(next);
+          }
         }
       }
     }
