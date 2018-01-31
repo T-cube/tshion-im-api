@@ -33,7 +33,7 @@ var ExpressProxy = function(app, opts) {
 
   const whitelist = ['http://cp.tlf.michael.local', 'https://cp.tlifang.com', 'https://cpapi.tlifang.com/oauth/token', 'http://cp.tlifang.com'];
   let corsOptionsDelegate = function(url, callback) {
-    console.log('>>>>>>>>>>>>>>>:', url);
+    // console.log('>>>>>>>>>>>>>>>:', url);
     let corsOptions;
     if (whitelist.indexOf(url) !== -1) {
       corsOptions = {
