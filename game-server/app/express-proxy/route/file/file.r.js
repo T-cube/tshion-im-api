@@ -254,7 +254,8 @@ module.exports = function(app) {
               let cdn = origin.cdn;
 
               return File.generateLink(cdn.key, req.query.rename).then(link => {
-                res.redirect(301, link);
+                res.json({download_url: link});
+                // res.redirect(301, link);
               });
             });
           }).catch(next);

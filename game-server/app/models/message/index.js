@@ -44,12 +44,13 @@ module.exports = function(app) {
       pagesize = parseInt(pagesize);
       return Promise.all([MessageCollection.find(last && {
         roomid,
-        _id: {
-          '$lt': app.ObjectID(last)
+        timestamp: {
+          '$lt': last
         }
       } || {
         roomid
-      }, {}).sort({ timestamp: -1, _id: -1 }).limit(pagesize).toArray().then(docs => {
+      }, {}).sort({ timestamp: -1})
+      .limit(pagesize).toArray().then(docs => {
         // console.log(docs);
         return {
           list: docs.reverse(),
@@ -64,8 +65,10 @@ module.exports = function(app) {
     static getNewLyList({ roomid, index }) {
       // console.log(index);
       if (!index) return Message.getList(roomid);
-      return MessageCollection.find({ roomid, _id: { $gt: app.ObjectID(index) } }, {}).sort({ _id: -1 }).toArray().then(docs => docs.reverse());
+      console.log(arguments);
+      return MessageCollection.find({ roomid, timestamp: { $gt: +index } }, {}).sort({ timestamp: -1 }).toArray().then(docs => docs.reverse());
     }
+
     static offlineMessageCount(query) {
       let { target } = query;
       // return OfflineMessageCollection.aggregate({

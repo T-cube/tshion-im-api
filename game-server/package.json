@@ -3,9 +3,6 @@
 	"version": "0.0.1",
 	"private": false,
 	"dependencies": {
-		"co": "^4.6.0",
-		"crc": "0.2.0",
-		"pomelo": "2.2.x",
-		"redis": "^2.6.5"
+
 	}
 }
