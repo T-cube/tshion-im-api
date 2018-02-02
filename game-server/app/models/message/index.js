@@ -45,7 +45,7 @@ module.exports = function(app) {
       return Promise.all([MessageCollection.find(last && {
         roomid,
         timestamp: {
-          '$lt': last
+          '$lt': parseInt(last)
         }
       } || {
         roomid
@@ -54,7 +54,7 @@ module.exports = function(app) {
         // console.log(docs);
         return {
           list: docs.reverse(),
-          last: docs.length && docs[0]._id || 0,
+          last: docs.length && docs[0].timestamp || 0,
         };
       })]).then(results => {
         return results[0];
@@ -66,7 +66,7 @@ module.exports = function(app) {
       // console.log(index);
       if (!index) return Message.getList(roomid);
       console.log(arguments);
-      return MessageCollection.find({ roomid, timestamp: { $gt: +index } }, {}).sort({ timestamp: -1 }).toArray().then(docs => docs.reverse());
+      return MessageCollection.find({ roomid, timestamp: { $gt: parseInt(index) } }, {}).sort({ timestamp: 1 }).toArray().then(docs => docs.reverse());
     }
 
     static offlineMessageCount(query) {

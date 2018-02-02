@@ -13,6 +13,7 @@ module.exports = function(app) {
         method(req, res, next) {
           console.log('123456789123456789', req.query);
           Message.getList(Object.assign(req.params, req.query)).then(result => {
+            console.log(123,result.list.length)
             res.json(result);
           }).catch(next);
         }
