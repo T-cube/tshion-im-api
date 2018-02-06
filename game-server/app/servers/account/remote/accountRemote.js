@@ -53,10 +53,10 @@ prototype.bindRoom = function({ uid, target, fcid, target_cid }, cb) {
     [target]: target_cid
   };
   new self.Room({ roomid: roomHash, members, room: roomInner }).save()
-    .then(room =>
-      self.Room.upgradeActive(room)
-      .then(nextRoom => cb(null, nextRoom))
-      .catch(cb))
+    .then(room => cb(null, room))
+      // self.Room.upgradeActive(room)
+      // .then(nextRoom => cb(null, nextRoom))
+      // .catch(cb))
     .catch(cb);
 };
 

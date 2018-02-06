@@ -24,6 +24,7 @@ let prototype = ChatRemote.prototype;
 prototype.add = function(uid, sid, cid, flag, cb) {
   let self = this;
   let channel = this.channelService.getChannel('global', flag);
+
   let { loginMap } = channel;
 
   // let sessionService = self.app.get('sessionService');
@@ -32,7 +33,7 @@ prototype.add = function(uid, sid, cid, flag, cb) {
   let loginer = loginMap.get(user) || {};
   // if (!loginer[uid]) {
   loginer[uid] = sid;
-  console.log('whatwhatwhatwhatwhatwhatwhat',cid);
+  console.log('whatwhatwhatwhatwhatwhatwhat', cid);
   loginMap.set(user, loginer);
   // }
 
@@ -81,7 +82,7 @@ prototype.roomInfo = function(uid, cid, cb) {
  */
 prototype.get = function(cid, flag) {
   var users = [];
-  var channel = this.channelService.getChannel('global', flag);
+  let channel = this.channelService.getChannel('global', flag);
   if (!!channel) {
     let members = channel.getMembers();
     for (let i = 0; i < members.length; i++) {
@@ -102,7 +103,8 @@ prototype.get = function(cid, flag) {
  */
 prototype.kick = function(uid, sid, cb) {
   var [user, cid] = uid.split('*');
-  var channel = this.channelService.getChannel('global', false);
+  let channel = this.channelService.getChannel('global', false);
+
   // leave channel
   if (!!channel) {
     let { loginMap } = channel;
@@ -116,10 +118,10 @@ prototype.kick = function(uid, sid, cb) {
     route: 'onLeave',
     user
   };
-  console.log(param,'>>>>>>>>>>>>>>>>>>>>>>>>>1');
+  console.log(param, '>>>>>>>>>>>>>>>>>>>>>>>>>1');
 
   this.app.rpc.account.accountRemote.unbindChannel(null, user, function(err, status) {
-    console.log(param,'>>>>>>>>>>>>>>>>>>>>>>>>>');
+    console.log(param, '>>>>>>>>>>>>>>>>>>>>>>>>>');
     channel.pushMessage(param);
     err && console.error(err);
     cb && cb();

@@ -172,11 +172,14 @@ module.exports = function(app) {
   };
 
   prototype._generateMessageIOS = function(msg) {
-    let { content, from, roomid, type, badge } = msg;
+    let { content, from, roomid, type, badge, from_name } = msg;
 
     let data = {
       sound: 'ping.aiff',
-      alert: content,
+      alert: {
+        title: from_name || 'T立方',
+        body: content
+      },
       payload: {
         sender: from,
         roomid,
@@ -192,11 +195,11 @@ module.exports = function(app) {
   };
 
   prototype._generateMessageAndroid = function(msg) {
-    let { content, from, roomid, type, badge } = msg;
+    let { content, from, roomid, type, badge, from_name } = msg;
 
     let notification = {
       alert: content,
-      title: 'T立方',
+      title: from_name || 'T立方',
       builder_id: 0,
       priority: 2,
       extras: {

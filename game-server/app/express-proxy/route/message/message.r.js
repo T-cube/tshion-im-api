@@ -11,9 +11,9 @@ module.exports = function(app) {
           params: [{ param: 'roomid', type: 'String' }, { query: 'last', type: 'String' }, { query: 'pagesize', type: 'Number' }]
         },
         method(req, res, next) {
-          console.log('123456789123456789', req.query);
+          // console.log('123456789123456789', req.query);
           Message.getList(Object.assign(req.params, req.query)).then(result => {
-            console.log(123,result.list.length)
+            // console.log(123,result.list.length)
             res.json(result);
           }).catch(next);
         }
@@ -36,7 +36,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           Message.getNewLyList(Object.assign(req.params, req.query)).then(result => {
-            console.log(result)
+            // console.log(result)
             res.json(result);
           }).catch(next);
         }
@@ -51,7 +51,7 @@ module.exports = function(app) {
         method(req, res, next) {
           // Message.offlineMessageCount()
           Message.deleteOfflineMessage(req.params).then(result => {
-            console.log(result, 'dddsdfsdfsdfsdfsdf')
+            // console.log(result, 'dddsdfsdfsdfsdfsdf')
             res.json({ num: result });
           }).catch(next);
         }

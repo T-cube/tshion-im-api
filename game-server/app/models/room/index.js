@@ -19,8 +19,8 @@ module.exports = function(app) {
         returnOriginal: false,
         returnNewDocument: true
       }).then(doc => {
-        console.log(121233333344,doc)
-        if (doc&&doc.value) return doc.value;
+        // console.log(121233333344,doc)
+        if (doc && doc.value) return doc.value;
 
         return RoomCollection.insertOne(self).then(result => {
           self._id = result.insertedId;

@@ -33,14 +33,14 @@ prototype.joinRoom = function(msg, session, next) {
     if (!target || !target_cid) return next({ error: 'target can not be null,target_cid can not be null' });
     self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
       if (err) return next(err);
-      self.app.onlineRedis.get(target).then(channel => {
+      self.app.onlineRedis.get(target).then(channel=> {
+
         let msg = room;
 
         self.app.roomMap.set(room.roomid, {
           [uid]: fcid,
           [target]: target_cid
         });
-
         if (!channel) msg.error = 'user offline';
         else {
           let channel = self.channelService.getChannel('global', false);
@@ -81,6 +81,7 @@ prototype.notifyGroup = function(options) {
   let self = this;
   let { members, cid, param } = options;
   let channel = self.channelService.getChannel('global');
+
   if (!channel) return;
   let users = [];
   for (let member of members) {
@@ -89,6 +90,7 @@ prototype.notifyGroup = function(options) {
     if (_member) users.push({ uid, sid: _member['sid'] });
   }
   users.length && self.channelService.pushMessageByUids(param, users);
+
 };
 /**
  * init group
@@ -132,6 +134,7 @@ prototype.addGroupMember = function(msg, session, next) {
   self.app.rpc.group.groupRemote.insertMembers(session, creator, group, members, function(err, result) {
     if (err) return next(err);
     let channel = self.channelService.getChannel('global');
+
     let map = channel.groupMap;
     let info = map.get(group);
     info.members = result.members;
@@ -175,7 +178,7 @@ prototype.sendGroup = function(msg, session, next) {
   let self = this;
   let { group } = msg;
   let [from, cid] = session.uid.split('*');
-  const channel = self.channelService.getChannel('global');
+  let channel = self.channelService.getChannel('global');
   let map = self.groupMap;
   let info = map.get(group);
   if (!info) return next({ code: 500, error: 'service no found this group' });
@@ -233,7 +236,7 @@ prototype.deviceToken = function(msg, session, next) {
  */
 prototype.send = function(msg, session, next) {
   let self = this;
-  let { target, roomid, content, type } = msg;
+  let { target, roomid, content, type, from_name } = msg;
 
   if (type == 'text') {
     content = content.replace(/&nbsp;/g, ' ');
@@ -262,6 +265,8 @@ prototype.send = function(msg, session, next) {
 
   self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
     if (err) return next(err);
+
+    result.from_name = from_name;
     if (!channel) {
       next(null, { route: param.route, msg: result });
       self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
@@ -278,13 +283,13 @@ prototype.send = function(msg, session, next) {
         let { loginMap } = channel;
         let loginer = loginMap.get(target);
         let clients = [];
-        let mobile = false;
+        // let mobile = false;
         for (let tuid in loginer) {
           let sid = loginer[tuid];
           // (tuid.indexOf('ios') || tuid.indexOf('android')) && (mobile = true);
           clients.push({ uid: tuid, sid });
         }
-        console.log(clients,111222111222,roomid,param)
+        console.log(clients, 111222111222, roomid, param)
         if (!clients.length)
           return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
             if (err) return next(err);

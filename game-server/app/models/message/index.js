@@ -40,7 +40,7 @@ module.exports = function(app) {
      */
     static getList(query) {
       let { roomid, pagesize = 20, last } = query;
-      console.log(roomid,11111)
+      // console.log(roomid,11111)
       pagesize = parseInt(pagesize);
       return Promise.all([MessageCollection.find(last && {
         roomid,
@@ -65,7 +65,7 @@ module.exports = function(app) {
     static getNewLyList({ roomid, index }) {
       // console.log(index);
       if (!index) return Message.getList(roomid);
-      console.log(arguments);
+      // console.log(arguments);
       return MessageCollection.find({ roomid, timestamp: { $gt: parseInt(index) } }, {}).sort({ timestamp: 1 }).toArray().then(docs => docs.reverse());
     }
 
