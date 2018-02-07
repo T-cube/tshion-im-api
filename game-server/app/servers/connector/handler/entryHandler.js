@@ -5,7 +5,7 @@ module.exports = function(app) {
 
 var Handler = function(app) {
   this.app = app;
-  this,sessionService = app.get('sessionService');
+  this.sessionService = app.get('sessionService');
 };
 
 class entryHandler {
