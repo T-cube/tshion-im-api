@@ -5,7 +5,7 @@ module.exports = function(app) {
 
 var Handler = function(app) {
   this.app = app;
-  this.sessionService = app.get('sessionService');
+  // this.sessionService = app.get('sessionService');
 };
 
 class entryHandler {
@@ -30,11 +30,12 @@ class entryHandler {
 
       const json = JSON.parse(result);
       let { uid } = json;
+      var sessionService = self.app.get('sessionService');
 
       uid += `*${cid}`;
       client && (uid += `*${client}`);
       //duplicate log in
-      if(!! this.sessionService.getByUid(uid)){
+      if (!!sessionService.getByUid(uid)) {
         next(null, {
           code: 500,
           error: true
