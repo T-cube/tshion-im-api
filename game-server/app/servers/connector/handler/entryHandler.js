@@ -35,13 +35,14 @@ class entryHandler {
       uid += `*${cid}`;
       client && (uid += `*${client}`);
       //duplicate log in
-      if (!!sessionService.getByUid(uid)) {
-        next(null, {
-          code: 500,
-          error: true
-        });
-        return;
-      }
+      // if (!!sessionService.getByUid(uid)) {
+      //   console.log('rrrrrrrrrrrrrrrr')
+      //   next(null, {
+      //     code: 500,
+      //     error: true
+      //   });
+      //   return;
+      // }
 
       session.bind(uid);
       session.set('cid', cid);
