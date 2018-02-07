@@ -5,6 +5,7 @@ module.exports = function(app) {
 
 var Handler = function(app) {
   this.app = app;
+  this,sessionService = app.get('sessionService');
 };
 
 class entryHandler {
@@ -33,6 +34,14 @@ class entryHandler {
       uid += `*${cid}`;
       client && (uid += `*${client}`);
       //duplicate log in
+      if(!! this.sessionService.getByUid(uid)){
+        next(null, {
+          code: 500,
+          error: true
+        });
+        return;
+      }
+
       session.bind(uid);
       session.set('cid', cid);
       session.push('cid', function(err) {
