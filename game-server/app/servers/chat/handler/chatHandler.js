@@ -33,7 +33,7 @@ prototype.joinRoom = function(msg, session, next) {
     if (!target || !target_cid) return next({ error: 'target can not be null,target_cid can not be null' });
     self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
       if (err) return next(err);
-      self.app.onlineRedis.get(target).then(channel=> {
+      self.app.onlineRedis.get(target).then(channel => {
 
         let msg = room;
 
@@ -318,4 +318,23 @@ prototype.send = function(msg, session, next) {
   self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
     err && console.log(err);
   });
+};
+
+prototype.saveOfflineMessage = function(msg, session, next) {
+  let self = this;
+  let { message_id } = msg;
+
+  if (message_id) {
+    self.app.rpc.message.messageRemote.getMessage(session, message_id, function(err, message) {
+      if (err) return next(err);
+
+      self.app.rpc.message.messageRemote.saveOfflineMessage(session, message, function(err) {
+        if (err) return next(err);
+
+        next({ code: 200 });
+      });
+    });
+  } else {
+    next({ code: 400, error: 'missing message_id' });
+  }
 };

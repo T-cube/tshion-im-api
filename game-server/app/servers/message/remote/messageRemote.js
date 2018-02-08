@@ -70,3 +70,7 @@ prototype.getLastMessage = function(rooms, cb) {
     cb(e);
   });
 };
+
+prototype.getMessage = function(message_id, cb) {
+  this.Message.getMessage(message_id).then(message => cb(null, message)).catch(cb);
+};

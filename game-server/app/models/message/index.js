@@ -4,6 +4,8 @@ const _ = require('../../../libs/util'),
 module.exports = function(app) {
   const MessageCollection = app.db.collection('message');
   const OfflineMessageCollection = app.db.collection('message.offline');
+  const ObjectID = app.get('ObjectID');
+
   return class Message {
     constructor(msg) {
       _.extend(msg, this, schema);
@@ -49,16 +51,21 @@ module.exports = function(app) {
         }
       } || {
         roomid
-      }, {}).sort({ timestamp: -1})
-      .limit(pagesize).toArray().then(docs => {
-        // console.log(docs);
-        return {
-          list: docs.reverse(),
-          last: docs.length && docs[0].timestamp || 0,
-        };
-      })]).then(results => {
+      }, {}).sort({ timestamp: -1 })
+        .limit(pagesize).toArray().then(docs => {
+          // console.log(docs);
+          return {
+            list: docs.reverse(),
+            last: docs.length && docs[0].timestamp || 0,
+          };
+        })
+      ]).then(results => {
         return results[0];
       });
+    }
+
+    static getMessage(_id) {
+      return MessageCollection.findOne({ _id: ObjectID(_id) });
     }
 
 
@@ -94,6 +101,7 @@ module.exports = function(app) {
     }
     static deleteOfflineMessage(query) {
       let { roomid, target } = query;
+      console.log(query, '................');
       return OfflineMessageCollection.count({ roomid, target }).then(count => {
         return OfflineMessageCollection.remove({ roomid, target }).then(() => count);
       });
