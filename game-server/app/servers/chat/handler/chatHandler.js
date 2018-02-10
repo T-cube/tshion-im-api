@@ -339,6 +339,6 @@ prototype.saveOfflineMessage = function(msg, session, next) {
   }
 };
 
-prototype.chekOnline = function(msg, session, next) {
+prototype.checkOnline = function(msg, session, next) {
   next({ code: 200 });
 };
