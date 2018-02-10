@@ -338,3 +338,7 @@ prototype.saveOfflineMessage = function(msg, session, next) {
     next({ code: 400, error: 'missing message_id' });
   }
 };
+
+prototype.chekOnline = function(msg, session, next) {
+  next({ code: 200 });
+};
