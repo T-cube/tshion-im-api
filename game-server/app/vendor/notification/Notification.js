@@ -172,7 +172,7 @@ module.exports = function(app) {
   };
 
   prototype._generateMessageIOS = function(msg) {
-    let { content, from, roomid, type, badge, from_name } = msg;
+    let { content, from, roomid, type, badge = 0, from_name } = msg;
 
     let data = {
       sound: 'ping.aiff',
@@ -195,7 +195,7 @@ module.exports = function(app) {
   };
 
   prototype._generateMessageAndroid = function(msg) {
-    let { content, from, roomid, type, badge, from_name } = msg;
+    let { content, from, roomid, type, badge = 0, from_name } = msg;
 
     let notification = {
       alert: content,

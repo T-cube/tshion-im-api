@@ -13,7 +13,7 @@ module.exports = function(app) {
       let { target: uid } = msg;
       msg.uid = uid;
       return Account.getDeviceToken({ uid }).then((tokens = []) => {
-        return pushNotification.pushNotification(tokens, msg, true);
+        return pushNotification.pushNotification(tokens, msg, false);
       });
 
     }
