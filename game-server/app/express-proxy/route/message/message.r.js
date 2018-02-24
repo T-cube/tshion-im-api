@@ -8,7 +8,11 @@ module.exports = function(app) {
       ':roomid': {
         docs: {
           name: '获取聊天日志',
-          params: [{ param: 'roomid', type: 'String' }, { query: 'last', type: 'String' }, { query: 'pagesize', type: 'Number' }]
+          params: [
+            { param: 'roomid', type: 'String' },
+            { query: 'last', type: 'String' },
+            { query: 'pagesize', type: 'Number' }
+          ]
         },
         method(req, res, next) {
           // console.log('123456789123456789', req.query);

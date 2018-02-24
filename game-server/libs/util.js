@@ -1,5 +1,16 @@
 const _ = new Object();
+let mobile_reg = /^1[34578]\d{9}$/;
+let email_reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
 module.exports = Object.assign(_, {
+  isNumber(number) {
+    return !isNaN(number);
+  },
+  isMobile(mobile) {
+    return mobile_reg.test(mobile);
+  },
+  isEmail(email) {
+    return email_reg.test(email);
+  },
   /**
    * chek param is blank
    *

@@ -13,10 +13,11 @@ const config = require('./config/config');
 
 const co = require('co');
 co(function*() {
-  const { ObjectID, db } = yield require('./libs/mongodb')(config.mongodb);
+  const [{ ObjectID, db }, tlf_db] = yield require('./libs/mongodb')(config);
 
   app.set('ObjectID', ObjectID, true);
   app.set('db', db, true);
+  app.set('tlf_db', tlf_db, true);
 
   require('./libs/redis')(app, config.redis);
   app.set('roomMap', new Map(), true);

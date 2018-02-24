@@ -89,7 +89,7 @@ module.exports = function(app) {
         },
         middleware: [fileFilter, fileHash],
         method(req, res, next) {
-          console.log(req.body, req.files.file)
+          // console.log(req.body, req.files.file)
           var file = req.files.file;
           var body = req.body;
 
@@ -166,7 +166,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           // /thumbnail/<Width>x<Height>>
-          console.log(req)
+          // console.log(req)
           File.getFile({ _id: ObjectID(req.params._id) }).then(file => {
             if (!file) return next(req.apiError(404, 'file not found'));
 
@@ -175,9 +175,9 @@ module.exports = function(app) {
             return File.getCacheFile(ObjectID(copy)).then(origin => {
               var { w = 200, y = 300 } = req.query;
               var key = `${origin.cdn.key}?imageMogr2/thumbnail/${w}x${y}`;
-              console.log(key)
+              // console.log(key)
               return File.generateLink(key).then(link => {
-                console.log(link)
+                // console.log(link)
                 res.redirect(301, link);
               });
             });
