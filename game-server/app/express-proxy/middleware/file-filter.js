@@ -8,7 +8,8 @@ module.exports = function(req, res, next) {
   if (!file) return next(req.apiError(400, 'file can not be null'));
 
   let ext = mime.getExtension(file.type);
-  if (!`.${ext}`.match(config.file.allowTypes)) return next(req.apiError(400, 'file type is not allowed'));
+  let isFiletypeAllow = (`.${ext}`.match(config.file.allowTypes)) || (file.name.toLowerCase().match(config.file.allowTypes));
+  if (!isFiletypeAllow) return next(req.apiError(400, 'file type is not allowed'));
   // if (!file.name.toLowerCase().match(config.file.allowTypes)) return next(req.apiError(400, 'file type is not allowed'));
   if (file.size > (config.file.maxSize)) return next(req.apiError(400, 'file size is out of limit'));
 
