@@ -127,3 +127,50 @@ prototype.kick = function(uid, sid, cb) {
     cb && cb();
   });
 };
+
+prototype.channelPushMessage = function(channelId, params, cb) {
+  var self = this;
+
+  var channel = self.channelService.getChannel(channelId);
+
+  channel.pushMessage(params);
+
+  cb(null);
+};
+
+/**
+ * push message by target uid
+ * @param {Strinh} channelId
+ * @param {{}} params
+ * @param {String} target
+ * @param {Function} cb
+ */
+prototype.channelPushMessageByUid = function(channelId, params, target, cb) {
+  let self = this;
+
+  var channel = self.channelService.getChannel(channelId, false);
+
+  let { loginMap } = channel;
+  let loginer = loginMap.get(target);
+
+  let clients = [];
+  for (let tuid in loginer) {
+    let sid = loginer[tuid];
+    clients.push({ uid: tuid, sid });
+  }
+
+  if (!clients.length) {
+    return cb('user offline');
+  }
+
+  self.channelService.pushMessageByUids(params, clients);
+  cb(null);
+};
+
+prototype.channelPushMessageByUids = function(params, clients, cb) {
+  var self = this;
+
+  self.channelService.pushMessageByUids(params, clients);
+
+  cb(null);
+};
