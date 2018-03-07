@@ -24,6 +24,7 @@ prototype.audioDial = function(msg, session, next) {
 
   let param = {
     route: 'audio.dial',
+    dial: msg.dial,
     from: uid
   };
 
