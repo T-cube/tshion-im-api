@@ -9,7 +9,7 @@
 ```
 
 ## rtc.rtcHandler.audioDialAcess
-*调起语音通话*
+*接收语音通话*
 ```javascript
 {
   target: String(ObjectID) // 发起方的id
@@ -17,7 +17,7 @@
 ```
 
 ## rtc.rtcHandler.audioDialReject
-*调起语音通话*
+*拒绝语音通话*
 ```javascript
 {
   target: String(ObjectID) // 发起方的id
