@@ -71,6 +71,13 @@ var ExpressProxy = function(app, opts) {
     });
   });
 
+  /**
+   * error handler
+   */
+  this.exp.use(function(err, req, res, next) {
+
+  });
+
   this.start(function() {
     console.log('express started');
   });

@@ -28,7 +28,7 @@ prototype.audioDial = function(msg, session, next) {
     from: uid
   };
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, param, msg.target, function(err) {
+  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
     if (err) return next({ code: 400, error: err });
 
     next(null, { code: 200 });
@@ -50,7 +50,7 @@ prototype.audioDialAcess = function(msg, session, next) {
     from: uid
   };
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, param, msg.target, function(err) {
+  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
     if (err) return next({ code: 400, error: err });
 
     next(null, { code: 200 });
@@ -67,7 +67,7 @@ prototype.audioDialReject = function(msg, session, next) {
     from: uid
   };
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, param, msg.target, function(err) {
+  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
     if (err) return next({ code: 400, error: err });
 
     next(null, { code: 200 });
