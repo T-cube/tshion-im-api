@@ -1,10 +1,13 @@
 'use strict';
 
+const crypto = require('crypto');
+
 const _ = require('../../../libs/util'),
   schema = require('./schema');
 
 module.exports = function(app) {
-  const groupCollection = app.db.collection('group');
+  const ObjectID = app.get('ObjectID');
+  const groupCollection = app.db.collection('chat.group');
 
   return class Group {
     constructor(info) {
@@ -16,6 +19,11 @@ module.exports = function(app) {
       if (!this.members || this.members.length < 2) return Promise.reject('group members must be more then 2 people');
 
       return groupCollection.insertOne(this);
+    }
+
+    static createRoomId(creator) {
+      var str = creator + (+new Date);
+      return crypto.createHash('md5').update(str).digest('hex');
     }
 
     static exists(group) {

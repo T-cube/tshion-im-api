@@ -2,9 +2,11 @@
 let crypto = require('crypto');
 
 module.exports = {
-  group: { type: 'string' },
-  creator: { type: 'string' },
+  name: { type: 'string' },
+  creator: { type: 'string|object' },
   members: { type: 'object' },
   roomid: { type: 'string', default () { return crypto.createHash('sha1').update(+new Date + '').digest('hex'); } },
-  date_create: { type: 'string|number', default () { return +new Date; } }
+  status: { type: 'string', default: 'normal' },
+  type: { type: 'string', default: 'normal' },
+  create_at: { type: 'string|number', default () { return new Date; } }
 };
