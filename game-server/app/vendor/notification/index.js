@@ -15,7 +15,6 @@ module.exports = function(app) {
       return Account.getDeviceToken({ uid }).then((tokens = []) => {
         return pushNotification.pushNotification(tokens, msg, false);
       });
-
     }
   });
 

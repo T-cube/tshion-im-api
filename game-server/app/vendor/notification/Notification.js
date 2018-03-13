@@ -35,7 +35,7 @@ module.exports = function(app) {
 
 
   function Notification() {
-
+    if(!(this instanceof Notification)) return new Notification();
     this.on('finish.notification', this._onFinishNotification.bind(this));
   }
 
