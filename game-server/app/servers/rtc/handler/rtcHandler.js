@@ -22,16 +22,21 @@ prototype.audioDial = function(msg, session, next) {
   let self = this;
   let [uid] = session.uid.split('*');
 
-  let param = {
-    route: 'audio.dial',
-    dial: msg.dial,
-    from: uid
-  };
+  const ObjectID = app.get('ObjectID');
+  self.app.rpc.account.accountRemote.userInfo(null, { _id: ObjectID(uid) }, { name: 1, avatar: 1 }, function(err, user) {
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
-    if (err) return next({ code: 400, error: err });
 
-    next(null, { code: 200 });
+    let param = {
+      route: 'audio.dial',
+      dial: msg.dial,
+      from: user
+    };
+
+    self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
+      if (err) return next({ code: 400, error: err });
+
+      next(null, { code: 200 });
+    });
   });
 };
 

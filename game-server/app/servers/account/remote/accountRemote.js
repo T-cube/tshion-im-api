@@ -7,14 +7,28 @@ module.exports = function(app) {
 
 var AccountRemote = function(app) {
   this.app = app;
+
   this.roomMap = new Map();
   this.chatMap = new Map();
+
   this.Room = require('../../../models/room')(app);
   this.Account = require('../../../models/account')(app);
+  this.User = require('../../../models/user')(app);
+
   this.channelService = app.get('channelService');
 };
 
 const prototype = AccountRemote.prototype;
+
+prototype.userInfo = function(query, fields, cb) {
+  if (fields instanceof cb) {
+    cb = fields;
+    fields = {};
+  }
+  this.User.findUser(query, fields).then(user => {
+    cb(null, user);
+  }).catch(cb);
+};
 
 prototype.login = function(token, cb) {
   // use when need
@@ -54,9 +68,9 @@ prototype.bindRoom = function({ uid, target, fcid, target_cid }, cb) {
   };
   new self.Room({ roomid: roomHash, members, room: roomInner }).save()
     .then(room => cb(null, room))
-      // self.Room.upgradeActive(room)
-      // .then(nextRoom => cb(null, nextRoom))
-      // .catch(cb))
+    // self.Room.upgradeActive(room)
+    // .then(nextRoom => cb(null, nextRoom))
+    // .catch(cb))
     .catch(cb);
 };
 
