@@ -18,6 +18,15 @@ module.exports = function(app) {
   return class User {
 
     /**
+     * 获取用户指定信息
+     * @param {{}} query
+     * @param {{}} fields
+     */
+    static findUser(query, fields) {
+      return userCollection.findOne(query, fields);
+    }
+
+    /**
      * 获取用户详情
      * @param {*} user_id
      */
