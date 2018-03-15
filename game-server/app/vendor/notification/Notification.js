@@ -61,7 +61,7 @@ module.exports = function(app) {
       }
 
       badge++;
-      console.log(badge)
+      console.log(badge);
       return BadgeCollection.updateOne({ uid }, { $set: { uid, badge } }, {
         upsert: badge == 1 ? true : false,
         returnOriginal: false,
