@@ -24,7 +24,7 @@ prototype.audioDial = function(msg, session, next) {
   let self = this;
   let [uid] = session.uid.split('*');
 
-  self.app.rpc.account.accountRemote.userInfo(null, { _id: self.ObjectID(uid) }, { name: 1, avatar: 1 }, function(err, user) {
+  self.app.rpc.account.accountRemote.userInfo(null, { _id: uid }, { name: 1, avatar: 1 }, function(err, user) {
 
 
     let param = {

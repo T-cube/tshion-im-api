@@ -31,7 +31,7 @@ module.exports = function(app) {
      * @param {*} user_id
      */
     static user(user_id) {
-      return userCollection.findOne({ _id: ObjectID(this.user) }, {
+      return userCollection.findOne({ _id: ObjectID(user_id) }, {
         name: 1,
         mobile: 1,
         age: 1,
