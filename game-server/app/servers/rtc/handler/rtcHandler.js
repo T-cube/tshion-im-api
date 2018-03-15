@@ -7,6 +7,8 @@ module.exports = function(app) {
 
 var Handler = function(app) {
   this.app = app;
+  this.ObjectID = app.get('ObjectID');
+
   this.channelService = app.get('channelService');
 };
 
@@ -22,8 +24,7 @@ prototype.audioDial = function(msg, session, next) {
   let self = this;
   let [uid] = session.uid.split('*');
 
-  const ObjectID = app.get('ObjectID');
-  self.app.rpc.account.accountRemote.userInfo(null, { _id: ObjectID(uid) }, { name: 1, avatar: 1 }, function(err, user) {
+  self.app.rpc.account.accountRemote.userInfo(null, { _id: self.ObjectID(uid) }, { name: 1, avatar: 1 }, function(err, user) {
 
 
     let param = {
