@@ -15,7 +15,7 @@ class MiPushModule extends Push {
   sendToRegId(regId, notification) {
     var message = this._message(notification);
     return new Promise((resolve, reject) => {
-      console.log(message,regId)
+      console.log(message,regId);
       MiPushSender.sendToRegId(regId, message, function(err, result) {
         // console.log.apply(null, arguments);
         if (err) return reject(err);
