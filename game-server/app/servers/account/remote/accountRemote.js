@@ -15,6 +15,7 @@ var AccountRemote = function(app) {
   this.Account = require('../../../models/account')(app);
   this.User = require('../../../models/user')(app);
 
+  this.ObjectID = app.get('ObjectID');
   this.channelService = app.get('channelService');
 };
 
@@ -25,6 +26,7 @@ prototype.userInfo = function(query, fields, cb) {
     cb = fields;
     fields = {};
   }
+  if (query._id) query._id = this.ObjectID(query._id);
   this.User.findUser(query, fields).then(user => {
     cb(null, user);
   }).catch(cb);

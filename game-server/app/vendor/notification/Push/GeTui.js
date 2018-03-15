@@ -47,6 +47,23 @@ class Getui extends Push {
     super();
   }
 
+  _NotificationTemplateDemo(notification) {
+    let { title, alert, extras } = notification;
+    var template = new NotificationTemplate({
+      appId: APPID,
+      appKey: APPKEY,
+      title: title,
+      text: alert,
+      logo: 'logo.png',
+      isRing: true,
+      isVibrate: true,
+      isClearable: true,
+      transmissionType: 2,
+      transmissionContent: extras ? JSON.stringify(extras) : ''
+    });
+    return template;
+  }
+
   /**
    * push message to single cid
    * @param {SingleMessage} message
@@ -67,11 +84,14 @@ class Getui extends Push {
     });
   }
 
+  /**
+   * push message
+   * @param {String} regId
+   * @param {{}} notification
+   */
   sendToRegId(regId, notification) {
-    var message = this._message(notification);
 
-
-    var template = TransmissionTemplateDemo();
+    var template = this._NotificationTemplateDemo(notification);
     //    var template = LinkTemplateDemo();
     //    var template = NotificationTemplateDemo();
     //    var template = NotyPopLoadTemplateDemo();

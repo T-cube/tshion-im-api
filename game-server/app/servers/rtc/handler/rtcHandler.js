@@ -7,7 +7,9 @@ module.exports = function(app) {
 
 var Handler = function(app) {
   this.app = app;
-  this.ObjectID = app.get('ObjectID');
+
+  this.audioDialMap = new Map();
+
   this.channelService = app.get('channelService');
 };
 
@@ -23,8 +25,11 @@ prototype.audioDial = function(msg, session, next) {
   let self = this;
   let [uid] = session.uid.split('*');
 
-  self.app.rpc.account.accountRemote.userInfo(null, { _id: self.ObjectID(uid) }, { name: 1, avatar: 1 }, function(err, user) {
+  self.app.rpc.account.accountRemote.userInfo(null, { _id: uid }, { name: 1, avatar: 1 }, function(err, user) {
 
+    if (err) {
+      return next({ err: 400, error: 'target error' });
+    }
 
     let param = {
       route: 'audio.dial',
@@ -32,8 +37,21 @@ prototype.audioDial = function(msg, session, next) {
       from: user
     };
 
+    // let [from, target] = msg.dial.split('_');
+    // if (self.audioDialMap.has(from)) {
+    //   return next({ code: 400, error: 'from_dialing' });
+    // }
+    // if (self.audioDialMap.has(target)) {
+    //   return next({ code: 400, error: 'target_dialing' });
+    // }
+
+    // self.audioDialMap.set(from);
+    // self.audioDialMap.set(target);
+
     self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
-      if (err) return next({ code: 400, error: err });
+      if (err) {
+        return next({ code: 400, error: err });
+      }
 
       next(null, { code: 200 });
     });
