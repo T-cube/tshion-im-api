@@ -7,7 +7,6 @@ module.exports = function(app) {
 
 var Handler = function(app) {
   this.app = app;
-  this.ObjectID = app.get('ObjectID');
 
   this.channelService = app.get('channelService');
 };
