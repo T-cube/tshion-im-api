@@ -1,27 +1,15 @@
 'use strict';
 
 const MiPush = require('../../mipush');
+const Push = require('./Push');
 
 const MiPushSender = new MiPush.Sender({
   appSecret: 'bf6pJcMhaLXxLOlYgzosyg=='
 });
 
-class MiPushModule {
-  _message(notification) {
-    var message = new MiPush.Message();
-    var { alert, title, extras = {} } = notification;
-    message.title = title;
-    message.description = alert;
-    message.restrictedPackageName = 'com.tlfapp';
-    message.passThrough = 0;
-    message.notifyType = -1;
-    message.payload = alert;
-
-    for (var key in extras) {
-      message.extra(key, extras[key]);
-    }
-
-    return message;
+class MiPushModule extends Push {
+  constructor(){
+    super();
   }
 
   sendToRegId(regId, notification) {
