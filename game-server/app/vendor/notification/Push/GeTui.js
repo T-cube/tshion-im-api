@@ -127,7 +127,7 @@ module.exports = function() {
 };
 
 //getUserStatus();
-pushMessageToSingle();
+// pushMessageToSingle();
 //pushMessageToSingleBatch();
 //pushMessageToList();
 //pushMessageToApp();
