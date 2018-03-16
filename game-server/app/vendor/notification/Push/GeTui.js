@@ -11,8 +11,7 @@ var SimpleAlertMsg = require('../../getui/sdk/payload/SimpleAlertMsg');
 var NotyPopLoadTemplate = require('../../getui/sdk/getui/template/NotyPopLoadTemplate');
 var LinkTemplate = require('../../getui/sdk/getui/template/LinkTemplate');
 var NotificationTemplate = require('../../getui/sdk/getui/template/NotificationTemplate');
-var PopupTransmissionTemplate = req;
-require('../../getui/sdk/getui/template/PopupTransmissionTemplate');
+var PopupTransmissionTemplate = require('../../getui/sdk/getui/template/PopupTransmissionTemplate');
 var TransmissionTemplate = require('../../getui/sdk/getui/template/TransmissionTemplate');
 
 var SingleMessage = require('../../getui/sdk/getui/message/SingleMessage');
