@@ -31,9 +31,9 @@
     "mongodb": "^2.2.24",
     "pomelo": "2.2.x",
     "promise-redis": "^0.0.5",
-    "protobufjs": "^6.8.6",
+    "protobufjs": "^3.8.2",
     "redis": "^2.6.5",
-    "request": "file:node_modules/request",
+    "request": "^2.85.0",
     "uuid": "^3.1.0"
   }
 }
