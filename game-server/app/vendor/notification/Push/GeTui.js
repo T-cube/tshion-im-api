@@ -47,18 +47,18 @@ class Getui extends Push {
   }
 
   _NotificationTemplateDemo(notification) {
-    let { title, alert, extras } = notification;
+    let { from_name: title, content: text, from, roomid, type } = notification;
     var template = new NotificationTemplate({
       appId: APPID,
       appKey: APPKEY,
       title: title,
-      text: alert,
+      text,
       logo: 'logo.png',
       isRing: true,
       isVibrate: true,
       isClearable: true,
       transmissionType: 2,
-      transmissionContent: extras ? JSON.stringify(extras) : ''
+      transmissionContent: JSON.stringify({ sender: from, roomid, type })
     });
     return template;
   }
