@@ -133,6 +133,7 @@ module.exports = function(app) {
       }),
       new Promise((resolve, reject) => {
         if (androidTokens.length) {
+          console.log('androidTokens:--------', androidTokens);
           return GeTui.sendToRegId(androidTokens, notification);
         } else resolve(null);
       }),
@@ -167,6 +168,7 @@ module.exports = function(app) {
         } else resolve(null);
       })
     ]).then(() => {
+      console.log('push done -----------------');
       return this._emitNextNotification(uid);
     }).catch(error => {
       console.error(error);
