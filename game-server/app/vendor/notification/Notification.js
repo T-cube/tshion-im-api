@@ -108,7 +108,7 @@ module.exports = function(app) {
     for (let token of tokens) {
       let { client, deviceToken, brand } = token;
       if (client == 'ios') iosTokens.push(deviceToken);
-      else if (brand == 'xiaomi') xiaomiTokens.push(deviceToken);
+      // else if (brand == 'xiaomi') xiaomiTokens.push(deviceToken);
       else androidTokens.push(deviceToken);
     }
 
