@@ -133,8 +133,7 @@ module.exports = function(app) {
       }),
       new Promise((resolve, reject) => {
         if (androidTokens.length) {
-          let ns = GeTui._NotificationTemplateDemo(notification);
-          return GeTui._pushMessageToSingle(ns, androidTokens);
+          return GeTui.sendToRegId(androidTokens, notification);
         } else resolve(null);
       }),
       new Promise((resolve, reject) => {

@@ -83,6 +83,30 @@ class Getui extends Push {
     });
   }
 
+  _pushMessageToSingleBatch(message, targets) {
+    process.env.gexin_pushSingleBatch_needAsync = true;
+    var Batch = gt.getBatch();
+
+    for (t of targets) {
+      //接收方
+      var target = new Target({
+        appId: APPID,
+        clientId: t
+          //        alias:'_lalala_'
+      });
+      Batch.add(message, target);
+    }
+
+    Batch.submit(function(err, res) {
+      if (err != null) {
+        Batch.retry(function(err, res) {
+          console.log('demo batch retry', res);
+        });
+      }
+      console.log('demo batch submit', res);
+    });
+  }
+
   /**
    * push message
    * @param {String} regId
@@ -103,15 +127,18 @@ class Getui extends Push {
       pushNetWorkType: 0 //是否wifi ，0不限，1wifi
     });
 
-    //接收方
-    var target = new Target({
-      appId: APPID,
-      clientId: regId
-        //        alias:'_lalala_'
-    });
-    //target.setAppId(APPID).setClientId(CID);
-
-    return this._pushMessageToSingle(message, target);
+    if (regId instanceof Array) {
+      return this._pushMessageToSingleBatch(message, regId);
+    } else {
+      //接收方
+      var target = new Target({
+        appId: APPID,
+        clientId: regId
+          //        alias:'_lalala_'
+      });
+      //target.setAppId(APPID).setClientId(CID);
+      return this._pushMessageToSingle(message, target);
+    }
 
   }
 }
@@ -174,41 +201,7 @@ function getUserStatus() {
   });
 }
 
-function pushMessageToSingleBatch() {
-  process.env.gexin_pushSingleBatch_needAsync = true;
-  var Batch = gt.getBatch();
 
-  var template = TransmissionTemplateDemo();
-  //    var template = LinkTemplateDemo();
-  //    var template = NotificationTemplateDemo();
-  //    var template = NotyPopLoadTemplateDemo();
-
-  //个推信息体
-  var message = new SingleMessage({
-    isOffline: true, //是否离线
-    offlineExpireTime: 3600 * 12 * 1000, //离线时间
-    data: template //设置推送消息类型
-  });
-
-  //接收方
-  var target = new Target({
-    appId: APPID,
-    clientId: CID
-      //        alias:'_lalala_'
-  });
-  Batch.add(message, target);
-
-  Batch.submit(function(err, res) {
-    if (err != null) {
-      Batch.retry(function(err, res) {
-        console.log('demo batch retry', res);
-      });
-    }
-    console.log('demo batch submit', res);
-  });
-
-
-}
 
 function pushMessageToList() {
   //process.env.gexin_pushList_needDetails = true;
