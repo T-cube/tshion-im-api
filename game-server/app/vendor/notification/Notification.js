@@ -4,7 +4,7 @@ const eventEmitter = require('events');
 const AndroidPush = require('@ym/android-push');
 const apn = require('apn');
 
-const { MiPush } = require('./Push');
+const { MiPush, GeTui } = require('./Push');
 
 const jpushConfig = require('../../../config/config').jpush;
 let vendor;
@@ -35,7 +35,7 @@ module.exports = function(app) {
 
 
   function Notification() {
-    if(!(this instanceof Notification)) return new Notification();
+    if (!(this instanceof Notification)) return new Notification();
     this.on('finish.notification', this._onFinishNotification.bind(this));
   }
 
@@ -102,11 +102,13 @@ module.exports = function(app) {
 
   prototype._pushNotification = function(tokens, notification) {
     let iosTokens = [],
+      xiaomiTokens = [],
       androidTokens = [];
     let { uid } = notification;
     for (let token of tokens) {
-      let { client, deviceToken } = token;
+      let { client, deviceToken, brand } = token;
       if (client == 'ios') iosTokens.push(deviceToken);
+      else if (brand == 'xiaomi') xiaomiTokens.push(deviceToken);
       else androidTokens.push(deviceToken);
     }
 
@@ -131,6 +133,12 @@ module.exports = function(app) {
       }),
       new Promise((resolve, reject) => {
         if (androidTokens.length) {
+          let ns = GeTui._NotificationTemplateDemo(notification);
+          return GeTui._pushMessageToSingle(ns, androidTokens);
+        } else resolve(null);
+      }),
+      new Promise((resolve, reject) => {
+        if (xiaomiTokens.length) {
           let ns = this._generateMessageAndroid(notification);
           console.log('.......ns', ns);
           let message = {

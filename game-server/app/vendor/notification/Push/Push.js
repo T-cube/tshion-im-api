@@ -1,4 +1,5 @@
 'use strict';
+const MiPush = require('../../mipush');
 
 module.exports = class Push {
   _message(notification) {

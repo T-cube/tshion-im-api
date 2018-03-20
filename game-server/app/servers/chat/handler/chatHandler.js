@@ -214,12 +214,12 @@ prototype.sendGroup = function(msg, session, next) {
  */
 prototype.deviceToken = function(msg, session, next) {
   let self = this;
-  let [uid, cid, client] = session.uid.split('*'), { deviceToken } = msg;
+  let [uid, cid, client] = session.uid.split('*'), { deviceToken, brand } = msg;
   if (client) {
     session.set('deviceToken', deviceToken);
     // console.log('.........', client, deviceToken, '.............');
     if (!deviceToken) return;
-    self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken }, function(err, value) {
+    self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken, brand }, function(err, value) {
       if (err) console.error(err);
       console.log('save device token:', value);
       next(null, {});

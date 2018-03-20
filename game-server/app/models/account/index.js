@@ -27,7 +27,7 @@ module.exports = function(app) {
       } else {
         return accountCollection.count({ deviceToken }).then(count => {
           if (count)
-            return accountCollection.update({ deviceToken }, { $set: { deviceToken: '' } }).then(() => {
+            return accountCollection.update({ deviceToken }, { $set: { deviceToken: '', brand: '' } }).then(() => {
               return this.saveAccount();
             });
           else
