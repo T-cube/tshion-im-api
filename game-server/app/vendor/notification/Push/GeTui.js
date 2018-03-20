@@ -109,7 +109,7 @@ class Getui extends Push {
             console.log('demo batch retry', res);
           });
         } else {
-          resolve(res);
+          return resolve(res);
           console.log('demo batch submit', res);
         }
       });

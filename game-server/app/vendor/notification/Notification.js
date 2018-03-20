@@ -135,7 +135,7 @@ module.exports = function(app) {
         if (androidTokens.length) {
           console.log(notification);
           console.log('androidTokens:--------', androidTokens);
-          return GeTui.sendToRegId(androidTokens, notification);
+          return resolve(GeTui.sendToRegId(androidTokens, notification));
         } else resolve(null);
       }),
       // new Promise((resolve, reject) => {
