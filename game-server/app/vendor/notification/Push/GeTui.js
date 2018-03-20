@@ -110,8 +110,8 @@ class Getui extends Push {
           });
         } else {
           resolve(res);
+          console.log('demo batch submit', res);
         }
-        console.log('demo batch submit', res);
       });
     });
   }
