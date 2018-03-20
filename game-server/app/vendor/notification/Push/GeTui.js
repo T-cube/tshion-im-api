@@ -97,13 +97,22 @@ class Getui extends Push {
       Batch.add(message, target);
     }
 
-    Batch.submit(function(err, res) {
-      if (err != null) {
-        Batch.retry(function(err, res) {
-          console.log('demo batch retry', res);
-        });
-      }
-      console.log('demo batch submit', res);
+    return new Promise((resolve, reject) => {
+
+      Batch.submit(function(err, res) {
+        if (err != null) {
+          Batch.retry(function(err, res) {
+            if (err) {
+              return reject(err);
+            }
+            resolve(res);
+            console.log('demo batch retry', res);
+          });
+        } else {
+          resolve(res);
+        }
+        console.log('demo batch submit', res);
+      });
     });
   }
 
