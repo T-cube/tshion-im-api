@@ -87,7 +87,7 @@ class Getui extends Push {
     process.env.gexin_pushSingleBatch_needAsync = true;
     var Batch = gt.getBatch();
 
-    for (t of targets) {
+    for (let t of targets) {
       //接收方
       var target = new Target({
         appId: APPID,
