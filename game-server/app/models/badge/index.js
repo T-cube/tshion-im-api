@@ -37,7 +37,7 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static setBadge(query, badge) {
-      console.log(this.arguments);
+      console.log(arguments);
       return Badger._updateBadge(query, {
         $set: Object.assign(query, { badge })
       }).then(() => badge);
