@@ -11,7 +11,7 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          console.log('wowowowowowowowowowoowowowwo');
+          console.log('wowowowowowowowowowoowowowwo',req.params);
           Badger.setBadge(req.params, 0).then(() => {
             res.json({});
           }).catch(next);
