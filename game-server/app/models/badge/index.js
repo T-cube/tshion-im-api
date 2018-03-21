@@ -40,7 +40,7 @@ module.exports = function(app) {
     static setBadge(query, badge) {
       console.log(arguments);
       return Badger._updateBadge(query, {
-        $set: Object.assign(query, { badge })
+        $set: {...query, badge }
       }).then(() => badge);
     }
 
