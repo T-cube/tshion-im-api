@@ -24,6 +24,7 @@ module.exports = function(app) {
     }
 
     static _updateBadge(query, data, options) {
+      console.log(arguments);
       return BadgeCollection.findOneAndUpdate(query, data, Object.assign({
         returnOriginal: false,
         returnNewDocument: true
