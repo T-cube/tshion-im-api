@@ -15,7 +15,7 @@ let vendor;
  * @returns {Notification}
  */
 module.exports = function(app) {
-  const BadgeCollection = app.db.collection('notification.badge');
+  const Badger = require('../../models/badge')(app);
 
   const operationMap = new Map();
   const pem_dir = `${__dirname}/../../../pem/apn/`;
@@ -54,21 +54,9 @@ module.exports = function(app) {
    * @param {String} uid
    */
   prototype._getBadge = function(uid) {
-    return BadgeCollection.findOne({ uid }).then(doc => {
-      let badge = 0;
-      if (doc) {
-        badge = doc.badge;
-      }
-
-      badge++;
-      console.log(badge);
-      return BadgeCollection.updateOne({ uid }, { $set: { uid, badge } }, {
-        upsert: badge == 1 ? true : false,
-        returnOriginal: false,
-        returnNewDocument: true
-      }).then(() => {
-        return badge;
-      });
+    return Badger.incBadge({ uid }).then(badger => {
+      if (!badger) return 0;
+      return badger.badge;
     });
   };
 
@@ -221,17 +209,6 @@ module.exports = function(app) {
     };
 
     return notification;
-  };
-
-  prototype.updateBadge = function(uid, num) {
-    BadgeCollection.findOne({ uid }).then(doc => {
-      if (!doc) return;
-
-      let { badge } = doc;
-      badge -= num;
-      if (badge < 0) badge = 0;
-      BadgeCollection.update({ uid }, { $set: { badge } });
-    });
   };
 
   if (!vendor) {

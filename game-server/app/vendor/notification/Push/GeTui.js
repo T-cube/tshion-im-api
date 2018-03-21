@@ -109,8 +109,8 @@ class Getui extends Push {
             console.log('demo batch retry', res);
           });
         } else {
-          return resolve(res);
           console.log('demo batch submit', res);
+          return resolve(res);
         }
       });
     });
@@ -122,7 +122,6 @@ class Getui extends Push {
    * @param {{}} notification
    */
   sendToRegId(regId, notification) {
-
     var template = this._NotificationTemplateDemo(notification);
     //    var template = LinkTemplateDemo();
     //    var template = NotificationTemplateDemo();
@@ -143,7 +142,6 @@ class Getui extends Push {
       var target = new Target({
         appId: APPID,
         clientId: regId
-          //        alias:'_lalala_'
       });
       //target.setAppId(APPID).setClientId(CID);
       return this._pushMessageToSingle(message, target);

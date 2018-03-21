@@ -1,8 +1,21 @@
 'use strict';
-module.exports = function(app){
-  const Notification = require('../../../vendor/notification')(app);
-
+module.exports = function(app) {
+  const Badger = require('../../../models/badge')(app);
   return {
-
+    put: {
+      'reset/:uid': {
+        docs: {
+          name: '清空指定用户的应用角标数',
+          params: [
+            { param: 'uid', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          Badger.setBadge(req.params, 0).then(() => {
+            res.json({});
+          }).catch(next);
+        }
+      }
+    }
   };
 };
