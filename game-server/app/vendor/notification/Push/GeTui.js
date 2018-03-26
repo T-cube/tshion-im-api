@@ -57,7 +57,7 @@ class Getui extends Push {
       isRing: true,
       isVibrate: true,
       isClearable: true,
-      transmissionType: 1,
+      transmissionType: 2,
       transmissionContent: JSON.stringify({ sender: from, roomid, type })
     });
     return template;
