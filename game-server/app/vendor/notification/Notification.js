@@ -96,7 +96,7 @@ module.exports = function(app) {
     for (let token of tokens) {
       let { client, deviceToken, brand } = token;
       if (client == 'ios') iosTokens.push(deviceToken);
-      // else if (brand == 'xiaomi') xiaomiTokens.push(deviceToken);
+      else if (brand == 'xiaomi') xiaomiTokens.push(deviceToken);
       else androidTokens.push(deviceToken);
     }
 
@@ -126,36 +126,36 @@ module.exports = function(app) {
           return resolve(GeTui.sendToRegId(androidTokens, notification));
         } else resolve(null);
       }),
-      // new Promise((resolve, reject) => {
-      //   if (xiaomiTokens.length) {
-      //     let ns = this._generateMessageAndroid(notification);
-      //     console.log('.......ns', ns);
-      //     let message = {
-      //       msg_content: ns.alert,
-      //       title: ns.title,
-      //       content_type: 'text',
-      //       extras: ns.extras
-      //     };
+      new Promise((resolve, reject) => {
+        if (xiaomiTokens.length) {
+          let ns = this._generateMessageAndroid(notification);
+          console.log('.......ns', ns);
+          // let message = {
+          //   msg_content: ns.alert,
+          //   title: ns.title,
+          //   content_type: 'text',
+          //   extras: ns.extras
+          // };
 
-      //     return MiPush.sendToRegId(androidTokens, ns)
-      //       //     androidPush.push({
-      //       //       platform: 'android',
-      //       //       audience: {
-      //       //         registration_id: androidTokens
-      //       //       },
-      //       //       notification: ns,
-      //       //       message,
-      //       //       options: {
-      //       //         time_to_live: 60,
-      //       //         // apn_production: false
-      //       //       }
-      //       //     })
-      //       .then(r => {
-      //         // console.log('android sent:', r);
-      //         resolve(r);
-      //       }).catch(reject);
-      //   } else resolve(null);
-      // })
+          return MiPush.sendToRegId(androidTokens, ns)
+            //     androidPush.push({
+            //       platform: 'android',
+            //       audience: {
+            //         registration_id: androidTokens
+            //       },
+            //       notification: ns,
+            //       message,
+            //       options: {
+            //         time_to_live: 60,
+            //         // apn_production: false
+            //       }
+            //     })
+            .then(r => {
+              // console.log('android sent:', r);
+              resolve(r);
+            }).catch(reject);
+        } else resolve(null);
+      })
     ]).then(() => {
       console.log('push done -----------------');
       return this._emitNextNotification(uid);
