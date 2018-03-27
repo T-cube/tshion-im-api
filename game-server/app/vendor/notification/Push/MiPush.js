@@ -3,8 +3,6 @@
 const MiPush = require('../../mipush');
 const Push = require('./Push');
 
-const uuidv4 = require('uuid/v4');
-
 const MiPushSender = new MiPush.Sender({
   appSecret: 'bf6pJcMhaLXxLOlYgzosyg=='
 });
@@ -14,7 +12,7 @@ class MiPushModule extends Push {
     super();
   }
 
-  _message(notification) {
+  _createMessage(notification) {
     var message = new MiPush.Message();
     var { alert, title, extras = {} } = notification;
     message.title = title;
@@ -22,7 +20,7 @@ class MiPushModule extends Push {
     message.restricted_package_nameApp = 'com.tlfapp';
     message.pass_through = 0;
     message.notify_type = -1;
-    message.notify_id = +new Date;
+    message.notify_id = +(+new Date + '').substr(4)
     message.payload = alert;
 
     for (var key in extras) {
@@ -33,9 +31,7 @@ class MiPushModule extends Push {
   }
 
   sendToRegId(regId, notification) {
-    var message = this._message(notification);
-
-    message.notifyId = +new Date;
+    var message = this._createMessage(notification);
 
     return new Promise((resolve, reject) => {
       MiPushSender.sendToRegId(regId, message, function(err, result) {
