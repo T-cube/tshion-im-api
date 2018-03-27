@@ -14,6 +14,24 @@ class MiPushModule extends Push {
     super();
   }
 
+  _message(notification) {
+    var message = new MiPush.Message();
+    var { alert, title, extras = {} } = notification;
+    message.title = title;
+    message.description = alert;
+    message.restricted_package_nameApp = 'com.tlfapp';
+    message.pass_through = 0;
+    message.notify_type = -1;
+    message.notify_id = +new Date;
+    message.payload = alert;
+
+    for (var key in extras) {
+      message.extra(key, extras[key]);
+    }
+
+    return message;
+  }
+
   sendToRegId(regId, notification) {
     var message = this._message(notification);
 
