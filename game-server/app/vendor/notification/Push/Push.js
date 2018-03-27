@@ -1,7 +1,5 @@
 'use strict';
 const MiPush = require('../../mipush');
-const uuid = require('uuid');
-uui
 
 module.exports = class Push {
   _message(notification) {
