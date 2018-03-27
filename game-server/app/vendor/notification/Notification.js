@@ -129,6 +129,7 @@ module.exports = function(app) {
       new Promise((resolve, reject) => {
         if (xiaomiTokens.length) {
           let ns = this._generateMessageAndroid(notification);
+          console.log('androidTokens:--------', xiaomiTokens);
           console.log('.......ns', ns);
           // let message = {
           //   msg_content: ns.alert,
@@ -137,7 +138,7 @@ module.exports = function(app) {
           //   extras: ns.extras
           // };
 
-          return MiPush.sendToRegId(androidTokens, ns)
+          return MiPush.sendToRegId(xiaomiTokens, ns)
             //     androidPush.push({
             //       platform: 'android',
             //       audience: {

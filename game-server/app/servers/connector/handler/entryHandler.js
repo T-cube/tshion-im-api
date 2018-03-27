@@ -25,6 +25,7 @@ class entryHandler {
     let self = this;
     let { cid, init_token, client } = msg;
     // console.log('msg',msg)
+    console.log('init_tokeb::::::::::::', init_token);
     self.app.tokenRedis.get(init_token).then(result => {
       if (!result) return next({ code: 404, error: 'init_token expired or no exists' });
 
