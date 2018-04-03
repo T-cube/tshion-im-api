@@ -31,7 +31,7 @@ class entryHandler {
 
       const json = JSON.parse(result);
       let { uid } = json;
-      var sessionService = self.app.get('sessionService');
+      // var sessionService = self.app.get('sessionService');
 
       uid += `*${cid}`;
       client && (uid += `*${client}`);
@@ -60,14 +60,15 @@ class entryHandler {
         self.app.get('serverId'),
         cid,
         true,
-        function(result) {
-          let { users, members } = result;
+        function(err, result) {
+          // let { users, members } = result;
+          let { channel_id } = result;
           self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, function(err, status) {
             if (err || !status) return next(err);
             next(null, {
-              cid,
-              users,
-              members
+              channel_id,
+              // users,
+              // members
             });
           });
         });

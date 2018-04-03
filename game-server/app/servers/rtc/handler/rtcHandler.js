@@ -48,7 +48,7 @@ prototype.audioDial = function(msg, session, next) {
     // self.audioDialMap.set(from);
     // self.audioDialMap.set(target);
 
-    self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
+    self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, msg.target, function(err) {
       if (err) {
         return next({ code: 400, error: err });
       }
@@ -73,7 +73,7 @@ prototype.audioDialAcess = function(msg, session, next) {
     from: uid
   };
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
+  self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
     if (err) return next({ code: 400, error: err });
 
     next(null, { code: 200 });
@@ -90,7 +90,7 @@ prototype.audioDialReject = function(msg, session, next) {
     from: uid
   };
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
+  self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
     if (err) return next({ code: 400, error: err });
 
     next(null, { code: 200 });
@@ -131,7 +131,7 @@ prototype.videoDial = function(msg, session, next) {
     // self.videoDialMap.set(from);
     // self.videoDialMap.set(target);
 
-    self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
+    self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
       if (err) {
         return next({ code: 400, error: err });
       }
@@ -156,7 +156,7 @@ prototype.videoDialAcess = function(msg, session, next) {
     from: uid
   };
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
+  self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
     if (err) return next({ code: 400, error: err });
 
     next(null, { code: 200 });
@@ -173,7 +173,7 @@ prototype.videoDialReject = function(msg, session, next) {
     from: uid
   };
 
-  self.app.rpc.chat.chatRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
+  self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, 'global', param, msg.target, function(err) {
     if (err) return next({ code: 400, error: err });
 
     next(null, { code: 200 });

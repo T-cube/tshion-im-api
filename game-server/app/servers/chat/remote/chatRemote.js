@@ -22,38 +22,29 @@ let prototype = ChatRemote.prototype;
  *
  */
 prototype.add = function(uid, sid, cid, flag, cb) {
-  let self = this;
-  let channel = this.channelService.getChannel('global', flag);
 
-  let { loginMap } = channel;
+  this.app.rpc.channel.channelRemote.bindChannel(null, uid, sid, flag, function(err, result) {
+    cb(null, result);
+  });
 
-  // let sessionService = self.app.get('sessionService');
-  let [user] = uid.split('*');
-
-  let loginer = loginMap.get(user) || {};
-  // if (!loginer[uid]) {
-  loginer[uid] = sid;
-  console.log('whatwhatwhatwhatwhatwhatwhat', cid);
-  loginMap.set(user, loginer);
-  // }
 
   // 通知好友上线
-  let param = {
-    route: 'onAdd',
-    user
-  };
-  channel.pushMessage(param);
+  // let param = {
+  //   route: 'onAdd',
+  //   user
+  // };
+  // channel.pushMessage(param);
 
-  if (!!channel) {
-    let member = channel.getMember(uid);
-    if (member) {
-      let sid = member['sid'];
-      channel.leave(uid, sid);
-    }
-  }
-  channel.add(uid, sid);
+  // if (!!channel) {
+  //   let member = channel.getMember(uid);
+  //   if (member) {
+  //     let sid = member['sid'];
+  //     channel.leave(uid, sid);
+  //   }
+  // }
+  // channel.add(uid, sid);
 
-  cb({ users: self.get(cid, flag), members: self.get(cid, flag) });
+  // cb({ users: self.get(cid, flag), members: self.get(cid, flag) });
 };
 
 /**
@@ -102,30 +93,21 @@ prototype.get = function(cid, flag) {
  *
  */
 prototype.kick = function(uid, sid, cb) {
-  var [user, cid] = uid.split('*');
-  let channel = this.channelService.getChannel('global', false);
-
-  // leave channel
-  if (!!channel) {
-    let { loginMap } = channel;
-    let loginer = loginMap.get(user) || {};
-    if (loginer[uid]) {
-      delete loginer[uid];
-    }
-    channel.leave(uid, sid);
-  }
-  var param = {
-    route: 'onLeave',
-    user
-  };
-  console.log(param, '>>>>>>>>>>>>>>>>>>>>>>>>>1');
-
-  this.app.rpc.account.accountRemote.unbindChannel(null, user, function(err, status) {
-    console.log(param, '>>>>>>>>>>>>>>>>>>>>>>>>>');
-    channel.pushMessage(param);
-    err && console.error(err);
-    cb && cb();
+  this.app.rpc.channel.channelRemote.kickChannel(null, uid, sid, function(err) {
+    cb();
   });
+  // var param = {
+  //   route: 'onLeave',
+  //   user
+  // };
+  // console.log(param, '>>>>>>>>>>>>>>>>>>>>>>>>>1');
+
+  // this.app.rpc.account.accountRemote.unbindChannel(null, user, function(err, status) {
+  //   console.log(param, '>>>>>>>>>>>>>>>>>>>>>>>>>');
+  //   channel.pushMessage(param);
+  //   err && console.error(err);
+  //   cb && cb();
+  // });
 };
 
 prototype.channelPushMessage = function(channelId, params, cb) {
