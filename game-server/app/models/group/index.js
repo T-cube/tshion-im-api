@@ -9,16 +9,24 @@ module.exports = function(app) {
   const ObjectID = app.get('ObjectID');
   const groupCollection = app.db.collection('chat.group');
 
+  const Member = require('./member')(app);
+
   return class Group {
     constructor(info) {
-      _.extend(info, this, schema);
+      let { name, creator } = info;
+      creator = ObjectID(creator);
+      _.extend({ name, creator, owner: creator }, this, schema);
     }
 
     save() {
       if (!this.group) return Promise.reject('group can be null');
-      if (!this.members || this.members.length < 2) return Promise.reject('group members must be more then 2 people');
+      // if (!this.members || this.members.length < 2) return Promise.reject('group members must be more then 2 people');
 
-      return groupCollection.insertOne(this);
+      return groupCollection.insertOne(this).then(result => {
+        this._id = result.insertedId;
+
+        return new Member({ group: this._id, uid: this.creator, type: 'owner' }).save().then(() => this);
+      });
     }
 
     static createRoomId(creator) {
@@ -27,7 +35,7 @@ module.exports = function(app) {
     }
 
     static exists(group) {
-      return groupCollection.findOne({ group }, { date_create: 1, roomid: 1 });
+      return groupCollection.findOne(group, { date_create: 1, roomid: 1 });
     }
 
     static insertMembers(query) {

@@ -43,6 +43,16 @@ module.exports = function(app) {
     }
 
     /**
+     * 查找多个用户
+     * @param {{}} query
+     * @param {{}} field
+     * @returns {Promise}
+     */
+    static findMany(query, field) {
+      return userCollection.find(query, Object.assign({ name: 1, avatar: 1 }, field)).sort({ _id: 1 }).toArray();
+    }
+
+    /**
      * 查找用户
      * @param {*} param0
      * @param {String} param0.user 发起查找的用户
