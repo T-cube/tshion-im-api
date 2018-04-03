@@ -8,10 +8,6 @@ The chat server currently runs on nodejs v0.8, and should run fine on the latest
 
 Both of them can be installed via 'sh npm-install.sh' (it will install a local copy of all the dependencies in the node_modules directory)
 
-## Viewing
-
- * Visit [demo game github](https://github.com/NetEase/chatofpomelo) to get the source code and install it on your local machine.
-
 ## Configuration
 
  * The server setting (server number, host and port, etc.) can be configured in 'game-server/config/servers.json' and 'game-server/config/master.json' files.
@@ -19,11 +15,6 @@ Both of them can be installed via 'sh npm-install.sh' (it will install a local c
 
 ## Deployment
 Enter chatofpomelo/game-server, and run 'pomelo start' or 'node app.js' in order to start the game server.
-Enter chatofpomelo/web-server, and run 'node app.js' in order to start the web server, and access '3001' port (which can be changed in 'app_express.js') to load game.
-
-## Monitoring
-
-Pomelo framework provides monitoring tool: AdminConsole. After game is loaded, you can access '7001' port and monitor the game information(operating-system, process, userInfo, sceneInfo, etc.).
 
 ## License
 
