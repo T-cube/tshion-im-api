@@ -1,6 +1,7 @@
 'use strict';
 const express = require('express');
 const bodyParser = require('body-parser');
+const oauthServer = require('oauth2-server');
 const connectMultiparty = require('connect-multiparty');
 
 const apiError = require('../express-proxy/libs/api-error');
@@ -55,6 +56,18 @@ var ExpressProxy = function(app, opts) {
     next();
   });
 
+  // oauth model user
+  this.exp.use('/api*', require('../express-proxy/middleware/oauth-check')());
+  this.exp.oauth = oauthServer({
+    model: require('../../libs/oauth-model')(app),
+    grants: ['password', 'refresh_token', 'authorization_code'],
+    debug: false,
+    accessTokenLifetime: 1800,
+    refreshTokenLifetime: 3600 * 24 * 15,
+    continueAfterResponse: true,
+  });
+
+
   // add app to req
   this.exp.use(function(req, res, next) {
     req.pomelo = app;
@@ -65,11 +78,16 @@ var ExpressProxy = function(app, opts) {
   require('../express-proxy/route')(this.exp, this.app);
   // router
   this.exp.all('/api/123', function(req, res) {
-    console.log(req.body, '..........................1111');
-    self.app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
-      res.json(data);
-    });
+    console.log(req.body, '..........................1111', console.log(req.user));
+    // self.app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
+    //   res.json(data);
+    // });
+    res.json({ name: 123 });
   });
+
+  // oauth error handler
+  this.exp.use(this.exp.oauth.errorHandler());
+
 
   /**
    * error handler
@@ -88,8 +106,10 @@ var pro = ExpressProxy.prototype;
 pro.name = '__ExpressProxy__';
 
 pro.start = function(cb) {
-  this.exp.listen(9999);
-  process.nextTick(cb);
+  if (this.exp) {
+    this.exp.listen(9999);
+    process.nextTick(cb);
+  }
 };
 
 pro.afterStart = function(cb) {

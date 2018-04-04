@@ -128,6 +128,14 @@ module.exports = function(app) {
             res.json(result);
           }).catch(next);
         }
+      },
+      'quit/:group_id': {
+        docs: {
+          name: '退出群组'
+        },
+        method(req, res, next) {
+
+        }
       }
     }
   };

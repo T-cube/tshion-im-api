@@ -29,6 +29,7 @@
     "mime": "^2.2.0",
     "mipush": "^1.1.0",
     "mongodb": "^2.2.24",
+    "oauth2-server": "^2.4.1",
     "pomelo": "2.2.x",
     "promise-redis": "^0.0.5",
     "protobufjs": "^3.8.2",

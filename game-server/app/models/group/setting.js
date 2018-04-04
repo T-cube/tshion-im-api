@@ -4,7 +4,7 @@ module.exports = function(app) {
   const ObjectID = app.get('ObjectID');
   const groupSettingCollection = app.db.collection('chat.group.setting');
 
-  defaultInfo = {
+  const defaultInfo = {
     level: '',
     status: 'normal',
     type: 'normal'
