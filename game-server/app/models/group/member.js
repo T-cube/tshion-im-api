@@ -142,6 +142,10 @@ module.exports = function(app) {
 
       group = ObjectID(group);
 
+      if (ids.length > 20) {
+        return Promise.reject(new Error('add max 20 members once'));
+      }
+
       return Member.memberCount(group).then(member_count => {
         if ((member_count + ids.length) > 100) {
           throw new Error('members out of limit, max member number is 100');

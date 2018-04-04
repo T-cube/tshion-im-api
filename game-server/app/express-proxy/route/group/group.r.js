@@ -89,17 +89,17 @@ module.exports = function(app) {
       }
     },
     put: {
-      'member/add/:group': {
+      'member/add/:group_id': {
         docs: {
           name: '群组添加成员',
           params: [
-            { param: 'group', type: 'String' },
+            { param: 'group_id', type: 'String' },
             { key: 'members', type: 'Array' },
           ]
         },
         method(req, res, next) {
           let { members } = req.body;
-          let { group } = req.params;
+          let { group_id } = req.params;
 
           if (members instanceof String) members = [members];
 
@@ -110,17 +110,17 @@ module.exports = function(app) {
       }
     },
     delete: {
-      'member/:group': {
+      'member/:group_id': {
         docs: {
           name: '删除群组成员',
           params: [
-            { param: 'group', type: 'String' },
+            { param: 'group_id', type: 'String' },
             { key: 'members', type: 'Array' }
           ]
         },
         method(req, res, next) {
           let { members } = req.body;
-          let { group } = req.params;
+          let { group_id } = req.params;
 
           if (members instanceof String) members = [members];
 
