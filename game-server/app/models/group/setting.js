@@ -24,6 +24,10 @@ module.exports = function(app) {
       }, options)).then(result => result.value);
     }
 
+    static getSettingByGroupId(group) {
+      return groupSettingCollection.findOne({ group: ObjectID(group) });
+    }
+
     _update() {
       return Setting._update.apply(this, arguments);
     }

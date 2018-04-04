@@ -7,6 +7,32 @@ module.exports = function(app) {
 
   return {
     get: {
+      '': {
+        docs: {
+          name: '获取群组列表',
+          params: [
+            { query: 'user_id', type: 'String' },
+          ]
+        },
+        method(req, res, next) {
+          Group.getListByUid(req.query.user_id).then(groups => {
+            res.json(groups);
+          }).catch(next);
+        }
+      },
+      ':group_id': {
+        docs: {
+          name: '获取群组信息',
+          params: [
+            { param: 'group_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          Group.info(req.params.group_id).then(info => {
+            res.json(info);
+          }).catch(next);
+        }
+      },
       'member/:member_id': {
         docs: {
           name: '获取成员信息',

@@ -34,6 +34,11 @@ module.exports = function(app) {
       return Member._update.apply(this, arguments);
     }
 
+
+    static findGroupByUid(uid) {
+      return groupMemberCollection.find({ uid: ObjectID(uid) }, { group: 1 }).toArray();
+    }
+
     /**
      * 获取成员信息
      * @param {String} memberId
