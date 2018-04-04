@@ -33,6 +33,19 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
+      'members/:group_id': {
+        docs: {
+          name: '获取群组内成员列表',
+          params: [
+            { param: 'group_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          Member.getMembersByGroupId(req.params.group_id).then(members => {
+            res.json(members);
+          }).catch(next);
+        }
+      },
       'member/:member_id': {
         docs: {
           name: '获取成员信息',

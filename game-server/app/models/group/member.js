@@ -35,8 +35,28 @@ module.exports = function(app) {
     }
 
 
+    /**
+     * get user group ids
+     * @param {String} uid
+     * @returns {Promise}
+     */
     static findGroupByUid(uid) {
       return groupMemberCollection.find({ uid: ObjectID(uid) }, { group: 1 }).toArray();
+    }
+
+    /**
+     * get member list by group id
+     * @param {String} group
+     * @returns {Promise}
+     */
+    static getMembersByGroupId(group) {
+      return groupMemberCollection.find({ group: ObjectID(group) }, {
+        uid: 1,
+        name: 1,
+        avatar: 1,
+        type: 1,
+        status: 1
+      }).toArray();
     }
 
     /**
@@ -60,8 +80,8 @@ module.exports = function(app) {
           member = Object.assign(member, user);
 
           return Member._update({ _id }, { $set: member }).then(result => member);
-        })
-      })
+        });
+      });
     }
 
     /**
