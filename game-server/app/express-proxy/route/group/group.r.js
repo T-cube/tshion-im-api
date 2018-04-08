@@ -74,7 +74,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           let { members } = req.body;
-
+          console.log('body:', req.body);
           new Group(req.body).save().then(newGroup => {
             var group = newGroup._id;
 
@@ -84,7 +84,10 @@ module.exports = function(app) {
             ]).then(() => {
               res.json(newGroup);
             });
-          }).catch(next);
+          }).catch(([errSetting, memberError]) => {
+            console.log(memberError,errSetting);
+            next(req.apiError(400, errSetting || memberError));
+          });
         }
       }
     },

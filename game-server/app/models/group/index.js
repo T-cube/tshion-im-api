@@ -15,12 +15,15 @@ module.exports = function(app) {
   return class Group {
     constructor(info) {
       let { name, creator } = info;
+
       creator = ObjectID(creator);
+      // console.log(creator, typeof creator);
       _.extend({ name, creator, owner: creator }, this, schema);
     }
 
     save() {
-      if (!this.group) return Promise.reject('group can be null');
+      // console.log(this.creator);
+      if (!this.name) return Promise.reject('name cant be null');
       // if (!this.members || this.members.length < 2) return Promise.reject('group members must be more then 2 people');
 
       return groupCollection.insertOne(this).then(result => {

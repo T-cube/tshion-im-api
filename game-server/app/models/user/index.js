@@ -45,11 +45,11 @@ module.exports = function(app) {
     /**
      * 查找多个用户
      * @param {{}} query
-     * @param {{}} field
+     * @param {{}} fields
      * @returns {Promise}
      */
-    static findMany(query, field) {
-      return userCollection.find(query, Object.assign({ name: 1, avatar: 1 }, field)).sort({ _id: 1 }).toArray();
+    static findMany(query, fields) {
+      return userCollection.find(query, Object.assign({ name: 1, avatar: 1 }, fields)).sort({ _id: 1 }).toArray();
     }
 
     /**

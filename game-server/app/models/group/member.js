@@ -141,16 +141,19 @@ module.exports = function(app) {
       let ids = memberIds.sort().map(_id => ObjectID(_id));
 
       group = ObjectID(group);
+      console.log('ids', ids);
 
       if (ids.length > 20) {
         return Promise.reject(new Error('add max 20 members once'));
       }
 
       return Member.memberCount(group).then(member_count => {
+        console.log('member_count', member_count);
         if ((member_count + ids.length) > 100) {
           throw new Error('members out of limit, max member number is 100');
         }
-        return User.findMany({ $in: ids }).then(members => {
+        return User.findMany({ _id: { $in: ids } }).then(members => {
+          console.log('members', members);
           return Member._insertMany(members.map(member => {
             var _id = member._id;
             delete member._id;

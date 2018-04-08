@@ -1,6 +1,9 @@
 const _ = new Object();
 let mobile_reg = /^1[34578]\d{9}$/;
 let email_reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+
+const { ObjectID } = require('mongodb');
+
 module.exports = Object.assign(_, {
   isNumber(number) {
     return !isNaN(number);
@@ -127,7 +130,9 @@ module.exports = Object.assign(_, {
     let object = to || new Object();
     let check = schema || from;
     for (let key in check) {
-      if ((typeof from[key] == 'object') && !(from[key] instanceof Array)) {
+      if (from[key] instanceof ObjectID && (~schema[key].type.indexOf('object'))) {
+        object[key] = from[key];
+      } else if ((typeof from[key] == 'object') && !(from[key] instanceof Array)) {
         object[key] = _.extend(from[key], object[key]);
       } else if (schema) {
         if (schema[key]) {
