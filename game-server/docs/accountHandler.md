@@ -10,7 +10,7 @@ return request
   // room map and the last message of room
   {
     room: Object,
-    message: Object
+    message: Object // the last message in this room
   },
   ...
 ]

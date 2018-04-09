@@ -4,7 +4,6 @@
 *user login*
 ```javascript
 {
-  client: Enum,     // ios, android, web, wcapp
   token: String, // access_token
   uid: String, // userid
 }
@@ -14,7 +13,7 @@ request return
 {
   host: String,       // the connector host
   port: Number,       // the connector port
-  init_token: String
+  init_token: String  // use init_token to connect connector
 }
 ```
 

@@ -1,4 +1,14 @@
 # ChatHandler
+
+## chat.chatHandler.deviceToken
+*save user device token*
+```javascript
+{
+  deviceToken: String
+  brand: String         // device model brand
+}
+```
+
 ## chat.chatHandler.joinRoom
 *user join a room*
 ```javascript
