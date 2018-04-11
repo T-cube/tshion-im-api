@@ -21,6 +21,13 @@ var ChannelRemote = function(app) {
 
 var prototype = ChannelRemote.prototype;
 
+
+prototype.generateChannelId = function(cb){
+  let channelId = Math.round(Math.random() * this.channelNumber + 0.5);
+
+  cb(null, channelId);
+};
+
 prototype.bindChannel = function(uid, sid, flag, cb) {
   // var channelId = Math.round(Math.random() * this.channelNumber + 0.5);
 

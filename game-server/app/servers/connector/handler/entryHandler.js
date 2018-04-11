@@ -26,56 +26,65 @@ class entryHandler {
     let { cid, init_token, client } = msg;
     // console.log('msg',msg)
     console.log('init_tokeb::::::::::::', init_token);
-    self.app.tokenRedis.get(init_token).then(result => {
-      if (!result) return next({ code: 404, error: 'init_token expired or no exists' });
+    new Promise((resolve, reject) => {
+      if (cid) return resolve(cid);
 
-      const json = JSON.parse(result);
-      let { uid } = json;
-      // var sessionService = self.app.get('sessionService');
-
-      uid += `*${cid}`;
-      client && (uid += `*${client}`);
-      //duplicate log in
-      // if (!!sessionService.getByUid(uid)) {
-      //   console.log('rrrrrrrrrrrrrrrr')
-      //   next(null, {
-      //     code: 500,
-      //     error: true
-      //   });
-      //   return;
-      // }
-
-      session.bind(uid);
-      session.set('cid', cid);
-      session.push('cid', function(err) {
-        if (err) {
-          console.error('set cid for session service failed! error is : %j', err.stack);
-        }
+      self.app.rpc.channel.channelRemote.generateChannelId(null, function(err, channelId) {
+        if (err) return reject(err);
+        resolve(channelId);
       });
+    }).then(cid => {
+      self.app.tokenRedis.get(init_token).then(result => {
+        if (!result) return next({ code: 404, error: 'init_token expired or no exists' });
 
-      session.on('closed', onUserLeave.bind(null, self.app, session, userLeaveCallback.bind(self, client, uid, next)));
-      //put user into channel
-      self.app.rpc.chat.chatRemote.add(session,
-        uid,
-        self.app.get('serverId'),
-        cid,
-        true,
-        function(err, result) {
-          // let { users, members } = result;
-          let { channel_id } = result;
-          self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, function(err, status) {
-            if (err || !status) return next(err);
-            next(null, {
-              channel_id,
-              // users,
-              // members
-            });
-          });
+        const json = JSON.parse(result);
+        let { uid } = json;
+        // var sessionService = self.app.get('sessionService');
+
+        uid += `*${cid}`;
+        client && (uid += `*${client}`);
+        //duplicate log in
+        // if (!!sessionService.getByUid(uid)) {
+        //   console.log('rrrrrrrrrrrrrrrr')
+        //   next(null, {
+        //     code: 500,
+        //     error: true
+        //   });
+        //   return;
+        // }
+
+        session.bind(uid);
+        session.set('cid', cid);
+        session.push('cid', function(err) {
+          if (err) {
+            console.error('set cid for session service failed! error is : %j', err.stack);
+          }
         });
 
-    }).catch(e => {
-      console.error(e);
-      next({ error: 'server redis error' });
+        session.on('closed', onUserLeave.bind(null, self.app, session, userLeaveCallback.bind(self, client, uid, next)));
+        //put user into channel
+        self.app.rpc.chat.chatRemote.add(session,
+          uid,
+          self.app.get('serverId'),
+          cid,
+          true,
+          function(err, result) {
+            // let { users, members } = result;
+            let { channel_id } = result;
+            self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, function(err, status) {
+              if (err || !status) return next(err);
+              next(null, {
+                channel_id,
+                // users,
+                // members
+              });
+            });
+          });
+
+      }).catch(e => {
+        console.error(e);
+        next({ error: 'server redis error' });
+      });
     });
   };
 
@@ -111,5 +120,5 @@ var onUserLeave = function(app, session, cb) {
   if (!session || !session.uid) {
     return;
   }
-  app.rpc.chat.chatRemote.kick(session, session.uid, app.get('serverId'), cb || null);
+  app.rpc.channel.channelRemote.kickChannel(session, session.uid, app.get('serverId'), cb || null);
 };
