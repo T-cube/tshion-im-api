@@ -22,7 +22,7 @@ var ChannelRemote = function(app) {
 var prototype = ChannelRemote.prototype;
 
 
-prototype.generateChannelId = function(cb){
+prototype.generateChannelId = function(cb) {
   let channelId = Math.round(Math.random() * this.channelNumber + 0.5);
 
   cb(null, channelId);
@@ -74,13 +74,17 @@ prototype.kickChannel = function(uid, sid, cb) {
 
   // var channelId = this.userChannelMap.get(user);
   var channel = this.channelService.getChannel(channelId);
+  console.log(channel.name, ':::::::::::::::;');
 
   // leave channel
   if (!!channel) {
     var { loginMap } = channel;
-    var loginer = loginMap.get(user) || {};
-    if (loginer[uid]) {
-      delete loginer[uid];
+    console.log(loginMap, ':::::::::::::::;');
+    if (loginMap) {
+      var loginer = loginMap.get(user) || {};
+      if (loginer[uid]) {
+        delete loginer[uid];
+      }
     }
 
     channel.leave(uid, sid);
@@ -90,7 +94,7 @@ prototype.kickChannel = function(uid, sid, cb) {
     if (err) {
       console.error(err);
     }
-    cb(null);
+    cb && cb(null);
   });
 };
 

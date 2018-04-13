@@ -25,7 +25,7 @@ class entryHandler {
     let self = this;
     let { cid, init_token, client } = msg;
     // console.log('msg',msg)
-    console.log('init_tokeb::::::::::::', init_token);
+    console.log('init_token::::::::::::', init_token);
     new Promise((resolve, reject) => {
       if (cid) return resolve(cid);
 
@@ -71,13 +71,30 @@ class entryHandler {
           function(err, result) {
             // let { users, members } = result;
             let { channel_id } = result;
-            self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, function(err, status) {
-              if (err || !status) return next(err);
-              next(null, {
-                channel_id,
-                // users,
-                // members
-              });
+            // self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, self.app.get('serverId'), function(err, status) {
+            //   console.log('heiheihei:', err);
+            //   if (err || !status) return next(err);
+            //   next(null, {
+            //     channel_id,
+            //     // users,
+            //     // members
+            //   });
+            // });
+            self.app.onlineRedis.get(uid).then(lastcid => {
+              if (lastcid && (lastcid !== cid)) {
+                console.log('lastcid::::::::::::', lastcid, self.app.get('serverId'));
+                console.log(console.log(Object.keys(self.app.settings)));
+
+                self.app.rpc.channel.channelRemote.kickChannel(session, uid, self.app.get('serverId'), function(err) {
+                  console.log('channel error2:::::::::', uid);
+                  // cb && cb();
+                  next(null, {
+                    channel_id,
+                    // users,
+                    // members
+                  });
+                });
+              }
             });
           });
 

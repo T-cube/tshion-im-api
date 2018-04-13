@@ -4,18 +4,19 @@ var { getUserInfoCache, getAccessTokenCache, setUserAccessTokenRelation } = requ
 
 module.exports = function(app) {
   const tlf_db = app.tlf_db;
-
+  const ObjectID = app.get('ObjectID');
   const userCollection = tlf_db.collection('user');
   const accesstokenCollection = tlf_db.collection('oauth.accesstoken');
 
   return {
     getAccessToken(bearerToken, callback) {
-      console.log(bearerToken)
-      // console.log('# getAccessToken (bearerToken: ' + bearerToken + ')');
+      // console.log(bearerToken)
+        // console.log('# getAccessToken (bearerToken: ' + bearerToken + ')');
       getAccessTokenCache(bearerToken).then(info => {
-        console.log(info);
+        // console.log(info);
         if (info) {
           return getUserInfoCache(info.user_id).then(user => {
+            // console.log(user);
             user._id = ObjectID(user._id);
             info.user = user;
             return callback(null, info);
@@ -45,8 +46,7 @@ module.exports = function(app) {
                   return setUserAccessTokenRelation(user, token)
                     .then(() => {
                       callback(null, token);
-                      console.log(1212)
-                    }).catch(e=>{console.log(e);throw new Error(e)});
+                    });
                 });
             });
         }

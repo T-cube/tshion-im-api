@@ -51,13 +51,19 @@ var ExpressProxy = function(app, opts) {
     origin: corsOptionsDelegate
   }));
 
+  // add app to req
+  this.exp.use(function(req, res, next) {
+    req.pomelo = app;
+    // console.log(req.app);
+    next();
+  });
+
   this.exp.use(function(req, res, next) {
     req.apiError = apiError;
     next();
   });
 
   // oauth model user
-  this.exp.use('/api*', require('../express-proxy/middleware/oauth-check')());
   this.exp.oauth = oauthServer({
     model: require('../../libs/oauth-model')(app),
     grants: ['password', 'refresh_token', 'authorization_code'],
@@ -67,14 +73,8 @@ var ExpressProxy = function(app, opts) {
     continueAfterResponse: true,
   });
 
+  this.exp.use('/api', require('../express-proxy/middleware/oauth-check')());
 
-  // add app to req
-  this.exp.use(function(req, res, next) {
-    req.pomelo = app;
-    next();
-  });
-
-  let self = this;
   require('../express-proxy/route')(this.exp, this.app);
   // router
   this.exp.all('/api/123', function(req, res) {
@@ -86,16 +86,18 @@ var ExpressProxy = function(app, opts) {
   });
 
   // oauth error handler
-  this.exp.use(this.exp.oauth.errorHandler());
+  console.log(this.exp.oauth.errorHandler.toString());
 
 
   /**
    * error handler
    */
   this.exp.use(function(err, req, res, next) {
-
+    console.log(err);
+    next(err);
   });
 
+  this.exp.use(this.exp.oauth.errorHandler());
   this.start(function() {
     console.log('express started');
   });

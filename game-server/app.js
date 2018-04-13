@@ -31,6 +31,7 @@ co(function*() {
       // 'websocket', 'polling-xhr', 'polling-jsonp', 'polling'
       transports: ['websocket','polling-xhr', 'polling',],
       // transports: ['polling-xhr','websocket', 'polling',],
+      // useProtobuf: true,
       heartbeats: true,
       closeTimeout: 60 * 1000,
       heartbeatTimeout: 60 * 1000,

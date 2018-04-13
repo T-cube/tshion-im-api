@@ -91,10 +91,12 @@ module.exports = function(app) {
         if (doc) {
           friends = doc.friends;
         }
-
+        query['$nor'] = [];
         if (friends.length) {
           query['$nor'] = friends.map(_id => ({ _id }));
         }
+
+        query['$nor'].push({ _id: ObjectID(user) });
         return userCollection.find(query, { avatar: 1, email: 1, mobile: 1, name: 1, sex: 1 }).toArray();
       });
     }
@@ -109,16 +111,13 @@ module.exports = function(app) {
 
         return requestCollection.findOne({ receiver: user_id, from }).then(doc => {
           if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT)) return User._updateFriendRequest({
-              receiver: user_id,
-              from,
-              status: doc.status
-            }, {
-              mark,
-              update_at: new Date
-            })
-            .then(() => {
-              return null;
-            });
+            receiver: user_id,
+            from,
+            status: doc.status
+          }, {
+            mark,
+            update_at: new Date
+          });
           let data = { receiver: user_id, from, mark, create_at: new Date, status: STATUS_FRIEND_REQUEST_PADDING };
           return requestCollection.insertOne(data).then(value => {
             data._id = value.insertedId;
@@ -126,6 +125,10 @@ module.exports = function(app) {
           });
         });
       });
+    }
+
+    static deleteRequest(request_id) {
+
     }
 
     /**
@@ -144,28 +147,38 @@ module.exports = function(app) {
      * 获取好友请求
      * @param {*} query
      */
-    static getFriendRequest(query) {
-      return requestCollection.find(query).sort({ create_at: -1, update_at: -1 }).toArray().then(docs => {
-        let froms = docs.map(doc => ObjectID(doc.from));
+    static getFriendRequest(query, { page = 0, pagesize = 20 }) {
+      pagesize = parseInt(pagesize);
+      page = parseInt(page);
 
-        return userCollection.find({ _id: { $in: froms } }, { name: 1, avatar: 1 }).toArray().then(users => {
-          return docs.map((doc, index) => ({...users.find(user => user._id.toString() == doc.from), ...doc }));
+      return requestCollection.find(query)
+      sort({ create_at: -1, update_at: -1 })
+        .skip(page * pagesize)
+        .limit(pagesize)
+        .toArray().then(docs => {
+          let froms = docs.map(doc => ObjectID(doc.from));
+
+          return userCollection.find({ _id: { $in: froms } }, { name: 1, avatar: 1 }).toArray().then(users => {
+            return docs.map((doc, index) => ({...users.find(user => user._id.toString() == doc.from), ...doc }));
+          });
         });
-      });
     }
 
     /**
      * 拒绝好友请求
-     * @param {*} request_id
+     * @param {String} request_id
+     * @param {String} receiver
+     * @returns {Promise}
      */
-    static _rejectFriendRequest(request_id) {
-      return User._updateFriendRequest({ _id: ObjectID(request_id) }, { status: STATUS_FRIEND_REQUEST_REJECT });
+    static _rejectFriendRequest(request_id, receiver) {
+      return User._updateFriendRequest({ _id: ObjectID(request_id), receiver }, { status: STATUS_FRIEND_REQUEST_REJECT });
     }
 
     /**
      * 添加好友
-     * @param {*} query
-     * @param {*} friends
+     * @param {{}} query
+     * @param {String[]} friends
+     * @returns {Promise}
      */
     static _addFriend(query, friends) {
       if (friends instanceof Array) {
@@ -185,8 +198,9 @@ module.exports = function(app) {
 
     /**
      * 往好友分组里添加好友
-     * @param {*} query
-     * @param {*} friends
+     * @param {{}} query
+     * @param {String[]} friends
+     * @returns {Promise}
      */
     static _addGroupFriend(query, friends) {
       if (friends instanceof Array) {
@@ -206,10 +220,12 @@ module.exports = function(app) {
 
     /**
      * 同意好友请求
-     * @param {*} request_id
+     * @param {String} request_id
+     * @param {String} receiver
+     * @returns {Promise}
      */
-    static _agreeFriendRequest(request_id) {
-      return requestCollection.findOne({ _id: ObjectID(request_id) }).then(request => {
+    static _agreeFriendRequest(request_id, receiver) {
+      return requestCollection.findOne({ _id: ObjectID(request_id), receiver }).then(request => {
         if (!request) throw new Error('request not found');
 
         let { from: user_a, receiver: user_b } = request;
@@ -231,22 +247,37 @@ module.exports = function(app) {
 
     /**
      * 处理好友请求
-     * @param {*} status
-     * @param {*} request_id
+     * @param {Enum[String]} status
+     * @param {String} request_id
+     * @param {String} receiver
+     * @returns {Promise}
      */
-    static handleFriendRequest(status, request_id) {
-      if (status == 'reject') return User._rejectFriendRequest(request_id);
-      if (status == 'agree') return User._agreeFriendRequest(request_id);
+    static handleFriendRequest(status, request_id, receiver) {
+      if (status == 'reject') return User._rejectFriendRequest(request_id, receiver);
+      if (status == 'agree') return User._agreeFriendRequest(request_id, receiver);
       return Promise.reject('');
     }
 
+    static _countFriendGroup(user_id) {
+      return friendGroupCollection.count({ user: ObjectID(user_id) });
+    }
+
+    static createFriendGroup(info) {
+      return
+    }
+
+    /**
+     * 获取用户好友分组列表
+     * @param {String} user_id
+     * @returns {Promise}
+     */
     static getFriendGroupList(user_id) {
       return friendGroupCollection.find({ user: ObjectID(user_id) }, { name: 1, type: 1 }).toArray();
     }
 
     /**
      * 用 id 数组查找多个用户信息
-     * @param {*} _ids
+     * @param {String[]} _ids
      */
     static _getUserInfoByIds(_ids) {
       return userCollection.find({ _id: { $in: _ids } }, { avatar: 1, name: 1, mobile: 1, email: 1, sex: 1, birthday: 1 }).toArray();

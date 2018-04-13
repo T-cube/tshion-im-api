@@ -24,7 +24,7 @@ class gateHandler {
   queryEntry(msg, session, next) {
     let self = this;
     let { token, uid } = msg;
-
+    console.log('your are here:', msg);
     if (!token) return next(null, { code: 500, message: 'token can not be null' });
     // get all connectors
     let connectors = this.app.getServersByType('connector');

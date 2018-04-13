@@ -93,8 +93,10 @@ prototype.get = function(cid, flag) {
  *
  */
 prototype.kick = function(uid, sid, cb) {
+  console.log('channel error:::::::::', uid, sid);
   this.app.rpc.channel.channelRemote.kickChannel(null, uid, sid, function(err) {
-    cb();
+    console.log('channel error2:::::::::', uid, sid);
+    cb && cb();
   });
   // var param = {
   //   route: 'onLeave',

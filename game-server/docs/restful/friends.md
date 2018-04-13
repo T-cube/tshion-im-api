@@ -32,6 +32,8 @@ GET /user/friend-request/receiver/:receiver
 param|name|type|des
 -----|----|----|---
 param|receiver|String|receive friend request user id
+query|page|Number|optional, from 0, default 0
+query|pagesize|Numner|optional, default 20
 
 ## 操作好友请求
 POST /user/friend-request/:status

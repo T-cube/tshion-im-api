@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = function(app) {
   const User = require('../../../models/user')(app);
   return {
@@ -22,12 +23,13 @@ module.exports = function(app) {
           params: [
             { query: 'name', type: 'String' },
             { query: 'keyword', type: 'String|Number' },
-            { query: 'mobile', type: 'Number' },
-            { query: 'user', type: 'String' }
+            { query: 'mobile', type: 'Number' }
           ]
         },
         method(req, res, next) {
-          User.find(req.query).then(users => {
+          var user = req.user;
+          // console.log('/user',user);
+          User.find(Object.assign(req.query, { user: user._id })).then(users => {
             res.json(users);
           }).catch(next);
         }
@@ -36,11 +38,14 @@ module.exports = function(app) {
         docs: {
           name: '获取收到的好友请求',
           params: [
-            { param: 'receiver', type: 'String' }
+            { param: 'receiver', type: 'String' },
+            { query: 'page', type: 'Number' },
+            { query: 'pagesize', type: 'Number' }
           ]
         },
         method(req, res, next) {
-          User.getFriendRequest(req.params).then(requests => {
+          var user = req.user;
+          User.getFriendRequest({ receiver: user._id }, req.query).then(requests => {
             res.json(requests);
           }).catch(next);
         }
@@ -53,7 +58,8 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          User.getAllFriendsInfo(req.params.user_id).then(friends => {
+          var user = req.user;
+          User.getAllFriendsInfo(user._id).then(friends => {
             res.json(friends);
           }).catch(next);
         }
@@ -80,7 +86,8 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          User.getFriends(req.params.user_id).then(result => {
+          var user = req.user;
+          User.getFriends(user._id).then(result => {
             res.json(result || {});
           }).catch(next);
         }
@@ -97,9 +104,14 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          User.sendRequest(req.body).then(request => {
+          var user = req.user;
+          let { user_id } = req.body;
+          if (user._id == user_id)
+            return next(req.apiError(400, 'can not add self as a friend '));
+
+          User.sendRequest(Object.assign(req.body, { from: user._id })).then(request => {
             res.json(request);
-            let { from, user_id: target } = req.body;
+            // let { from, user_id: target } = req.body;
 
           }).catch(next);
         }
@@ -120,7 +132,8 @@ module.exports = function(app) {
         method(req, res, next) {
           let { request_id } = req.body;
           let { status } = req.params;
-          User.handleFriendRequest(status, request_id).then(result => {
+          var user = req.user;
+          User.handleFriendRequest(status, request_id, user._id).then(result => {
             res.json(result);
           }).catch(next);
         }

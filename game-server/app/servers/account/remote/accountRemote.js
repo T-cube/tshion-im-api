@@ -17,6 +17,7 @@ var AccountRemote = function(app) {
 
   this.ObjectID = app.get('ObjectID');
   this.channelService = app.get('channelService');
+  // this.sessionService = app.get('')
 };
 
 const prototype = AccountRemote.prototype;
@@ -41,15 +42,27 @@ prototype.login = function(token, cb) {
 };
 
 
-prototype.bindChannel = function(uid, cid, cb) {
+prototype.bindChannel = function(uid, cid, sid, cb) {
   let self = this;
+  // console.log(self.app.onlineRedis);
   self.app.onlineRedis.get(uid).then(lastcid => {
     if (lastcid && (lastcid !== cid)) {
-      self.rpc.chat.chatRemote.kick(null, `${uid}*${lastcid}`, app.get('serverId'), null);
+      console.log('lastcid::::::::::::', lastcid, self.app.get('serverId'));
+      console.log(console.log(Object.keys(self.app.settings)));
+
+      self.app.rpc.chat.chatRemote.kick(null,
+        `${uid}*${lastcid}`,
+        sid,
+        function() {
+          console.log('error:::::::');
+          self.app.onlineRedis.set(uid, cid).then(status => {
+            cb(null, status);
+          }).catch(e => {
+            cb(e);
+            console.log('error:::::::', e);
+          });
+        });
     }
-    this.app.onlineRedis.set(uid, cid).then(status => {
-      cb(null, status);
-    }).catch(cb);
   });
 };
 

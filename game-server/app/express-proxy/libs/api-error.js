@@ -17,6 +17,7 @@ const knowError = {
 //   "error_description":{error_description}
 // }
 const apiError = function (code, message) {
+  console.log(message);
   if (typeof message == 'object') {
     let e = message.message;
     e.code = message.code || 500;
