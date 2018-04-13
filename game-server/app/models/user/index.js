@@ -131,10 +131,11 @@ module.exports = function(app) {
     /**
      * delete friend request
      * @param {String} request_id
+     * @param {{}} receiver
      * @returns {Promise}
      */
-    static deleteRequest(request_id) {
-
+    static deleteRequest(request_id, receiver) {
+      return requestCollection.remove({ _id: ObjectID(request_id), receiver });
     }
 
     /**
@@ -165,7 +166,7 @@ module.exports = function(app) {
         .toArray().then(docs => {
           let froms = docs.map(doc => ObjectID(doc.from));
 
-          return userCollection.find({ _id: { $in: froms } }, { name: 1, avatar: 1 }).toArray().then(users => {
+          return userCollection.find({ _id: { $in: froms } }, { name: 1, avatar: 1, mobile: 1 }).toArray().then(users => {
             return docs.map((doc, index) => ({...users.find(user => user._id.toString() == doc.from), ...doc }));
           });
         });
@@ -254,9 +255,9 @@ module.exports = function(app) {
 
     /**
      * 处理好友请求
-     * @param {Enum[String]} status
+     * @param {String[]} status
      * @param {String} request_id
-     * @param {String} receiver
+     * @param {ObjectID} receiver
      * @returns {Promise}
      */
     static handleFriendRequest(status, request_id, receiver) {
@@ -269,8 +270,28 @@ module.exports = function(app) {
       return friendGroupCollection.count({ user: ObjectID(user_id) });
     }
 
-    static createFriendGroup(info) {
-      return
+    /**
+     * 创建好友分组
+     * @param {String} name
+     * @param {ObjectID} user
+     * @returns {Promise}
+     */
+    static createFriendGroup(name, user) {
+      return User._countFriendGroup(user).then(count => {
+        if (count >= 50) {
+          throw new Error('user friend\'s group number max 50');
+        }
+        let info = {
+          name,
+          user,
+          members: [],
+          type: 'custom'
+        };
+        return friendGroupCollection.insert(info).then(res => {
+          info._id = res.insertedId;
+          return info;
+        });
+      });
     }
 
     /**

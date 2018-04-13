@@ -34,6 +34,18 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
+      'friend/groups': {
+        docs: {
+          name: '获取用户好友分组列表',
+        },
+        method(req, res, next) {
+          var user =req.user;
+
+          User.getFriendGroupList(user._id).then(groups=>{
+            res.json(groups);
+          }).catch(next);
+        }
+      },
       'friend-request/receiver/:receiver': {
         docs: {
           name: '获取收到的好友请求',
@@ -94,6 +106,21 @@ module.exports = function(app) {
       }
     },
     post: {
+      'friend/group': {
+        docs: {
+          name: '创建好友分组',
+          params: [
+            { key: 'name', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+
+          User.createFriendGroup(req.body.name, user._id).then(group => {
+            res.json(group);
+          }).catch(next);
+        }
+      },
       'friend-request': {
         docs: {
           name: '添加好友请求',
@@ -105,13 +132,13 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           var user = req.user;
-          let { user_id } = req.body;
+          var { user_id } = req.body;
           if (user._id == user_id)
             return next(req.apiError(400, 'can not add self as a friend '));
 
           User.sendRequest(Object.assign(req.body, { from: user._id })).then(request => {
             res.json(request);
-            // let { from, user_id: target } = req.body;
+            // var { from, user_id: target } = req.body;
 
           }).catch(next);
         }
@@ -130,10 +157,27 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          let { request_id } = req.body;
-          let { status } = req.params;
+          var { request_id } = req.body;
+          var { status } = req.params;
           var user = req.user;
           User.handleFriendRequest(status, request_id, user._id).then(result => {
+            res.json(result);
+          }).catch(next);
+        }
+      }
+    },
+    devare: {
+      'friend-request/:request_id': {
+        docs: {
+          name: '删除好友请求',
+          params: [
+            { param: 'request_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+
+          User.devareRequest(req.params.request_id, user._id).then(result => {
             res.json(result);
           }).catch(next);
         }
