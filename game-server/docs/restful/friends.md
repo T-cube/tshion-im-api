@@ -23,8 +23,21 @@ POST /user/friend-request
 param|name|type|des
 -----|----|----|---
 key|user_id|String|target user id
-key|from|String|send request user id
+key|from|String|send request user id, 废弃
 key|mark|String|optional, 备注
+
+returns
+```js
+{
+  _id: String,
+  receiver: String,
+  from: String,
+  mark: String,
+  create_at: Date,
+  status: 'STATUS_FRIEND_REQUEST_PADDING',
+  update_at: Date,
+}
+```
 
 ## 拉取好友请求列表
 GET /user/friend-request/receiver/:receiver
@@ -34,6 +47,27 @@ param|name|type|des
 param|receiver|String|receive friend request user id
 query|page|Number|optional, from 0, default 0
 query|pagesize|Numner|optional, default 20
+
+returns
+```js
+[
+  {
+    _id: String,
+    name: String,
+    avatar: String,
+    receiver: String,
+    from: String,
+    mark: String,
+    create_at: Date,
+    status: Enum[
+                STATUS_FRIEND_REQUEST_PADDING // 待处理
+                STATUS_FRIEND_REQUEST_AGREE   // 已同意
+                STATUS_FRIEND_REQUEST_REJECT  // 已拒绝
+                STATUS_FRIEND_REQUEST_IGNORE  // 已忽略
+              ]
+  }
+]
+```
 
 ## 操作好友请求
 POST /user/friend-request/:status

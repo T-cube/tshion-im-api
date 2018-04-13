@@ -109,16 +109,17 @@ module.exports = function(app) {
       return requestCollection.findOne({ receiver: user_id, from, status: STATUS_FRIEND_REQUEST_AGREE }).then(doc => {
         if (doc) return null;
 
-        return requestCollection.findOne({ receiver: user_id, from }).then(doc => {
+        let receiver = ObjectID(user_id);
+        return requestCollection.findOne({ receiver, from }).then(doc => {
           if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT)) return User._updateFriendRequest({
-            receiver: user_id,
+            receiver,
             from,
             status: doc.status
           }, {
             mark,
             update_at: new Date
           });
-          let data = { receiver: user_id, from, mark, create_at: new Date, status: STATUS_FRIEND_REQUEST_PADDING };
+          let data = { receiver, from, mark, create_at: new Date, status: STATUS_FRIEND_REQUEST_PADDING };
           return requestCollection.insertOne(data).then(value => {
             data._id = value.insertedId;
             return data;
@@ -127,6 +128,11 @@ module.exports = function(app) {
       });
     }
 
+    /**
+     * delete friend request
+     * @param {String} request_id
+     * @returns {Promise}
+     */
     static deleteRequest(request_id) {
 
     }
@@ -145,14 +151,15 @@ module.exports = function(app) {
 
     /**
      * 获取好友请求
-     * @param {*} query
+     * @param {{}} query
+     * @returns {Promise}
      */
     static getFriendRequest(query, { page = 0, pagesize = 20 }) {
       pagesize = parseInt(pagesize);
       page = parseInt(page);
 
       return requestCollection.find(query)
-      sort({ create_at: -1, update_at: -1 })
+        .sort({ create_at: -1, update_at: -1 })
         .skip(page * pagesize)
         .limit(pagesize)
         .toArray().then(docs => {
