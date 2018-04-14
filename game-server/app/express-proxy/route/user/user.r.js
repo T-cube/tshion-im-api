@@ -39,9 +39,9 @@ module.exports = function(app) {
           name: '获取用户好友分组列表',
         },
         method(req, res, next) {
-          var user =req.user;
+          var user = req.user;
 
-          User.getFriendGroupList(user._id).then(groups=>{
+          User.getFriendGroupList(user._id).then(groups => {
             res.json(groups);
           }).catch(next);
         }
@@ -166,7 +166,7 @@ module.exports = function(app) {
         }
       }
     },
-    devare: {
+    delete: {
       'friend-request/:request_id': {
         docs: {
           name: '删除好友请求',

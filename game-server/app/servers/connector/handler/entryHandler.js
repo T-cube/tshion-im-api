@@ -83,7 +83,7 @@ class entryHandler {
             self.app.onlineRedis.get(uid).then(lastcid => {
               if (lastcid && (lastcid !== cid)) {
                 // console.log('lastcid::::::::::::', lastcid, self.app.get('serverId'));
-                console.log(console.log(Object.keys(self.app.settings)));
+                // console.log(console.log(Object.keys(self.app.settings)));
 
                 self.app.rpc.channel.channelRemote.kickChannel(session, uid, self.app.get('serverId'), function(err) {
                   // console.log('channel error2:::::::::', uid);

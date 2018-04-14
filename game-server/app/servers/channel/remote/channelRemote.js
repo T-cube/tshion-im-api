@@ -74,12 +74,12 @@ prototype.kickChannel = function(uid, sid, cb) {
 
   // var channelId = this.userChannelMap.get(user);
   var channel = this.channelService.getChannel(channelId);
-  console.log(channel.name, ':::::::::::::::;');
+  // console.log(channel.name, ':::::::::::::::;');
 
   // leave channel
   if (!!channel) {
     var { loginMap } = channel;
-    console.log(loginMap, ':::::::::::::::;');
+    // console.log(loginMap, ':::::::::::::::;');
     if (loginMap) {
       var loginer = loginMap.get(user) || {};
       if (loginer[uid]) {
