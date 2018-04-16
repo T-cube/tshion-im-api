@@ -1,6 +1,6 @@
 'use strict';
 const md5File = require('md5-file');
-const QINIU = require('@ym/qiniu');
+const QINIU = require('ym-qiniu');
 const uuidv4 = require('uuid/v4');
 
 const config = require('../../../config/config');

@@ -1,7 +1,7 @@
 'use strict';
 
 const eventEmitter = require('events');
-const AndroidPush = require('@ym/android-push');
+const AndroidPush = require('ym-android-push');
 const apn = require('apn');
 
 const { MiPush, GeTui } = require('./Push');

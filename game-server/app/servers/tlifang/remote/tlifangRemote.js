@@ -1,5 +1,5 @@
 'use strict';
-const rpc = require('@ym/rpc');
+const rpc = require('ym-rpc');
 module.exports = function(app) {
   const Remote = new TlifangRemote(app);
   return Remote;

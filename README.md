@@ -13,30 +13,23 @@ Both of them can be installed via 'sh npm-install.sh' (it will install a local c
  * The server setting (server number, host and port, etc.) can be configured in 'game-server/config/servers.json' and 'game-server/config/master.json' files.
  * Other settings (log4js etc.) also can be configured in 'game-server/config' folder.
 
-## Deployment
-Enter chatofpomelo/game-server, and run 'pomelo start' or 'node app.js' in order to start the game server.
 
-## License
+## Start
+### 配置项
+  * 复制start/config文件夹下的所有文件到game-server/config/下
+  * 复制start/pem文件夹下的所有文件到 game-server/pem下
+### 安装依赖
+  * via *npm install* or *yarn*
+  * 如果遇到canvas依赖安装错误，请参考github上node-canvas的安装教程
+### 启动
+  * npm run start
+  * 如果遇到env问题，请npm run dev
 
-(The MIT License)
+## Account
+* 用户系统数据库是mongodb
+* 用户系统公用数据原则：只做查询不做修改
+* model在 game-server/app/model/user
+* config.js 文件中的 tlf_db 为配置项
+* 登陆采用的 rpc 在 game-server/app/servers/tlifang/remote
+基本上涉及到用户数据的就这些
 
-Copyright (c) 2013 NetEase, Inc. and other contributors
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OT`HER DEALINGS IN THE SOFTWARE.

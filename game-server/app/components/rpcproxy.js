@@ -1,6 +1,6 @@
 'use strict';
 
-const rpc = require('@ym/rpc');
+const rpc = require('ym-rpc');
 const http = require('http');
 
 module.exports = function(app, config) {

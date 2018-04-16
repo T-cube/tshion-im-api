@@ -3,9 +3,7 @@
 const MiPush = require('../../mipush');
 const Push = require('./Push');
 
-const MiPushSender = new MiPush.Sender({
-  appSecret: 'bf6pJcMhaLXxLOlYgzosyg=='
-});
+const MiPushSender = new MiPush.Sender(require('../../../../config/config').mipush);
 
 class MiPushModule extends Push {
   constructor() {

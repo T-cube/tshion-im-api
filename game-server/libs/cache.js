@@ -1,4 +1,4 @@
-const redis = require('@ym/redis').promiseRedis({
+const redis = require('ym-redis').promiseRedis({
   host: '127.0.0.1',
   port: 6379,
   db: 3,
