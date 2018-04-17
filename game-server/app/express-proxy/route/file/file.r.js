@@ -49,7 +49,7 @@ module.exports = function(app) {
               options.url = doc.url;
               options.copy = doc._id;
               return new File(options).save().then(result => {
-                res.json(result);
+                res.sendJson(result);
               });
 
             } else {
@@ -74,7 +74,7 @@ module.exports = function(app) {
                   options.copy = cacheFile._id;
 
                   return new File(options).save().then(newFile => {
-                    res.json(newFile);
+                    res.sendJson(newFile);
                   });
                 });
               });
@@ -118,7 +118,7 @@ module.exports = function(app) {
               options.url = doc.url;
               options.copy = doc._id;
               return new File(options).save().then(result => {
-                res.json(result);
+                res.sendJson(result);
               });
 
             } else {
@@ -145,7 +145,7 @@ module.exports = function(app) {
                   options.copy = cacheFile._id;
 
                   return new File(options).save().then(newFile => {
-                    res.json(newFile);
+                    res.sendJson(newFile);
                   });
                 });
               });
@@ -254,7 +254,7 @@ module.exports = function(app) {
               let cdn = origin.cdn;
 
               return File.generateLink(cdn.key, req.query.rename).then(link => {
-                res.json({download_url: link});
+                res.sendJson({download_url: link});
                 // res.redirect(301, link);
               });
             });

@@ -25,7 +25,7 @@ module.exports = function(app) {
           var roomid = Group.createRoomId(creator);
 
           new Group({ name, creator, members, roomid }).save().then(group => {
-            res.json(group);
+            res.sendJson(group);
           }).catch(next);
         }
       }

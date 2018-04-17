@@ -1,13 +1,17 @@
 'use strict';
 const _ = require('../../../libs/util');
+const FriendInfoSchema = require('./friend-info');
 
 module.exports = function(app) {
   const ObjectID = app.get('ObjectID');
+
   const tlf_db = app.tlf_db;
   const db = app.db;
+
   const userCollection = tlf_db.collection('user');
   const requestCollection = db.collection('friend.request');
   const friendCollection = db.collection('friend');
+  const friendInfoCollection = db.collection('friend.info');
   const friendGroupCollection = db.collection('friend.group');
 
 
@@ -227,6 +231,44 @@ module.exports = function(app) {
     }
 
     /**
+     * 创建好友关系
+     * @param {ObjectID} user
+     * @param {ObjectID} friend
+     * @returns {Promise}
+     */
+    static _createFriend(user, friend) {
+      let query = {
+        user,
+        friend,
+      };
+
+      return friendInfoCollection.findOneAndUpdate(query, {
+        $set: Object.assign(query, { nickname: '' })
+      }, {
+        upsert: true,
+        returnOriginal: false
+      });
+    }
+
+    /**
+     * 修改好友信息
+     * @param {String} friend
+     * @param {String|ObjectID} user
+     * @param {{}} info
+     * @returns {Promise}
+     */
+    static updateFriendInfo(friend, user, info) {
+      return friendInfoCollection.findOneAndUpdate({
+        friend: ObjectID(friend),
+        user: ObjectID(user)
+      }, {
+        $set: FriendInfoSchema(info)
+      }, {
+        returnOriginal: false
+      });
+    }
+
+    /**
      * 同意好友请求
      * @param {String} request_id
      * @param {String} receiver
@@ -241,13 +283,15 @@ module.exports = function(app) {
 
         let promise_a = User._addFriend({ user: user_a }, user_b);
         let promise_a_group = User._addGroupFriend({ user: user_a, type: 'default' }, user_b);
+        let promise_a_info = User._createFriend(user_a, user_b);
 
         let promise_b = User._addFriend({ user: user_b }, user_a);
         let promise_b_group = User._addGroupFriend({ user: user_b, type: 'default' }, user_a);
+        let promise_b_info = User._createFriend(user_b, user_a);
 
         let promise_request = User._updateFriendRequest({ _id: ObjectID(request_id) }, { status: STATUS_FRIEND_REQUEST_AGREE });
 
-        return Promise.all([promise_a, promise_a_group, promise_b, promise_b_group, promise_request]).then(() => {
+        return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
           return { result: 'ok' };
         });
       });
@@ -315,9 +359,35 @@ module.exports = function(app) {
      * 获取分组好友信息
      * @param {*} group_id
      */
-    static getGroupFriendsInfo(group_id) {
-      return friendGroupCollection.findOne({ _id: ObjectID(group_id) }).then(result => {
-        return User._getUserInfoByIds(result.members);
+    static getGroupFriendsInfo(group_id, user) {
+      return friendGroupCollection.findOne({ _id: ObjectID(group_id), user: ObjectID(user) }).then(result => {
+        if (!result) return [];
+
+        return User._getFriendsInfo(result.members);
+      });
+    }
+
+    /**
+     *
+     * @param {Array} ids
+     * @returns {Promise}
+     */
+    static _getFriendsInfo(ids){
+      return User._getUserInfoByIds(ids).then(users=>{
+        let query = users.map(member => member._id);
+
+        return friendInfoCollection.find({ friend: { $in: query } }, {
+          nickname: 1,
+          setting: 1
+        }).toArray().then(friends => {
+          return users.map((member, index) => {
+            let friend = friends[index];
+            delete friend._id;
+            if (!friend) return member;
+
+            return Object.assign(member, friend, { showname: friend.nickname ? friend.nickname : member.name });
+          });
+        })
       });
     }
 
@@ -327,7 +397,7 @@ module.exports = function(app) {
      */
     static getAllFriendsInfo(user_id) {
       return friendCollection.findOne({ user: ObjectID(user_id) }).then(result => {
-        return User._getUserInfoByIds(result.friends);
+        return User._getFriendsInfo(result.friends);
       });
     }
 
@@ -340,6 +410,9 @@ module.exports = function(app) {
         friendCollection.findOne({ user: ObjectID(user_id) }),
         User.getFriendGroupList(user_id)
       ]).then(([friends, groups]) => {
+        if (!friends) {
+          return { groups: [] };
+        }
         friends.groups = groups;
         return friends;
       })

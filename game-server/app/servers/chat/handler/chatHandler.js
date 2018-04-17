@@ -24,26 +24,28 @@ prototype.joinRoom = function(msg, session, next) {
 
   self.app.rpc.account.accountRemote.getDeviceToken(session, { uid: target }, function(err, tokens) {
 
+
     let token = tokens[0];
     if (token) {
       let { cid } = tokens[0];
       target_cid = cid;
     }
 
-    if (!target || !target_cid) return next({ error: 'target can not be null,target_cid can not be null' });
+    // if (!target || !target_cid) return next({ code: 400, error: 'target can not be null,target_cid can not be null' });
+    if (!target) return next({ code: 400, error: 'target can not be null' });
     self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
       if (err) return next(err);
-      self.app.onlineRedis.get(target).then(channel => {
-
+      self.app.onlineRedis.get(target).then(channelId => {
+        console.log(':::::::::::::::;channelId', channelId);
         let msg = room;
 
         self.app.roomMap.set(room.roomid, {
           [uid]: fcid,
           [target]: target_cid
         });
-        if (!channel) msg.error = 'user offline';
+        if (!channelId) msg.error = 'user offline';
         else {
-          let channel = self.channelService.getChannel('global', false);
+          let channel = self.channelService.getChannel(channelId, false);
           // roomid save 2 people channelid
           if (target == '*') {
             channel.pushMessage(param);
@@ -90,7 +92,6 @@ prototype.notifyGroup = function(options) {
     if (_member) users.push({ uid, sid: _member['sid'] });
   }
   users.length && self.channelService.pushMessageByUids(param, users);
-
 };
 /**
  * init group

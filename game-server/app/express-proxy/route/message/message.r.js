@@ -18,7 +18,7 @@ module.exports = function(app) {
           // console.log('123456789123456789', req.query);
           Message.getList(Object.assign(req.params, req.query)).then(result => {
             // console.log(123,result.list.length)
-            res.json(result);
+            res.sendJson(result);
           }).catch(next);
         }
       },
@@ -29,7 +29,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           Message.offlineMessageCount(req.params).then(counts => {
-            res.json(counts);
+            res.sendJson(counts);
           }).catch(next);
         }
       },
@@ -41,7 +41,7 @@ module.exports = function(app) {
         method(req, res, next) {
           Message.getNewLyList(Object.assign(req.params, req.query)).then(result => {
             // console.log(result)
-            res.json(result);
+            res.sendJson(result);
           }).catch(next);
         }
       }
@@ -56,7 +56,7 @@ module.exports = function(app) {
           // Message.offlineMessageCount()
           Message.deleteOfflineMessage(req.params).then(result => {
             // console.log(result, 'dddsdfsdfsdfsdfsdf')
-            res.json({ num: result });
+            res.sendJson({ num: result });
           }).catch(next);
         }
       }

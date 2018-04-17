@@ -93,12 +93,20 @@ param|name|type|des
 param|user_id|String|target user id
 
 ## 获取好友某个分组的信息
-GET /user/friends/:user_id/:group_id
+GET /user/friends/info/:user_id/:group_id
 
 param|name|type|des
 -----|----|----|---
 param|user_id|String|user id
 param|group_id|String|friend group id
+
+## 修改好友信息
+PUT /user/friend/info/:friend_id
+
+param|name|type|des
+-----|----|----|---
+param|friend_id|String|friend id
+key|nickname|String|friend nickname you want to set
 
 ## 创建好友分组
 

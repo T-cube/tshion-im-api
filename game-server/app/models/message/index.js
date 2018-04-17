@@ -8,14 +8,14 @@ module.exports = function(app) {
 
   return class Message {
     constructor(msg) {
-      _.extend(msg, this, schema);
+      this.msg = schema(msg);
     }
 
     /**
      * 存储消息
      */
     save() {
-      return MessageCollection.insertOne(this);
+      return MessageCollection.insertOne(this.msg);
     }
 
     /**
@@ -45,13 +45,13 @@ module.exports = function(app) {
       // console.log(roomid,11111)
       pagesize = parseInt(pagesize);
       return Promise.all([MessageCollection.find(last && {
-        roomid,
-        timestamp: {
-          '$lt': parseInt(last)
-        }
-      } || {
-        roomid
-      }, {}).sort({ timestamp: -1 })
+          roomid,
+          timestamp: {
+            '$lt': parseInt(last)
+          }
+        } || {
+          roomid
+        }, {}).sort({ timestamp: -1 })
         .limit(pagesize).toArray().then(docs => {
           // console.log(docs);
           return {
@@ -82,13 +82,13 @@ module.exports = function(app) {
       //
       // })
       return OfflineMessageCollection.group({
-        from: true,
-        roomid: true
-      }, {
-        target
-      }, {
-        count: 0
-      },
+          from: true,
+          roomid: true
+        }, {
+          target
+        }, {
+          count: 0
+        },
         function(curr, result) { result.count++; }, true);
     };
     static getLastMessage(rooms) {

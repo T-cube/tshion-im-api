@@ -20,7 +20,7 @@ class accountHandler {
 
 
         let list = (res || []).filter(room => room.message);
-        next(null, list);
+        next(null, { code: 200, data: list });
       });
 
     });
