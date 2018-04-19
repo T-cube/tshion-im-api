@@ -23,7 +23,7 @@ module.exports = function (app) {
          */
         static findUser(query, fields) {
             // return userCollection.findOne(query, fields);
-            return tlf2_db.find("tlf_user", query, fields);
+            return tlf2_db.find('tlf_user', query, fields);
         }
 
         /**
@@ -31,7 +31,7 @@ module.exports = function (app) {
          * @param {*} user_id
          */
         static user(user_id) {
-            return tlf2_db.find("tlf_user",{id: user_id}, {
+            return tlf2_db.find('tlf_user',{id: user_id}, {
                 name: 1,
                 mobile: 1,
                 age: 1,
@@ -49,7 +49,7 @@ module.exports = function (app) {
          * @returns {Promise}
          */
         static findMany(query, fields) {
-            return tlf2_db.find("tlf_user",query, Object.assign({name: 1, avatar: 1}, fields),"order by id");
+            return tlf2_db.find('tlf_user',query, Object.assign({name: 1, avatar: 1}, fields),'order by id');
         }
 
         /**
@@ -97,7 +97,7 @@ module.exports = function (app) {
                 }
 
                 query['$nor'].push({_id: ObjectID(user)});
-                return tlf2_db.find("tlf_user",query, {avatar: 1, email: 1, mobile: 1, name: 1, sex: 1});
+                return tlf2_db.find('tlf_user',query, {avatar: 1, email: 1, mobile: 1, name: 1, sex: 1});
             });
         }
 
@@ -170,7 +170,7 @@ module.exports = function (app) {
                 .toArray().then(docs => {
                     let froms = docs.map(doc => ObjectID(doc.from));
 
-                    return tlf2_db.find("tlf_user",{id: {$in: froms}}, {
+                    return tlf2_db.find('tlf_user',{id: {$in: froms}}, {
                         name: 1,
                         avatar: 1,
                         mobile: 1
@@ -319,7 +319,7 @@ module.exports = function (app) {
          * @param {String[]} _ids
          */
         static _getUserInfoByIds(_ids) {
-            return tlf2_db.find("tlf_user",{_id: {$in: _ids}}, {
+            return tlf2_db.find('tlf_user',{_id: {$in: _ids}}, {
                 avatar: 1,
                 name: 1,
                 mobile: 1,

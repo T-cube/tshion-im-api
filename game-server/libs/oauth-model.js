@@ -28,7 +28,7 @@ module.exports = function (app) {
               return callback(null, null);
             }
 
-            return tlf2_db.find("tlf_user", {
+            return tlf2_db.find('tlf_user', {
               id: uid
             }, {
               _id: 1,
