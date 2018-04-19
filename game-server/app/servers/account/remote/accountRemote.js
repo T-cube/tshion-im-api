@@ -1,129 +1,115 @@
 'use strict';
 
 const crypto = require('crypto');
-module.exports = function (app) {
-    return new AccountRemote(app);
+module.exports = function(app) {
+  return new AccountRemote(app);
 };
 
-var AccountRemote = function (app) {
-    this.app = app;
+var AccountRemote = function(app) {
+  this.app = app;
 
-    this.roomMap = new Map();
-    this.chatMap = new Map();
+  this.roomMap = new Map();
+  this.chatMap = new Map();
 
-    this.Room = require('../../../models/room')(app);
-    this.Account = require('../../../models/account')(app);
-    this.User = require('../../../models/user')(app);
+  this.Room = require('../../../models/room')(app);
+  this.Account = require('../../../models/account')(app);
+  this.User = require('../../../models/user')(app);
 
-    this.ObjectID = app.get('ObjectID');
-    this.channelService = app.get('channelService');
-    // this.sessionService = app.get('')
+  this.ObjectID = app.get('ObjectID');
+  this.channelService = app.get('channelService');
+  // this.sessionService = app.get('')
 };
 
 const prototype = AccountRemote.prototype;
 
-prototype.userInfo = function (query, fields, cb) {
-    if (fields instanceof cb) {
-        cb = fields;
-        fields = {};
-    }
-    if (query._id) query._id = this.ObjectID(query._id);
-    this.User.findUser(query, fields).then(user => {
-        cb(null, user);
-    }).catch(cb);
+prototype.userInfo = function(query, fields, cb) {
+  if (fields instanceof cb) {
+    cb = fields;
+    fields = {};
+  }
+  if (query._id) query._id = this.ObjectID(query._id);
+  this.User.findUser(query, fields).then(user => {
+    cb(null, user);
+  }).catch(cb);
 };
 
-prototype.login = function (token, cb) {
-    // use when need
-    this.app.Redis.get(token).then(uid => {//直接通过redis获取用户id
-        cb(null, {user_id: uid});
-    });
-    // this.app.rpc.tlifang.tlifangRemote.login(null, token, function(err, data) {
-    //   if (err) return cb(err);
-    //   cb(null, data);
-    // });
+prototype.login = function(token, cb) {
+  // use when need
+  this.app.rpc.tlifang.tlifangRemote.login(null, token, function(err, data) {
+    if (err) return cb(err);
+    cb(null, data);
+  });
+};
+
+prototype.getChannelId = function(uid, cb) {
+  this.app.onlineRedis.get(uid).then(lastcid => {
+    cb(null, lastcid);
+  }).catch(cb);
+};
+
+prototype.setChannelId = function(uid, cid, cb) {
+  this.app.onlineRedis.set(uid, cid).then(status => {
+    console.log('status:::::::::', status, cid, uid);
+    cb(null, status);
+  }).catch(cb);
 };
 
 
-prototype.bindChannel = function (uid, cid, sid, cb) {
-    let self = this;
-    // console.log(self.app.onlineRedis);
-    self.app.onlineRedis.get(uid).then(lastcid => {
-        if (lastcid && (lastcid !== cid)) {
-            // console.log('lastcid::::::::::::', lastcid, self.app.get('serverId'));
-            // console.log(console.log(Object.keys(self.app.settings)));
-
-            self.app.rpc.chat.chatRemote.kick(null,
-                `${uid}*${lastcid}`,
-                sid,
-                function () {
-                    // console.log('error:::::::');
-                    self.app.onlineRedis.set(uid, cid).then(status => {
-                        cb(null, status);
-                    }).catch(e => {
-                        cb(e);
-                        // console.log('error:::::::', e);
-                    });
-                });
-        }
-    });
+prototype.unbindChannel = function(uid, cb) {
+  this.app.onlineRedis.del(uid).then(status => {
+    cb(null, status);
+  }).catch(cb);
 };
 
-prototype.unbindChannel = function (uid, cb) {
-    this.app.onlineRedis.del(uid).then(status => {
-        cb(null, status);
-    }).catch(cb);
+prototype.bindRoom = function({ uid, target, fcid, target_cid }, cb) {
+  let self = this;
+  let members = [uid, target].sort();
+  const roomHash = crypto.createHash('sha1').update(members.join('*')).digest('hex');
+
+  let roomInner = {
+    [uid]: fcid,
+    [target]: target_cid
+  };
+  new self.Room({ roomid: roomHash, members, room: roomInner }).save()
+    .then(room => cb(null, room))
+    // self.Room.upgradeActive(room)
+    // .then(nextRoom => cb(null, nextRoom))
+    // .catch(cb))
+    .catch(cb);
 };
 
-prototype.bindRoom = function ({uid, target, fcid, target_cid}, cb) {
-    let self = this;
-    let members = [uid, target].sort();
-    const roomHash = crypto.createHash('sha1').update(members.join('*')).digest('hex');
-
-    let roomInner = {
-        [uid]: fcid,
-        [target]: target_cid
-    };
-    new self.Room({roomid: roomHash, members, room: roomInner}).save()
-        .then(room => cb(null, room))
-        // self.Room.upgradeActive(room)
-        // .then(nextRoom => cb(null, nextRoom))
-        // .catch(cb))
-        .catch(cb);
+prototype.activeRoom = function(roomid, cb) {
+  let self = this;
+  self.Room.findRoom({ roomid }).then(room => {
+    if (!room) return cb(null);
+    return self.Room.upgradeActive(room).then(nextRoom => cb(null, nextRoom));
+  }).catch(cb);
 };
 
-prototype.activeRoom = function (roomid, cb) {
-    let self = this;
-    self.Room.findRoom({roomid}).then(room => {
-        if (!room) return cb(null);
-        return self.Room.upgradeActive(room).then(nextRoom => cb(null, nextRoom));
-    }).catch(cb);
+prototype.unActiveRoom = function(roomid, cb) {
+  let self = this;
+  self.Room.unActive(roomid).then(result => cb(null, result)).catch(cb);
 };
 
-prototype.unActiveRoom = function (roomid, cb) {
-    let self = this;
-    self.Room.unActive(roomid).then(result => cb(null, result)).catch(cb);
+prototype.saveDeviceToken = function(info, cb) {
+  let self = this;
+  new self.Account(info).saveDeviceToken().then(value => cb(null, value)).catch(cb);
 };
 
-prototype.saveDeviceToken = function (info, cb) {
-    let self = this;
-    new self.Account(info).saveDeviceToken().then(value => cb(null, value)).catch(cb);
+prototype.getDeviceToken = function(info, cb) {
+  let self = this;
+  self.Account.getDeviceToken(info).then(tokens => cb(null, tokens)).catch(cb);
 };
 
-prototype.getDeviceToken = function (info, cb) {
-    let self = this;
-    self.Account.getDeviceToken(info).then(tokens => cb(null, tokens)).catch(cb);
+prototype.revokeDeviceToken = function(info, cb) {
+  let self = this;
+  self.Account.delDeviceToken(info).then(result => cb(null, result)).catch(cb);
 };
 
-prototype.revokeDeviceToken = function (info, cb) {
-    let self = this;
-    self.Account.delDeviceToken(info).then(result => cb(null, result)).catch(cb);
-};
-
-prototype.findFriends = function (uid) {
+prototype.findFriends = function(uid) {
 
 };
 
-prototype.express = function (a, b, cb) {
-    cb(null, {a, b});
+prototype.express = function(a, b, cb) {
+  cb(null, { a, b });
 };

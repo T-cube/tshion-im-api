@@ -31,6 +31,7 @@ class entryHandler {
 
       self.app.rpc.channel.channelRemote.generateChannelId(null, function(err, channelId) {
         if (err) return reject(err);
+        console.log('channelId:::::::::;', channelId);
         resolve(channelId);
       });
     }).then(cid => {
@@ -38,10 +39,11 @@ class entryHandler {
         if (!result) return next({ code: 404, error: 'init_token expired or no exists' });
 
         const json = JSON.parse(result);
+        console.log('result:::::::::::::', result);
         let { uid } = json;
         // var sessionService = self.app.get('sessionService');
 
-        uid += `*${cid}`;
+        // uid += `*${cid}`;
         client && (uid += `*${client}`);
         //duplicate log in
         // if (!!sessionService.getByUid(uid)) {
@@ -69,35 +71,39 @@ class entryHandler {
           cid,
           true,
           function(err, result) {
+
             // let { users, members } = result;
             let { channel_id } = result;
-            // self.app.rpc.account.accountRemote.bindChannel(session, uid, cid, self.app.get('serverId'), function(err, status) {
-            //   console.log('heiheihei:', err);
-            //   if (err || !status) return next(err);
-            //   next(null, {
-            //     channel_id,
-            //     // users,
-            //     // members
-            //   });
-            // });
-            self.app.onlineRedis.get(uid).then(lastcid => {
-              if (lastcid && (lastcid !== cid)) {
-                // console.log('lastcid::::::::::::', lastcid, self.app.get('serverId'));
-                // console.log(console.log(Object.keys(self.app.settings)));
+            self.app.rpc.account.accountRemote.getChannelId(session, uid, function(err, lastcid) {
+              new Promise((resolve, reject) => {
+                if (lastcid && (lastcid !== cid)) {
+                  console.log('lastcid::::::::::::', lastcid, self.app.get('serverId'));
+                  // console.log(console.log(Object.keys(self.app.settings)));
 
-                self.app.rpc.channel.channelRemote.kickChannel(session, uid, self.app.get('serverId'), function(err) {
-                  // console.log('channel error2:::::::::', uid);
-                  // cb && cb();
-                  if (err) return next(err);
+                  self.app.rpc.channel.channelRemote.kickChannel(session, uid, lastcid, self.app.get('serverId'), function(err) {
 
-                  next(null, {
+                    console.log('channel error2:::::::::', err);
+                    // cb && cb();
+                    resolve({
+                      channel_id,
+                      // users,
+                      // members
+                    });
+                  });
+                } else {
+                  resolve({
                     channel_id,
                     // users,
                     // members
                   });
+                }
+              }).then(res => {
+                self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function(err, status) {
+                  if (err) return next(err);
+                  next(null, res);
                 });
-              }
-            }).catch(next);
+              }).catch(next);
+            });
           });
 
       }).catch(e => {
@@ -112,7 +118,7 @@ class entryHandler {
    */
   kick(msg, session, next) {
     let self = this;
-    let [uid, cid, client] = session.uid.split('*');
+    let [uid, client] = session.uid.split('*');
     onUserLeave(self.app, session, userLeaveCallback.bind(self, client, uid, next));
   };
 }
@@ -139,5 +145,10 @@ var onUserLeave = function(app, session, cb) {
   if (!session || !session.uid) {
     return;
   }
-  app.rpc.channel.channelRemote.kickChannel(session, session.uid, app.get('serverId'), cb || null);
+  var uid = session.uid;
+  app.rpc.account.accountRemote.getChannelId(session, uid, function(err, channelId) {
+    app.rpc.account.accountRemote.unbindChannel(session, uid, function() {
+      app.rpc.channel.channelRemote.kickChannel(session, uid, channelId, app.get('serverId'), cb || null);
+    });
+  });
 };

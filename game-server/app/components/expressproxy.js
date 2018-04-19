@@ -30,6 +30,8 @@ var ExpressProxy = function(app, opts) {
     'defaultCharset': 'utf-8'
   }));
 
+  this.exp.use(require('../express-proxy/middleware/send-json'));
+
   const cors = require('cors');
 
   const whitelist = ['http://cp.tlf.michael.local', 'https://cp.tlifang.com', 'https://cpapi.tlifang.com/oauth/token', 'http://cp.tlifang.com'];
@@ -82,7 +84,7 @@ var ExpressProxy = function(app, opts) {
     // self.app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
     //   res.json(data);
     // });
-    res.json({ name: 123 });
+    res.sendJson({ name: 123 });
   });
 
   // oauth error handler

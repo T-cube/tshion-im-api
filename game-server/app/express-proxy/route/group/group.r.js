@@ -16,7 +16,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           Group.getListByUid(req.query.user_id).then(groups => {
-            res.json(groups);
+            res.sendJson(groups);
           }).catch(next);
         }
       },
@@ -29,7 +29,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           Group.info(req.params.group_id).then(info => {
-            res.json(info);
+            res.sendJson(info);
           }).catch(next);
         }
       },
@@ -42,7 +42,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           Member.getMembersByGroupId(req.params.group_id).then(members => {
-            res.json(members);
+            res.sendJson(members);
           }).catch(next);
         }
       },
@@ -57,7 +57,7 @@ module.exports = function(app) {
           let { member_id } = req.params;
 
           Member.getMemberInfo(member_id).then(info => {
-            res.json(info);
+            res.sendJson(info);
           }).catch(next);
         }
       }
@@ -82,7 +82,7 @@ module.exports = function(app) {
               new Setting({ group }).save(),
               Member.addMany(members, group)
             ]).then(() => {
-              res.json(newGroup);
+              res.sendJson(newGroup);
             });
           }).catch(([errSetting, memberError]) => {
             console.log(memberError,errSetting);
@@ -107,7 +107,7 @@ module.exports = function(app) {
           if (members instanceof String) members = [members];
 
           Member.addMany(members, group).then(result => {
-            res.json(result);
+            res.sendJson(result);
           }).catch(next);
         }
       }
@@ -128,7 +128,7 @@ module.exports = function(app) {
           if (members instanceof String) members = [members];
 
           Member.deleteMembers(members).then(result => {
-            res.json(result);
+            res.sendJson(result);
           }).catch(next);
         }
       },

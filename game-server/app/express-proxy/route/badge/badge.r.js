@@ -12,7 +12,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           Badger.setBadge(req.params, 0).then(() => {
-            res.json({});
+            res.sendJson({});
           }).catch(next);
         }
       }

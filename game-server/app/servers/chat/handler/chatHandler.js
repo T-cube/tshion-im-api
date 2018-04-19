@@ -10,57 +10,55 @@ var Handler = function(app) {
   // app.roomMap = new Map();
 };
 var prototype = Handler.prototype;
+
 /**
  * Join chatRoom
  */
 prototype.joinRoom = function(msg, session, next) {
   let self = this;
   let { target, target_cid } = msg;
-  let [uid, fcid] = session.uid.split('*');
+  let [uid] = session.uid.split('*');
   let param = {
     route: 'joinRoom',
     from: uid,
   };
-
-  self.app.rpc.account.accountRemote.getDeviceToken(session, { uid: target }, function(err, tokens) {
-
-    let token = tokens[0];
-    if (token) {
-      let { cid } = tokens[0];
-      target_cid = cid;
-    }
-
-    if (!target || !target_cid) return next({ error: 'target can not be null,target_cid can not be null' });
-    self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
-      if (err) return next(err);
-      self.app.onlineRedis.get(target).then(channel => {
-
-        let msg = room;
-
-        self.app.roomMap.set(room.roomid, {
-          [uid]: fcid,
-          [target]: target_cid
-        });
-        if (!channel) msg.error = 'user offline';
-        else {
-          let channel = self.channelService.getChannel('global', false);
-          // roomid save 2 people channelid
-          if (target == '*') {
-            channel.pushMessage(param);
-          } else {
-            let tuid = `${target}*${target_cid}`;
-            let member = channel.getMember(tuid);
-            let tsid = member['sid'];
-            self.channelService.pushMessageByUids(Object.assign(param, room), [{ uid: tuid, sid: tsid }]);
-          }
+  console.log(target);
+  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(fcid) {
+    self.app.rpc.channel.channelRemote.getUserChannelId(session, target, function(err, channelId) {
+      self.app.rpc.account.accountRemote.getDeviceToken(session, { uid: target }, function(err, tokens) {
+        let token = tokens[0];
+        if (token) {
+          let { cid } = tokens[0];
+          target_cid = cid;
         }
-        next(null, msg);
-      }).catch(e => {
-        next(e);
+        // if (!target || !target_cid) return next({ code: 400, error: 'target can not be null,target_cid can not be null' });
+        if (!target) return next({ code: 400, error: 'target can not be null' });
+        self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
+          if (err) return next(err);
+          console.log(':::::::::::::::;channelId', channelId);
+          let msg = room;
+
+          self.app.roomMap.set(room.roomid, {
+            [uid]: fcid,
+            [target]: target_cid
+          });
+          if (!channelId) {
+            msg.error = 'user offline';
+            msg.code = 404;
+            next(msg);
+          } else {
+            // roomid save 2 people channelid
+            self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, Object.assign(param, room), target, function(err, result) {
+              next(null, msg);
+            });
+          }
+        });
       });
     });
   });
 };
+
+
 prototype.unActiveRoom = function(msg, session, next) {
   let self = this;
   let { roomid } = msg;
@@ -90,7 +88,6 @@ prototype.notifyGroup = function(options) {
     if (_member) users.push({ uid, sid: _member['sid'] });
   }
   users.length && self.channelService.pushMessageByUids(param, users);
-
 };
 /**
  * init group
@@ -214,15 +211,18 @@ prototype.sendGroup = function(msg, session, next) {
  */
 prototype.deviceToken = function(msg, session, next) {
   let self = this;
-  let [uid, cid, client] = session.uid.split('*'), { deviceToken, brand } = msg;
+  let [uid, client] = session.uid.split('*'), { deviceToken, brand } = msg;
   if (client) {
     session.set('deviceToken', deviceToken);
     // console.log('.........', client, deviceToken, '.............');
     if (!deviceToken) return;
-    self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken, brand }, function(err, value) {
-      if (err) console.error(err);
-      console.log('save device token:', value);
-      next(null, {});
+    self.app.onlineRedis.getChannelId(session, session.uid, function(err, cid) {
+
+      self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken, brand }, function(err, value) {
+        if (err) console.error(err);
+        console.log('save device token:', value);
+        next(null, {});
+      });
     });
   }
 };
@@ -243,80 +243,41 @@ prototype.send = function(msg, session, next) {
     if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
   }
 
-  let room = self.app.roomMap.get(roomid);
-  let cid = room ? room[target] : null;
-  var [from, fcid] = session.uid.split('*');
-  var param = Object.assign(msg, {
-    route: 'onChat',
-    roomid,
-    from,
-    target
-  });
-  let channel = self.channelService.getChannel('global');
-  // if (!room) {
-  //   next({route: param.route, code: 404, error: 'no room' });
-  // }
+  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(fcid) {
 
-  let room_info = {
-    [from]: [fcid],
-    [target]: [cid]
-  };
-  msg.room = room_info;
+    var [from] = session.uid.split('*');
+    var param = Object.assign(msg, {
+      route: 'onChat',
+      roomid,
+      from,
+      target
+    });
 
-  self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
-    if (err) return next(err);
+    self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
+      if (err) return next(err);
 
-    result.from_name = from_name;
-    if (!channel) {
-      next(null, { route: param.route, msg: result });
-      self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-        err && console.error(err);
-      });
-    } else {
-
+      result.from_name = from_name;
       param = Object.assign(param, result);
-      if (target == '*') {
-        channel.pushMessage(param);
-      } else {
-        // let uid = `${target}*${cid}`;
-        // let member = channel.getMember(uid);
-        let { loginMap } = channel;
-        let loginer = loginMap.get(target);
-        let clients = [];
-        // let mobile = false;
-        for (let tuid in loginer) {
-          let sid = loginer[tuid];
-          // (tuid.indexOf('ios') || tuid.indexOf('android')) && (mobile = true);
-          clients.push({ uid: tuid, sid });
-        }
-        // console.log(clients, 111222111222, roomid, param)
-        if (!clients.length)
-          return self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-            if (err) return next(err);
 
-            self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
-              if (err) console.warn(err);
-            });
-            next({ route: param.route, msg: result, code: 404, error: 'user offline' });
+      self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
+        if (err == 'user offline') {
+          self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+            err && console.error(err);
+            next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
           });
-        // let sid = member['sid'];
-        // self.channelService.pushMessageByUids(param, [{ uid, sid }]);
-        self.channelService.pushMessageByUids(param, clients);
-        // !mobile && self.app.rpc.push.pushRemote.pushMessageOne(null, result, null);
-      }
-    }
+        } else {
+          next(null, { route: param.route, msg: param });
+        };
+      });
 
-    self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
-      if (err) console.warn(err);
-    });
+      self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
+        if (err) console.warn(err);
+      });
 
-    next(null, {
-      route: param.route,
-      msg: result
+      self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
+        err && console.log(err);
+      });
     });
-  });
-  self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
-    err && console.log(err);
   });
 };
 

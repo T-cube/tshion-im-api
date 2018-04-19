@@ -19,3 +19,28 @@ returns
   ]
 }
 ```
+
+## 获取聊天记录
+GET /message/:roomid
+
+param|name|type|des
+-----|----|----|---
+param|roomid|String|chat room id
+query|last|String|the last timestamp of message list
+query|pagesize|Number|optional, the size of one page list
+
+## 获取最新聊天记录
+GET /message/:roomdi/newly
+
+param|name|type|des
+-----|----|----|---
+param|roomid|String|chat room id
+query|index|String|the newly message timestamp of message list
+
+## 清空某人离线消息
+DELETE /message/offline/:roomid/:target
+
+param|name|type|des
+-----|----|----|---
+param|roomid|String|chat room id
+param|target|String|target user id

@@ -13,7 +13,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           User.user(req.params.user_id).then(user => {
-            res.json(user);
+            res.sendJson(user);
           }).catch(next);
         }
       },
@@ -30,7 +30,7 @@ module.exports = function(app) {
           var user = req.user;
           // console.log('/user',user);
           User.find(Object.assign(req.query, { user: user._id })).then(users => {
-            res.json(users);
+            res.sendJson(users);
           }).catch(next);
         }
       },
@@ -42,7 +42,7 @@ module.exports = function(app) {
           var user = req.user;
 
           User.getFriendGroupList(user._id).then(groups => {
-            res.json(groups);
+            res.sendJson(groups);
           }).catch(next);
         }
       },
@@ -58,7 +58,7 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           User.getFriendRequest({ receiver: user._id }, req.query).then(requests => {
-            res.json(requests);
+            res.sendJson(requests);
           }).catch(next);
         }
       },
@@ -72,7 +72,7 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           User.getAllFriendsInfo(user._id).then(friends => {
-            res.json(friends);
+            res.sendJson(friends);
           }).catch(next);
         }
       },
@@ -85,8 +85,10 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          User.getGroupFriendsInfo(req.params.group_id).then(friends => {
-            res.json(friends);
+          var user = req.user;
+          console.log(req.params)
+          User.getGroupFriendsInfo(req.params.group_id, user._id).then(friends => {
+            res.sendJson(friends);
           }).catch(next);
         }
       },
@@ -100,7 +102,7 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           User.getFriends(user._id).then(result => {
-            res.json(result || {});
+            res.sendJson(result || {});
           }).catch(next);
         }
       }
@@ -117,7 +119,7 @@ module.exports = function(app) {
           var user = req.user;
 
           User.createFriendGroup(req.body.name, user._id).then(group => {
-            res.json(group);
+            res.sendJson(group);
           }).catch(next);
         }
       },
@@ -137,7 +139,7 @@ module.exports = function(app) {
             return next(req.apiError(400, 'can not add self as a friend '));
 
           User.sendRequest(Object.assign(req.body, { from: user._id })).then(request => {
-            res.json(request);
+            res.sendJson(request);
             // var { from, user_id: target } = req.body;
 
           }).catch(next);
@@ -161,7 +163,25 @@ module.exports = function(app) {
           var { status } = req.params;
           var user = req.user;
           User.handleFriendRequest(status, request_id, user._id).then(result => {
-            res.json(result);
+            res.sendJson(result);
+          }).catch(next);
+        }
+      }
+    },
+    put: {
+      'friend/info/:friend_id': {
+        docs: {
+          name: '修改好友信息',
+          params: [
+            { param: 'friend_id', type: 'String' },
+            { key: 'nickname', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+
+          User.updateFriendInfo(req.params.friend_id, user._id, req.body).then(friend => {
+            res.sendJson(friend);
           }).catch(next);
         }
       }
@@ -178,7 +198,7 @@ module.exports = function(app) {
           var user = req.user;
 
           User.devareRequest(req.params.request_id, user._id).then(result => {
-            res.json(result);
+            res.sendJson(result);
           }).catch(next);
         }
       }

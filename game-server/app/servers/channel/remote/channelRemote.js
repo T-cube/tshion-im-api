@@ -28,10 +28,10 @@ prototype.generateChannelId = function(cb) {
   cb(null, channelId);
 };
 
-prototype.bindChannel = function(uid, sid, flag, cb) {
+prototype.bindChannel = function(uid, channelId, sid, flag, cb) {
   // var channelId = Math.round(Math.random() * this.channelNumber + 0.5);
 
-  var [user, channelId] = uid.split('*');
+  var [user] = uid.split('*');
   var channel = this.channelService.getChannel(channelId, flag);
 
 
@@ -40,7 +40,7 @@ prototype.bindChannel = function(uid, sid, flag, cb) {
   loginer[uid] = sid;
   loginMap.set(user, loginer);
 
-  this.userChannelMap.set(uid, channelId);
+  this.userChannelMap.set(user, channelId);
   channel.add(uid, sid);
 
   cb(null, { channel_id: channelId });
@@ -68,9 +68,16 @@ prototype.get = function(channelId, flag) {
   return users;
 };
 
+prototype.getUserChannelId = function(uid, cb) {
+  let [user] = uid.split('*');
+  console.log('getUserChannelId:::::::::',user,this.userChannelMap);
+  let channelId = this.userChannelMap.get(user);
+  cb(null, channelId);
+};
 
-prototype.kickChannel = function(uid, sid, cb) {
-  var [user, channelId] = uid.split('*');
+
+prototype.kickChannel = function(uid, channelId, sid, cb) {
+  var [user] = uid.split('*');
 
   // var channelId = this.userChannelMap.get(user);
   var channel = this.channelService.getChannel(channelId);
@@ -114,10 +121,15 @@ prototype.channelPushMessage = function(channelId, params, cb) {
  * @param {Function} cb
  */
 prototype.channelPushMessageByUid = function(params, target, cb) {
-  var channelId = this.channelMap.get(target);
+  var channelId = this.userChannelMap.get(target);
   var channel = this.channelService.getChannel(channelId);
+  console.log(target, channel, this.userChannelMap);
 
+  if (!channel) {
+    return cb('user offline');
+  }
   var { loginMap } = channel;
+  console.log(target, loginMap);
   var loginer = loginMap.get(target);
 
   var clients = [];

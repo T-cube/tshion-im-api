@@ -9,7 +9,7 @@ module.exports = function(app) {
     File.getFileHash(file.path).then(hash => {
       var filename = file.name || file.filename;
       return File.getStatic({ filename, hash }).then(staticFile => {
-        if (staticFile) return res.json(staticFile);
+        if (staticFile) return res.sendJson(staticFile);
 
         req.files.file.hash = hash;
         next();
