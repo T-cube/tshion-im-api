@@ -1,17 +1,17 @@
 'use strict';
 
-var { getUserInfoCache, getAccessTokenCache, setUserAccessTokenRelation } = require('./cache');
+var {getUserInfoCache, getAccessTokenCache, setUserAccessTokenRelation} = require('./cache');
 
-module.exports = function(app) {
-  const tlf_db = app.tlf_db;
+module.exports = function (app) {
+  const tlf2_db = app.tlf2_db;
   const ObjectID = app.get('ObjectID');
-  const userCollection = tlf_db.collection('user');
-  const accesstokenCollection = tlf_db.collection('oauth.accesstoken');
+
+  // const accesstokenCollection = tlf_db.collection('oauth.accesstoken');//改为redis获取
 
   return {
     getAccessToken(bearerToken, callback) {
       // console.log(bearerToken)
-        // console.log('# getAccessToken (bearerToken: ' + bearerToken + ')');
+      // console.log('# getAccessToken (bearerToken: ' + bearerToken + ')');
       getAccessTokenCache(bearerToken).then(info => {
         // console.log(info);
         if (info) {
@@ -23,32 +23,31 @@ module.exports = function(app) {
           });
         } else {
           // find access is exists
-          return accesstokenCollection.findOne({ access_token: bearerToken })
-            .then(token => {
-              if (!token) {
-                return callback(null, null);
-              }
+          return app.Redis.get(bearerToken).then(uid => {
+            if (!uid) {
+              return callback(null, null);
+            }
 
-              return userCollection.findOne({
-                  _id: token.user_id
-                }, {
-                  _id: 1,
-                  name: 1,
-                  email: 1,
-                  mobile: 1,
-                  avatar: 1,
-                  // 'wechat.openid': 1
-                })
-                .then(user => {
-                  console.log(user)
-                  token.user = user;
-
-                  return setUserAccessTokenRelation(user, token)
-                    .then(() => {
-                      callback(null, token);
-                    });
-                });
-            });
+            return tlf2_db.find("tlf_user", {
+              id: uid
+            }, {
+              _id: 1,
+              name: 1,
+              email: 1,
+              mobile: 1,
+              avatar: 1,
+              // 'wechat.openid': 1
+            })
+              .then(res => {
+                let user = res[0];
+                console.log(user);
+                let token = {user_id: uid, user: user};
+                return setUserAccessTokenRelation(user, token)
+                  .then(() => {
+                    callback(null, token);
+                  });
+              });
+          });
         }
       }).catch(callback);
     },

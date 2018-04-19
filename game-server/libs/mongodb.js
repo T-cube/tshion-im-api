@@ -2,7 +2,7 @@
 const { ObjectID, MongoClient } = require('mongodb');
 
 module.exports = function(config) {
-  let { mongodb, tlf_db } = config;
+  let { mongodb } = config;
   return Promise.all([
     new Promise((resolve, reject) => {
       MongoClient.connect(`mongodb://${mongodb.host || '127.0.0.1'}:${mongodb.port || 27017}/${mongodb.db || 'test'}`, (err, db) => {
@@ -18,11 +18,11 @@ module.exports = function(config) {
         }
       });
     }),
-    new Promise((resolve, reject) => {
-      MongoClient.connect(`mongodb://${tlf_db.host}:${tlf_db.port}/${tlf_db.db}`, (err, db) => {
-        if (err) return reject(err);
-        resolve(db);
-      });
-    })
+    // new Promise((resolve, reject) => {
+    //   MongoClient.connect(`mongodb://${tlf_db.host}:${tlf_db.port}/${tlf_db.db}`, (err, db) => {
+    //     if (err) return reject(err);
+    //     resolve(db);
+    //   });
+    // })
   ]);
 };

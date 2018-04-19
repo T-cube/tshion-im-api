@@ -75,7 +75,7 @@ module.exports = function(app) {
         type: 1,
         status: 1
       }).then(member => {
-        return User.findUser({ _id: member.uid }, { name, avatar }).then(user => {
+        return User.findUser({ id: member.uid }, { name, avatar }).then(user => {
           delete user._id;
           member = Object.assign(member, user);
 
@@ -91,7 +91,7 @@ module.exports = function(app) {
     save() {
       let { group, uid } = this;
       uid = ObjectID(uid);
-      return User.findUser({ _id: uid }, { avatar: 1, name: 1 }).then(user => {
+      return User.findUser({ id: uid }, { avatar: 1, name: 1 }).then(user => {
         delete user._id;
         let query = { group: ObjectID(group), uid: ObjectID(uid) };
         return this._update(query, { $set: Object.assign(this, user) }, { upsert: true });
