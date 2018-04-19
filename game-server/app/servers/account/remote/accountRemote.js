@@ -41,30 +41,19 @@ prototype.login = function(token, cb) {
   });
 };
 
-
-prototype.bindChannel = function(uid, cid, sid, cb) {
-  let self = this;
-  // console.log(self.app.onlineRedis);
-  self.app.onlineRedis.get(uid).then(lastcid => {
-    if (lastcid && (lastcid !== cid)) {
-      // console.log('lastcid::::::::::::', lastcid, self.app.get('serverId'));
-      // console.log(console.log(Object.keys(self.app.settings)));
-
-      self.app.rpc.chat.chatRemote.kick(null,
-        `${uid}*${lastcid}`,
-        sid,
-        function() {
-          // console.log('error:::::::');
-          self.app.onlineRedis.set(uid, cid).then(status => {
-            cb(null, status);
-          }).catch(e => {
-            cb(e);
-            // console.log('error:::::::', e);
-          });
-        });
-    }
-  });
+prototype.getChannelId = function(uid, cb) {
+  this.app.onlineRedis.get(uid).then(lastcid => {
+    cb(null, lastcid);
+  }).catch(cb);
 };
+
+prototype.setChannelId = function(uid, cid, cb) {
+  this.app.onlineRedis.set(uid, cid).then(status => {
+    console.log('status:::::::::', status, cid, uid);
+    cb(null, status);
+  }).catch(cb);
+};
+
 
 prototype.unbindChannel = function(uid, cb) {
   this.app.onlineRedis.del(uid).then(status => {

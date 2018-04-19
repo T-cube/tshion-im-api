@@ -33,7 +33,7 @@ module.exports = function(app) {
      */
     saveOffline() {
       let self = this;
-      return OfflineMessageCollection.insertOne(self);
+      return OfflineMessageCollection.insertOne(self.msg);
     }
 
     /**

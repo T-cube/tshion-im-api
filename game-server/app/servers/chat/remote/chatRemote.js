@@ -23,7 +23,7 @@ let prototype = ChatRemote.prototype;
  */
 prototype.add = function(uid, sid, cid, flag, cb) {
 
-  this.app.rpc.channel.channelRemote.bindChannel(null, uid, sid, flag, function(err, result) {
+  this.app.rpc.channel.channelRemote.bindChannel(null, uid, cid, sid, flag, function(err, result) {
     cb(null, result);
   });
 
@@ -93,9 +93,7 @@ prototype.get = function(cid, flag) {
  *
  */
 prototype.kick = function(uid, sid, cb) {
-  console.log('channel error:::::::::', uid, sid);
   this.app.rpc.channel.channelRemote.kickChannel(null, uid, sid, function(err) {
-    console.log('channel error2:::::::::', uid, sid);
     cb && cb();
   });
   // var param = {

@@ -25,7 +25,9 @@ module.exports = function(app) {
       'offline/:target': {
         docs: {
           name: '获取离线消息统计',
-          params: [{ param: 'target', type: 'String' }]
+          params: [
+            { param: 'target', type: 'String' }
+          ]
         },
         method(req, res, next) {
           Message.offlineMessageCount(req.params).then(counts => {
@@ -36,7 +38,10 @@ module.exports = function(app) {
       ':roomid/newly': {
         docs: {
           name: '获取最新的聊天记录',
-          params: [{ param: 'roomid', type: 'String' }, { query: 'index', type: 'String' }],
+          params: [
+            { param: 'roomid', type: 'String' },
+            { query: 'index', type: 'String' }
+          ],
         },
         method(req, res, next) {
           Message.getNewLyList(Object.assign(req.params, req.query)).then(result => {
@@ -50,10 +55,18 @@ module.exports = function(app) {
       'offline/:roomid/:target': {
         des: {
           name: '删除离线消息',
-          params: [{ param: 'roomid', type: 'String' }, { param: 'target', type: 'String' }]
+          params: [
+            { param: 'roomid', type: 'String' },
+            { param: 'target', type: 'String' }
+          ]
         },
         method(req, res, next) {
           // Message.offlineMessageCount()
+          var user = req.user;
+          var { target } = req.params;
+          if (user._id.toHexString() == target) {
+            return next(req.apiError(400, 'can not delete self offline message in room'));
+          }
           Message.deleteOfflineMessage(req.params).then(result => {
             // console.log(result, 'dddsdfsdfsdfsdfsdf')
             res.sendJson({ num: result });
