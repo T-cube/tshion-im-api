@@ -58,7 +58,7 @@ module.exports = function (app) {
          * @param {*} param0
          * @param {String} param0.user 发起查找的用户
          */
-        static find({name, mobile, email, keyword, user}) {
+        static find({name, mobile, email, keyword, user_id}) {
             var query = {};
             var $or = [];
             if (name) {
@@ -87,7 +87,7 @@ module.exports = function (app) {
             }
             if (!Object.getOwnPropertyNames(query).length) return Promise.resolve([]);
 
-            return friendCollection.findOne({user: ObjectID(user)}).then(doc => {
+            return friendCollection.findOne({user: user_id}).then(doc => {
                 let friends = [];
                 if (doc) {
                     friends = doc.friends;
@@ -97,7 +97,7 @@ module.exports = function (app) {
                     query['$nor'] = friends.map(_id => ({_id}));
                 }
 
-                query['$nor'].push({_id: ObjectID(user)});
+                query['$nor'].push({id: user_id});
                 return tlf2_db.find('tlf_user',query, {avatar: 1, email: 1, mobile: 1, name: 1, sex: 1});
             });
         }

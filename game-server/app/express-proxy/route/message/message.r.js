@@ -64,7 +64,7 @@ module.exports = function(app) {
           // Message.offlineMessageCount()
           var user = req.user;
           var { target } = req.params;
-          if (user._id.toHexString() == target) {
+          if (user.id == target) {
             return next(req.apiError(400, 'can not delete self offline message in room'));
           }
           Message.deleteOfflineMessage(req.params).then(result => {

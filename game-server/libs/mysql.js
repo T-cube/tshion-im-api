@@ -57,14 +57,6 @@ class Mysql {
 
   };
 
-  strChang(obj) {
-    if (typeof obj === 'string') {
-      return "'" + obj + "'"
-    }
-    else {
-      return obj;
-    }
-  };
 
   /**
    * 生成sql查询语句
@@ -92,7 +84,7 @@ class Mysql {
 
     let queryKeys = Object.keys(query);
     let querySql;
-
+    let valueArr = [];//参数统一放入数组，防止sql注入
     if (queryKeys.length === 0) {
       querySql = '';
     }
@@ -108,19 +100,15 @@ class Mysql {
               switch (key2) {
                 case '$in':
                   let arr = value[key2];
-                  arr.forEach(index => {
-                    if (typeof arr[index] === 'string') {
-                      arr[index] = this.strChang(arr[index]);
-                    }
-                  });
-                  queryArr.push(key + ' in (' + arr.join(',') + ')');
+                  valueArr.push(...arr);
+                  queryArr.push(key + ' in (' + arr.map(m =>{return '?'}).join(',') + ')');
                   break;
               }
             });
             break;
           default:
-            value = this.strChang(value);
-            queryArr.push(key + ' = ' + value);
+            valueArr.push(value);
+            queryArr.push(key + ' = ?');
             break;
         }
       });
@@ -134,7 +122,7 @@ class Mysql {
     }
     let sql = 'select ' + fieldSql + ' from ' + tableName + ' ' + querySql + optSql + ';';
     console.log('sql : ' + sql);
-    return this.query(sql, []);
+    return this.query(sql, valueArr);
   };
 
 }

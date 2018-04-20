@@ -13,11 +13,14 @@ const config = require('./config/config');
 
 const co = require('co');
 co(function*() {
-  const [{ ObjectID, db }, tlf_db] = yield require('./libs/mongodb')(config);
+  const [{ ObjectID, db }] = yield require('./libs/mongodb')(config);
 
   app.set('ObjectID', ObjectID, true);
   app.set('db', db, true);
-  app.set('tlf_db', tlf_db, true);
+
+  const mysql = require('./libs/mysql');
+  const tlf2_db = new mysql(config);
+  app.set('tlf2_db', tlf2_db, true);
 
   require('./libs/redis')(app, config.redis);
   app.set('roomMap', new Map(), true);
@@ -43,16 +46,20 @@ co(function*() {
 
   app.set('errorHandler', require('./libs/error.handler'));
 
+  if (app.getServerType() === 'master') {
+    console.log(`;;;;;;;;; evn === ${app.env}`);
+  }
+
   // add express server component
   if (app.getServerType() == 'express') {
     var exp = require('./app/components/expressproxy');
     app.load('expressproxy', exp(app));
   }
 
-  if (app.getServerType() == 'rpc') {
-    var rpc = require('./app/components/rpcproxy');
-    app.load('rpc', rpc(app, config.rpc));
-  }
+  // if (app.getServerType() == 'rpc') {
+  //   var rpc = require('./app/components/rpcproxy');
+  //   app.load('rpc', rpc(app, config.rpc));
+  // }
 
   // start app
   app.start(require('../shared/fixChannelMap')(app));

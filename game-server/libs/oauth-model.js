@@ -17,7 +17,6 @@ module.exports = function (app) {
         if (info) {
           return getUserInfoCache(info.user_id).then(user => {
             // console.log(user);
-            user._id = ObjectID(user._id);
             info.user = user;
             return callback(null, info);
           });
@@ -31,22 +30,28 @@ module.exports = function (app) {
             return tlf2_db.find('tlf_user', {
               id: uid
             }, {
-              _id: 1,
+              id: 1,
               name: 1,
               email: 1,
               mobile: 1,
               avatar: 1,
               // 'wechat.openid': 1
             })
-              .then(res => {
-                let user = res[0];
-                console.log(user);
-                let token = {user_id: uid, user: user};
-                return setUserAccessTokenRelation(user, token)
-                  .then(() => {
-                    callback(null, token);
-                  });
+            .then(res => {
+              let user = res[0];
+              console.log(user);
+              //expires 当前后台无法获取token过期时间，采取当前时间加一天
+              let token = {
+                user_id: uid,
+                user: user,
+                expires: new Date(Date.now() + 24 * 3600 * 1000),
+                access_token: bearerToken
+              };
+              return setUserAccessTokenRelation(user, token)
+              .then(() => {
+                callback(null, token);
               });
+            });
           });
         }
       }).catch(callback);

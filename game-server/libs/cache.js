@@ -22,7 +22,7 @@ var exports = module.exports;
  * @returns {Promise}
  */
 function setUserInfoCache(userinfo) {
-  let user_key = `${PREFIX.USER_INFO}${userinfo._id.toHexString()}`;
+  let user_key = `${PREFIX.USER_INFO}${userinfo.id}`;
 
   return redis.hmset(user_key, userinfo);
 };
@@ -33,7 +33,7 @@ function setUserInfoCache(userinfo) {
  * @returns {Promise}
  */
 function updateUserInfoCache(info) {
-  let user_key = `${PREFIX.USER_INFO}${info._id.toHexString()}`;
+  let user_key = `${PREFIX.USER_INFO}${info.id}`;
 
   return redis.hmset(user_key, info);
 };
@@ -44,7 +44,7 @@ function updateUserInfoCache(info) {
  * @returns {Promise}
  */
 function getUserInfoCache(user_id) {
-  let user_key = `${PREFIX.USER_INFO}${(typeof user_id =='string')? user_id:user_id.toHexString()}`;
+  let user_key = `${PREFIX.USER_INFO}${user_id}`;
 
   return redis.hmget(user_key);
 };
@@ -77,7 +77,7 @@ function getAccessTokenCache(access_token) {
  * @returns {Promise}
  */
 function setUserAccessTokenRelation(user, token) {
-  let user_token = `${PREFIX.USER_ACCESS}${user._id.toHexString()}`;
+  let user_token = `${PREFIX.USER_ACCESS}${user.id}`;
   let key = `${PREFIX.ACCESS_TOKEN}${token.access_token}`;
 
   return redis.get(user_token).then(preKey => {

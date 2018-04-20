@@ -178,5 +178,5 @@ module.exports = Object.assign(_, {
         delete object[key];
     });
     return object;
-  },
+  }
 });

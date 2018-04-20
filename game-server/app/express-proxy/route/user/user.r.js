@@ -29,7 +29,7 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           // console.log('/user',user);
-          User.find(Object.assign(req.query, { user: user._id })).then(users => {
+          User.find(Object.assign(req.query, { user: user.id })).then(users => {
             res.sendJson(users);
           }).catch(next);
         }

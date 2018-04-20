@@ -267,7 +267,7 @@ prototype.send = function(msg, session, next) {
           });
         } else {
           next(null, { route: param.route, msg: param });
-        };
+        }
       });
 
       self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
