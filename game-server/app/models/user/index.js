@@ -292,7 +292,7 @@ module.exports = function(app) {
         let promise_request = User._updateFriendRequest({ _id: ObjectID(request_id) }, { status: STATUS_FRIEND_REQUEST_AGREE });
 
         return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
-          return { result: 'ok' };
+          return { result: 'ok', from: request.from, receiver: request.receiver };
         });
       });
     }

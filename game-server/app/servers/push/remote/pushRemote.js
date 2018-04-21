@@ -10,6 +10,13 @@ const PushRemote = function(app) {
 };
 const prototype = PushRemote.prototype;
 
+prototype.notifyClient = function(route, msg, target, cb) {
+  var param = {route, msg};
+
+  this.app.rpc.channel.channelRemote.channelPushMessageByUid(null, param, target, cb);
+};
+
+
 prototype.pushMessageOne = function(msg, cb) {
   if (!msg.content) {
     let content;

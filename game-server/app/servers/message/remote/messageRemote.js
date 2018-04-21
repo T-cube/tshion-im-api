@@ -16,8 +16,7 @@ prototype.saveMessage = function(msg, cb) {
   let self = this;
 
   new this.Message(msg).save().then(result => {
-    msg._id = result.insertedId;
-    cb(null, msg);
+    cb(null, result);
   }).catch(e => {
     console.error(e);
     cb(e);
@@ -60,10 +59,10 @@ prototype.saveGroupMessage = function(msg, offlineMembers = [], cb) {
   });
 };
 
-prototype.getLastMessage = function(rooms, cb) {
+prototype.getLastMessage = function(user, rooms, cb) {
   let self = this;
 
-  self.Message.getLastMessage(rooms).then(results => {
+  self.Message.getLastMessage(rooms, user).then(results => {
     cb(null, results);
   }).catch(e => {
     console.error(e);

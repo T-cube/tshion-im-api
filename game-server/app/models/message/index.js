@@ -15,7 +15,11 @@ module.exports = function(app) {
      * 存储消息
      */
     save() {
-      return MessageCollection.insertOne(this.msg);
+      let message = this.msg;
+      return MessageCollection.insertOne(message).then(res=>{
+        message._id = res.insertedId;
+        return message;
+      });
     }
 
     /**
@@ -55,8 +59,9 @@ module.exports = function(app) {
         .limit(pagesize).toArray().then(docs => {
           // console.log(docs);
           return {
-            list: docs.reverse(),
-            last: docs.length && docs[0].timestamp || 0,
+            list: docs,
+            // list: docs.reverse(),
+            last: docs.length && docs[docs.length-1].timestamp || 0,
           };
         })
       ]).then(results => {
@@ -91,10 +96,12 @@ module.exports = function(app) {
         },
         function(curr, result) { result.count++; }, true);
     };
-    static getLastMessage(rooms) {
+
+    static getLastMessage(rooms, self) {
       return Promise.all(rooms.map(room => MessageCollection.find({ roomid: room.roomid }).limit(1).sort({ timestamp: -1 }).toArray())).then(results => {
         let r = results.map((messages, index) => {
-          return { room: rooms[index], message: messages[0] };
+          let room = rooms[index];
+          return { room, message: messages[0], target_id:  room.members.find(m => m != self)};
         });
         return r;
       });
