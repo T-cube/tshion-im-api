@@ -22,7 +22,8 @@ module.exports = function (app) {
           });
         } else {
           // find access is exists
-          return app.Redis.get(bearerToken).then(uid => {
+          Promise.all([app.Redis.get(bearerToken), app.Redis.pttl(bearerToken)]).then(res => {
+            let [uid, leftTimes] = res;
             if (!uid) {
               return callback(null, null);
             }
@@ -37,21 +38,20 @@ module.exports = function (app) {
               avatar: 1,
               // 'wechat.openid': 1
             })
-            .then(res => {
-              let user = res[0];
-              console.log(user);
-              //expires 当前后台无法获取token过期时间，采取当前时间加一天
-              let token = {
-                user_id: uid,
-                user: user,
-                expires: new Date(Date.now() + 24 * 3600 * 1000),
-                access_token: bearerToken
-              };
-              return setUserAccessTokenRelation(user, token)
-              .then(() => {
-                callback(null, token);
+              .then(res => {
+                let user = res[0];
+                console.log(user);
+                let token = {
+                  user_id: uid,
+                  user: user,
+                  expires: new Date(Date.now() + leftTimes),
+                  access_token: bearerToken
+                };
+                return setUserAccessTokenRelation(user, token)
+                  .then(() => {
+                    callback(null, token);
+                  });
               });
-            });
           });
         }
       }).catch(callback);

@@ -57,6 +57,32 @@ class Mysql {
 
   };
 
+  dealItem(key, itme,) {
+    let queryItem = [], values = [];
+    if (typeof itme === 'object') {
+      let valueKeys = Object.keys(itme);
+      valueKeys.forEach(key2 => {
+        switch (key2) {
+          case '$in':
+            let arr = itme[key2];
+            values.push(...arr);
+            queryItem.push(key + ' in (' + arr.map(m => {
+              return '?'
+            }).join(',') + ')');
+            break;
+          case '$regex':
+            values.push();
+            queryItem.push(key + ' regexp ' + itme[key2]);
+            break;
+        }
+      });
+    }
+    else {
+      values.push(itme);
+      queryItem.push(key + ' = ?');
+    }
+    return {queryItem: queryItem.join(' and '), values: values};
+  };
 
   /**
    * 生成sql查询语句
@@ -92,23 +118,33 @@ class Mysql {
       querySql = ' where ';
       let queryArr = [];
       queryKeys.forEach(key => {
-        let value = query[key];
-        switch (typeof value) {
-          case 'object':
-            let valueKeys = Object.keys(value);
-            valueKeys.forEach(key2 => {
-              switch (key2) {
-                case '$in':
-                  let arr = value[key2];
-                  valueArr.push(...arr);
-                  queryArr.push(key + ' in (' + arr.map(m =>{return '?'}).join(',') + ')');
-                  break;
-              }
+        switch (key) {
+          case '$or':
+            let $orQuery = [];
+            query[key].forEach(item => {
+              Object.keys(item).forEach(key2 => {
+                let {queryItem, values} = this.dealItem(key2, item[key2]);
+                valueArr.push(...values);
+                $orQuery.push(queryItem);
+              });
             });
+            queryArr.push('(' + $orQuery.join(' or ') + ')');
+            break;
+          case '$nor':
+            let $norQuery = [];
+            query[key].forEach(item => {
+              Object.keys(item).forEach(key2 => {
+                let {queryItem, values} = this.dealItem(key2, item[key2]);
+                valueArr.push(...values);
+                $norQuery.push(queryItem);
+              });
+            });
+            queryArr.push('!(' + $norQuery.join(' or ') + ')');
             break;
           default:
-            valueArr.push(value);
-            queryArr.push(key + ' = ?');
+            let {queryItem, values} = this.dealItem(key, query[key]);
+            valueArr.push(...values);
+            queryArr.push(queryItem);
             break;
         }
       });
