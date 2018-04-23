@@ -53,7 +53,8 @@ co(function*() {
   // add express server component
   if (app.getServerType() == 'express') {
     var exp = require('./app/components/expressproxy');
-    app.load('expressproxy', exp(app));
+    exp(app);
+    // app.load('expressproxy', exp(app));
   }
 
   // if (app.getServerType() == 'rpc') {

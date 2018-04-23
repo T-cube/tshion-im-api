@@ -24,6 +24,7 @@ module.exports = function (app) {
           // find access is exists
           Promise.all([app.Redis.get(bearerToken), app.Redis.pttl(bearerToken)]).then(res => {
             let [uid, leftTimes] = res;
+            uid = parseInt(uid);
             if (!uid) {
               return callback(null, null);
             }

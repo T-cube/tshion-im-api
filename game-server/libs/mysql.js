@@ -41,6 +41,7 @@ class Mysql {
       this._pool.acquire((err, client) => {
         if (!!err) {
           console.error('[sqlqueryErr] ' + err.stack);
+          reject(err);
           return;
         }
         client.query(sql, args, (err, res) => {
@@ -71,8 +72,8 @@ class Mysql {
             }).join(',') + ')');
             break;
           case '$regex':
-            values.push();
-            queryItem.push(key + ' regexp ' + itme[key2]);
+            values.push(itme[key2]);
+            queryItem.push(key + ' regexp ' + '?');
             break;
         }
       });
@@ -128,7 +129,9 @@ class Mysql {
                 $orQuery.push(queryItem);
               });
             });
-            queryArr.push('(' + $orQuery.join(' or ') + ')');
+            if($orQuery.length > 0){
+              queryArr.push('(' + $orQuery.join(' or ') + ')');
+            }
             break;
           case '$nor':
             let $norQuery = [];
@@ -139,7 +142,9 @@ class Mysql {
                 $norQuery.push(queryItem);
               });
             });
-            queryArr.push('!(' + $norQuery.join(' or ') + ')');
+            if($norQuery.length > 0){
+              queryArr.push('!(' + $norQuery.join(' or ') + ')');
+            }
             break;
           default:
             let {queryItem, values} = this.dealItem(key, query[key]);
