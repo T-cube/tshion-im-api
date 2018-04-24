@@ -5,6 +5,36 @@ module.exports = function(app) {
 
   return {
     get: {
+      'lastList': {
+        docs: {
+          name: '获取玩家最后一条聊天记录列表',
+          params: []
+        },
+        method(req, res, next) {
+          // console.log('123456789123456789', req.query);
+          var user_id = req.user.id;
+          Message.lastList(user_id).then(result => {
+            // console.log(123,result.list.length)
+            let lastListMap = {};
+            let lastList = [];
+            for (let i = 0; i < result.length; i++) {
+              if(user_id === result[i].from){
+                if(!lastListMap[result[i].target]){
+                  lastListMap[result[i].target] = result[i];
+                  lastList.push(result[i]);
+                }
+              }
+              else {
+                if(!lastListMap[result[i].from]){
+                  lastListMap[result[i].from] = result[i];
+                  lastList.push(result[i]);
+                }
+              }
+            }
+            res.sendJson(lastList);
+          }).catch(next);
+        }
+      },
       ':roomid': {
         docs: {
           name: '获取聊天日志',

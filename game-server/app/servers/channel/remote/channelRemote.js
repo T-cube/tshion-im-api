@@ -145,3 +145,14 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
   this.channelService.pushMessageByUids(params, clients);
   cb();
 };
+
+/**
+ * 获取玩家是否在线
+ * @param target 玩家id
+ * @param cb
+ */
+prototype.isOnline = function(target, cb) {
+  var channelId = this.userChannelMap.get(target);
+  var channel = this.channelService.getChannel(channelId);
+  cb(!!channel);
+};
