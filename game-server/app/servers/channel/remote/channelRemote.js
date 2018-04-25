@@ -132,6 +132,8 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
   console.log(target, loginMap);
   var loginer = loginMap.get(target);
 
+  console.log('loginer::::::::::,', loginer);
+
   var clients = [];
   for (let uid in loginer) {
     let sid = loginer[uid];

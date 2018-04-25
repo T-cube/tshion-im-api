@@ -141,7 +141,11 @@ module.exports = function(app) {
           User.sendRequest(Object.assign(req.body, { from: user.id })).then(request => {
             res.sendJson(request);
             // var { from, user_id: target } = req.body;
-
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', { request: request._id, from: user._id.toHexString(), type: request.update_at ? 'update' : 'new' }, user_id, function(err) {
+              if (err) {
+                console.error('notify error:', err);
+              }
+            });
           }).catch(next);
         }
       },
@@ -164,6 +168,17 @@ module.exports = function(app) {
           var user = req.user;
           User.handleFriendRequest(status, request_id, user.id).then(result => {
             res.sendJson(result);
+
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
+              request: request_id,
+              receiver: result.receiver,
+              from: result.from,
+              type: status
+            }, req.from, function(err){
+              if(err) {
+                console.error('resolve notify error:', err);
+              }
+            });
           }).catch(next);
         }
       }

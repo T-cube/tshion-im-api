@@ -1,0 +1,86 @@
+html
+  head
+    meta(charset='utf-8')
+    title='API接口信息'
+
+    link(href='css/apis.css', rel='stylesheet')
+    link(href='js/lib/toastr/toastr.min.css' rel='stylesheet')
+    link(href='css/icon-font.css' rel='stylesheet')
+
+    script(src='js/lib/jquery-3.1.1.min.js')
+    script(src='js/lib/toastr/toastr.min.js')
+    script(src='js/lib/clipboard.min.js')
+    script(src='js/apis.js')
+  body
+    //- button#download='下载图片'
+
+    mixin eachApi(api)
+      div.apis
+        each v,k in api
+          if /^[A-Z|\_]+$/.test(k)
+            a.link(href=`#${v.name}`)=v.name
+          else
+            p.ftitle=k
+            if typeof v == 'object'
+              +eachApi(v)
+
+    mixin eachJson(obj)
+      each val,key in obj
+        if typeof val=='object' && key != 'api' && key != 'oauth'
+          div.box
+            p.title=key
+            +eachApi(val)
+        //- else
+          +eachJson(val)
+
+    div#go_top(class='icon-arrow-up go', title='返回顶部', )
+    div.body
+
+      div.total
+        p=`api统计：${apis.length}个`
+
+        //- +eachJson(json)
+
+        //- div.links
+        //-   each item in apis
+        //-     a.link(href=`#${(item.name)}`)=item.name
+
+      each item in apis
+        div.item
+          a.titlebox(id=item.name, data-clipboard-action='copy', data-clipboard-text=`http://192.168.1.18:2000/apis#${encodeURIComponent(item.name)}`)
+            h3.title=`${item.name} (${item.type.toUpperCase()})`
+          p.url
+            label='url(点击复制): '
+            i.icon-link=' '
+            label.btn(data-clipboard-action='copy', data-clipboard-text=item.url)=item.url
+          if item.permission
+            p=`权限: ${item.permission}`
+          if item.api_name
+            p=`name: ${item.api_name}`
+          if item.params
+            if item.params.length
+              table.params
+                thead
+                  td='类型'
+                  td='参数'
+                  td='参数类型'
+                each param in item.params
+                  tr
+                    td=(param.key&&'key')||(param.param&&'param')||(param.query&&'query')
+                    td=param.key||param.param||param.query
+                    td=`${param.type} ${param.tail&&param.tail||''} ${param.values&&JSON.stringify(param.values).replace(/(^\[|\]$)/g,'')||''}`
+
+          if item.send
+            div.example
+              label.light='发送示例: '
+              label=JSON.stringify(item.send)
+          if item.returns
+            div.example
+              label.light='返回示例: '
+              label=JSON.stringify(item.returns)
+
+
+      //- div.icons
+      //-   h3.title='点击图标复制对应class字符串到剪贴板'
+      //-   each icon in icons
+      //-     i(class=`${icon} icon`, title=icon, data-clipboard-action='copy',data-clipboard-text=icon)

@@ -34,6 +34,7 @@
     "pomelo": "2.2.x",
     "promise-redis": "^0.0.5",
     "protobufjs": "^3.8.2",
+    "pug": "^2.0.3",
     "redis": "^2.6.5",
     "request": "^2.85.0",
     "schema-object": "^4.0.11",

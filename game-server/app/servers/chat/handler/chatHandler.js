@@ -22,6 +22,7 @@ prototype.joinRoom = function(msg, session, next) {
     route: 'joinRoom',
     from: uid,
   };
+  console.log(msg);
   console.log(target);
   self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(fcid) {
     self.app.rpc.channel.channelRemote.getUserChannelId(session, target, function(err, channelId) {
@@ -258,7 +259,7 @@ prototype.send = function(msg, session, next) {
 
       result.from_name = from_name;
       param = Object.assign(param, result);
-
+      console.log('jelll;;;;;;;;',param,result);
       self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
         if (err == 'user offline') {
           self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
