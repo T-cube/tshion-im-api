@@ -22,6 +22,7 @@ prototype.joinRoom = function(msg, session, next) {
     route: 'joinRoom',
     from: uid,
   };
+  console.log(msg);
   console.log(target);
   self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(fcid) {
     self.app.rpc.channel.channelRemote.getUserChannelId(session, target, function(err, channelId) {

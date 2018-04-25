@@ -1,4 +1,6 @@
 'use strict';
+const path = require('path');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const oauthServer = require('oauth2-server');
@@ -15,6 +17,15 @@ var ExpressProxy = function(app, opts) {
   this.opts = opts;
   this.exp = express();
   this.app = app;
+
+  // set static file rootP
+  const views = path.join(__dirname, '../express-proxy/views');
+  this.exp.use(express.static(views));
+  // set views root
+  this.exp.set('views', views);
+  // set static html views engine
+  this.exp.set('view engine', 'pug');
+  this.exp.locals.pretty = true;
 
   // body-parser
   this.exp.use(bodyParser.urlencoded({
