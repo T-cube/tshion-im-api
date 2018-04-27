@@ -73,9 +73,16 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          let { members } = req.body;
+          let body = req.body;
+          let user = req.user;
+
+          let { members = [] } = body;
+          body.creator = user._id;
+
+          // if (!~members.indexOf(user._id.toHexString())) members.push(user._id);
+
           console.log('body:', req.body);
-          new Group(req.body).save().then(newGroup => {
+          new Group(body).save(members).then(newGroup => {
             var group = newGroup._id;
 
             return Promise.all([
@@ -85,7 +92,7 @@ module.exports = function(app) {
               res.sendJson(newGroup);
             });
           }).catch(([errSetting, memberError]) => {
-            console.log(memberError,errSetting);
+            console.log(memberError, errSetting);
             next(req.apiError(400, errSetting || memberError));
           });
         }
@@ -103,12 +110,17 @@ module.exports = function(app) {
         method(req, res, next) {
           let { members } = req.body;
           let { group_id } = req.params;
+          let user = req.user;
 
-          if (members instanceof String) members = [members];
+          Group.findGroupByIdAndOwner(group_id, user._id).then(group => {
+            if (!group) return next(req.apiError(400, 'cant add member by not a owner'));
 
-          Member.addMany(members, group).then(result => {
-            res.sendJson(result);
-          }).catch(next);
+            if (members instanceof String) members = [members];
+
+            Member.addMany(members, group_id).then(result => {
+              res.sendJson(result);
+            }).catch(next);
+          });
         }
       }
     },
@@ -124,12 +136,17 @@ module.exports = function(app) {
         method(req, res, next) {
           let { members } = req.body;
           let { group_id } = req.params;
+          let user = req.user;
 
-          if (members instanceof String) members = [members];
+          Group.findGroupByIdAndOwner(group_id, user._id).then(group => {
+            if (!group) return next(req.apiError(400, 'cant remove member by not a owner'));
 
-          Member.deleteMembers(members).then(result => {
-            res.sendJson(result);
-          }).catch(next);
+            if (members instanceof String) members = [members];
+
+            Member.deleteMembers(members).then(result => {
+              res.sendJson(result);
+            }).catch(next);
+          });
         }
       },
       'quit/:group_id': {

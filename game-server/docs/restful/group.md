@@ -5,7 +5,7 @@ POST /api/group
 
 param|name|type|des
 -----|----|----|---
-key|creator|String|group creator _id
+key|creator|String|*discard*, group creator _id
 key|name|String|group name
 key|members|Array|member user_id array, max 20 once, max 200 total
 

@@ -21,16 +21,20 @@ module.exports = function(app) {
       _.extend({ name, creator, owner: creator }, this, schema);
     }
 
-    save() {
+    save(members) {
       // console.log(this.creator);
       if (!this.name) return Promise.reject('name cant be null');
-      // if (!this.members || this.members.length < 2) return Promise.reject('group members must be more then 2 people');
-
+      if (!members || members.length < 2) return Promise.reject('group members must be more then 2 people');
+      console.log(this);
       return groupCollection.insertOne(this).then(result => {
         this._id = result.insertedId;
 
         return new Member({ group: this._id, uid: this.creator, type: 'owner' }).save().then(() => this);
       });
+    }
+
+    static findGroupByIdAndOwner(_id, owner) {
+      return groupCollection.findOne({_id: ObjectID(_id), owner: ObjectID(owner)});
     }
 
     /**
