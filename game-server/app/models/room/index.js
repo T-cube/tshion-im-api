@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 
 module.exports = function(app) {
   const _ = require('../../../libs/util'),
@@ -27,6 +28,12 @@ module.exports = function(app) {
           return self;
         });
       });
+    }
+
+    static createRoomInfo() {
+      const members = Array.from(arguments);
+      const roomid = crypto.createHash('sha1').update(members.join('')).digest('hex');
+      return {roomid, members};
     }
 
     static upgradeActive(room) {

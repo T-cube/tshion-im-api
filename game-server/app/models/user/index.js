@@ -3,6 +3,8 @@ const _ = require('../../../libs/util');
 const FriendInfoSchema = require('./friend-info');
 
 module.exports = function(app) {
+  const Room = require('../room')(app);
+
   const ObjectID = app.get('ObjectID');
 
   const tlf_db = app.tlf_db;
@@ -291,8 +293,12 @@ module.exports = function(app) {
 
         let promise_request = User._updateFriendRequest({ _id: ObjectID(request_id) }, { status: STATUS_FRIEND_REQUEST_AGREE });
 
-        return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
-          return { result: 'ok', from: request.from, receiver: request.receiver };
+        const roomInfo = Room.createRoomInfo()
+
+        return new Room().save().then(()=>{
+          return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
+            return { result: 'ok', from: request.from, receiver: request.receiver };
+          });
         });
       });
     }
@@ -306,7 +312,12 @@ module.exports = function(app) {
      */
     static handleFriendRequest(status, request_id, receiver) {
       if (status == 'reject') return User._rejectFriendRequest(request_id, receiver);
-      if (status == 'agree') return User._agreeFriendRequest(request_id, receiver);
+      if (status == 'agree') {
+        return User._agreeFriendRequest(request_id, receiver).then(result => {
+
+          return result;
+        });
+      }
       return Promise.reject('');
     }
 
@@ -362,8 +373,18 @@ module.exports = function(app) {
     static getGroupFriendsInfo(group_id, user) {
       return friendGroupCollection.findOne({ _id: ObjectID(group_id), user: ObjectID(user) }).then(result => {
         if (!result) return [];
-
-        return User._getFriendsInfo(result.members);
+        return User._getFriendsInfo(result.members).then(members => {
+          const uid = user.toString();
+          console.log(uid)
+          return Promise.all(members.map(member => {
+            return Room.findRoom({members: {$all: [member._id.toHexString(), uid]}}).then(room => {
+              if(room) {
+                member.roomid = room.roomid;
+              }
+              return member;
+            });
+          }));
+        });
       });
     }
 
@@ -372,8 +393,8 @@ module.exports = function(app) {
      * @param {Array} ids
      * @returns {Promise}
      */
-    static _getFriendsInfo(ids){
-      return User._getUserInfoByIds(ids).then(users=>{
+    static _getFriendsInfo(ids) {
+      return User._getUserInfoByIds(ids).then(users => {
         let query = users.map(member => member._id);
 
         return friendInfoCollection.find({ friend: { $in: query } }, {
