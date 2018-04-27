@@ -4,13 +4,13 @@ const SchemaObject = require('schema-object');
 
 const MessageSchema = new SchemaObject({
   content: String,
-  from: String,
-  target: String,
+  from: {type: String, required: true},
+  target: {type: String, required: true},
   roomid: String,
   route: String,
   group: String,
-  timestamp: { type: Number, default: () => +new Date },
-  type: { type: String, default: 'text', enum: ['text', 'audio', 'video', 'file', 'image', 'link'] },
+  timestamp: {type: Number, default: () => +new Date},
+  type: {type: String, default: 'text', enum: ['text', 'audio', 'video', 'file', 'image', 'link']},
   audio: String,
   file: String,
   image: String,
@@ -18,6 +18,6 @@ const MessageSchema = new SchemaObject({
   duration: Number
 });
 
-module.exports = function(msg) {
+module.exports = function (msg) {
   return new MessageSchema(msg).toObject();
 };

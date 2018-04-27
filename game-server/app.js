@@ -46,9 +46,6 @@ co(function*() {
 
   app.set('errorHandler', require('./libs/error.handler'));
 
-  if (app.getServerType() === 'master') {
-    console.log(`;;;;;;;;; evn === ${app.env}`);
-  }
 
   // add express server component
   if (app.getServerType() == 'express') {

@@ -301,6 +301,10 @@ prototype.saveOfflineMessage = function(msg, session, next) {
   }
 };
 
-prototype.checkOnline = function(msg, session, next) {
-  next({ code: 200 });
+prototype.checkOnline = function (msg, session, next) {
+  let {uid} = msg;
+  this.app.rpc.channel.channelRemote.isOnline(session,uid, function (res) {
+    next({code: 200, online: res});
+  });
+
 };

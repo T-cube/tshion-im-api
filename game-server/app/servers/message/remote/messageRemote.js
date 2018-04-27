@@ -1,21 +1,22 @@
 'use strict';
-module.exports = function(app) {
+module.exports = function (app) {
   return new MessageRemote(app);
 };
 
-var MessageRemote = function(app) {
+var MessageRemote = function (app) {
   this.app = app;
   this.channelService = app.get('channelService');
   this.Message = require('../../../models/message')(app);
-
+  this.Chat = require('../../../models/chat')(app);
 };
 
 const prototype = MessageRemote.prototype;
 
-prototype.saveMessage = function(msg, cb) {
+prototype.saveMessage = function (msg, cb) {
   let self = this;
 
   new this.Message(msg).save().then(result => {
+    this.Chat.insertOrUpdate(msg);
     cb(null, result);
   }).catch(e => {
     console.error(e);
@@ -23,7 +24,7 @@ prototype.saveMessage = function(msg, cb) {
   });
 };
 
-prototype.saveOfflineMessage = function(msg, cb) {
+prototype.saveOfflineMessage = function (msg, cb) {
   new this.Message(msg).saveOffline().then(result => {
     cb(null, result);
   }).catch(e => {
@@ -32,8 +33,8 @@ prototype.saveOfflineMessage = function(msg, cb) {
   });
 };
 
-prototype.getOfflineMessage = function(target, cb) {
-  this.Message.offlineMessageCount({ target }).then(result => {
+prototype.getOfflineMessage = function (target, cb) {
+  this.Message.offlineMessageCount({target}).then(result => {
     cb(null, result);
   }).catch(e => {
     console.error(e);
@@ -42,24 +43,28 @@ prototype.getOfflineMessage = function(target, cb) {
 };
 
 
-prototype.saveGroupMessage = function(msg, offlineMembers = [], cb) {
+prototype.saveGroupMessage = function (msg, offlineMembers = [], cb) {
   let self = this;
 
-  if (!offlineMembers.length) new self.Message(msg).save().then(result => {
-    cb(null, result);
-  }).catch(e => {
-    console.error(e);
-    cb(e);
-  });
-  else Promise.all([new self.Message(msg).save(), self.Message.saveMany(offlineMembers.map(target => {
-    return new self.Message(Object.assign(msg, { target }));
-  }), true)]).then(results => cb(null, results)).catch(e => {
-    console.error(e);
-    cb(e);
-  });
+  if (!offlineMembers.length) {
+    new self.Message(msg).save().then(result => {
+      cb(null, result);
+    }).catch(e => {
+      console.error(e);
+      cb(e);
+    });
+  }
+  else {
+    Promise.all([new self.Message(msg).save(), self.Message.saveMany(offlineMembers.map(target => {
+      return new self.Message(Object.assign(msg, {target}));
+    }), true)]).then(results => cb(null, results)).catch(e => {
+      console.error(e);
+      cb(e);
+    });
+  }
 };
 
-prototype.getLastMessage = function(user, rooms, cb) {
+prototype.getLastMessage = function (user, rooms, cb) {
   let self = this;
 
   self.Message.getLastMessage(rooms, user).then(results => {
@@ -70,6 +75,6 @@ prototype.getLastMessage = function(user, rooms, cb) {
   });
 };
 
-prototype.getMessage = function(message_id, cb) {
+prototype.getMessage = function (message_id, cb) {
   this.Message.getMessage(message_id).then(message => cb(null, message)).catch(cb);
 };

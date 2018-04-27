@@ -132,8 +132,6 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
   console.log(target, loginMap);
   var loginer = loginMap.get(target);
 
-  console.log('loginer::::::::::,', loginer);
-
   var clients = [];
   for (let uid in loginer) {
     let sid = loginer[uid];
@@ -153,8 +151,8 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
  * @param target 玩家id
  * @param cb
  */
-prototype.isOnline = function(target, cb) {
-  var channelId = this.userChannelMap.get(target);
+prototype.isOnline = function(uid, cb) {
+  var channelId = this.userChannelMap.get(uid);
   var channel = this.channelService.getChannel(channelId);
   cb(!!channel);
 };
