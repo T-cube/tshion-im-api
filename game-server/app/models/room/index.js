@@ -30,6 +30,10 @@ module.exports = function(app) {
       });
     }
 
+    static createGroupRoomInfo(roomid) {
+      return {type, roomid};
+    }
+
     static createRoomInfo() {
       const members = Array.from(arguments);
       const roomid = crypto.createHash('sha1').update(members.join('')).digest('hex');

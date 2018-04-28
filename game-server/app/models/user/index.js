@@ -293,12 +293,9 @@ module.exports = function(app) {
 
         let promise_request = User._updateFriendRequest({ _id: ObjectID(request_id) }, { status: STATUS_FRIEND_REQUEST_AGREE });
 
-        const roomInfo = Room.createRoomInfo()
 
-        return new Room().save().then(()=>{
-          return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
-            return { result: 'ok', from: request.from, receiver: request.receiver };
-          });
+        return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
+          return { result: 'ok', from: request.from, receiver: request.receiver };
         });
       });
     }
@@ -314,8 +311,12 @@ module.exports = function(app) {
       if (status == 'reject') return User._rejectFriendRequest(request_id, receiver);
       if (status == 'agree') {
         return User._agreeFriendRequest(request_id, receiver).then(result => {
+          let { from: receiver } = result;
+          const roomInfo = Room.createRoomInfo(from, receiver)
 
-          return result;
+          return new Room(roomInfo).save().then(() => {
+            return result;
+          });
         });
       }
       return Promise.reject('');
@@ -377,8 +378,8 @@ module.exports = function(app) {
           const uid = user.toString();
           console.log(uid)
           return Promise.all(members.map(member => {
-            return Room.findRoom({members: {$all: [member._id.toHexString(), uid]}}).then(room => {
-              if(room) {
+            return Room.findRoom({ members: { $all: [member._id.toHexString(), uid] } }).then(room => {
+              if (room) {
                 member.roomid = room.roomid;
               }
               return member;

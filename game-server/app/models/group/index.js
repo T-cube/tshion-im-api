@@ -11,6 +11,7 @@ module.exports = function(app) {
 
   const Member = require('./member')(app);
   const Setting = require('./setting')(app);
+  const Room = require('../room')(app);
 
   return class Group {
     constructor(info) {
@@ -26,11 +27,14 @@ module.exports = function(app) {
       if (!this.name) return Promise.reject('name cant be null');
       if (!members || members.length < 2) return Promise.reject('group members must be more then 2 people');
       console.log(this);
-      return groupCollection.insertOne(this).then(result => {
-        this._id = result.insertedId;
+      return Promise.all([
+        groupCollection.insertOne(this).then(result => {
+          this._id = result.insertedId;
 
-        return new Member({ group: this._id, uid: this.creator, type: 'owner' }).save().then(() => this);
-      });
+          return new Member({ group: this._id, uid: this.creator, type: 'owner' }).save().then(() => this);
+        }),
+        new Room(Room.createGroupRoomInfo(this.roomid)).save()
+      ]).then(([group]) => group);
     }
 
     static findGroupByIdAndOwner(_id, owner) {
