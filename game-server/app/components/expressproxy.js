@@ -7,13 +7,15 @@ const oauthServer = require('oauth2-server');
 const connectMultiparty = require('connect-multiparty');
 
 const apiError = require('../express-proxy/libs/api-error');
+const logger = require('pomelo-logger').getLogger('con-log', __filename);
+const morgan = require('morgan');
 
-module.exports = function(app, opts) {
+module.exports = function (app, opts) {
   opts = opts || {};
   return new ExpressProxy(app, opts);
 };
 
-var ExpressProxy = function(app, opts) {
+var ExpressProxy = function (app, opts) {
   this.opts = opts;
   this.exp = express();
   this.app = app;
@@ -46,7 +48,7 @@ var ExpressProxy = function(app, opts) {
   const cors = require('cors');
 
   const whitelist = ['http://cp.tlf.michael.local', 'https://cp.tlifang.com', 'https://cpapi.tlifang.com/oauth/token', 'http://cp.tlifang.com'];
-  let corsOptionsDelegate = function(url, callback) {
+  let corsOptionsDelegate = function (url, callback) {
     // console.log('>>>>>>>>>>>>>>>:', url);
     let corsOptions;
     if (whitelist.indexOf(url) !== -1) {
@@ -64,14 +66,16 @@ var ExpressProxy = function(app, opts) {
     origin: corsOptionsDelegate
   }));
 
+  this.exp.use(morgan('dev'));
+
   // add app to req
-  this.exp.use(function(req, res, next) {
+  this.exp.use(function (req, res, next) {
     req.pomelo = app;
     // console.log(req.app);
     next();
   });
 
-  this.exp.use(function(req, res, next) {
+  this.exp.use(function (req, res, next) {
     req.apiError = apiError;
     next();
   });
@@ -90,28 +94,36 @@ var ExpressProxy = function(app, opts) {
 
   require('../express-proxy/route')(this.exp, this.app);
   // router
-  this.exp.all('/api/123', function(req, res) {
+  this.exp.all('/api/123', function (req, res) {
     console.log(req.body, '..........................1111', console.log(req.user));
     // self.app.rpc.account.accountRemote.express(null, 1, 2, function(err, data) {
     //   res.json(data);
     // });
-    res.sendJson({ name: 123 });
+    res.sendJson({name: 123});
   });
+
+
 
   // oauth error handler
   console.log(this.exp.oauth.errorHandler.toString());
 
-
   /**
    * error handler
    */
-  this.exp.use(function(err, req, res, next) {
-    console.log(err);
-    next(err);
+  this.exp.use(function (err, req, res, next) {
+    let status = err.status || 500;
+    res.status(status);
+    let json = {
+      status: status,
+      message: err.message,
+      stack: err.stack
+    };
+    res.json(json);
+    logger.error(err.stack);
   });
 
   this.exp.use(this.exp.oauth.errorHandler());
-  this.start(function() {
+  this.start(function () {
     console.log('express started');
   });
 };
@@ -120,19 +132,20 @@ var pro = ExpressProxy.prototype;
 
 pro.name = '__ExpressProxy__';
 
-pro.start = function(cb) {
+pro.start = function (cb) {
   if (this.exp) {
     this.exp.listen(9999);
     process.nextTick(cb);
   }
 };
 
-pro.afterStart = function(cb) {
+pro.afterStart = function (cb) {
   process.nextTick(cb);
 };
 
-pro.stop = function(force, cb) {
+pro.stop = function (force, cb) {
   process.nextTick(cb);
 };
 
-var test = function(req, res, next) {};
+var test = function (req, res, next) {
+};
