@@ -25,7 +25,7 @@ function setUserInfoCache(userinfo) {
   let user_key = `${PREFIX.USER_INFO}${userinfo.id}`;
 
   return redis.hmset(user_key, userinfo);
-};
+}
 
 /**
  * update userinfo in redis cache
@@ -36,7 +36,7 @@ function updateUserInfoCache(info) {
   let user_key = `${PREFIX.USER_INFO}${info.id}`;
 
   return redis.hmset(user_key, info);
-};
+}
 
 /**
  * get user info from redis cache
@@ -47,7 +47,7 @@ function getUserInfoCache(user_id) {
   let user_key = `${PREFIX.USER_INFO}${user_id}`;
 
   return redis.hmget(user_key);
-};
+}
 
 /**
  * set access token to redis cache
@@ -57,7 +57,7 @@ function setAccessTokenCache(token) {
   let key = `${PREFIX.ACCESS_TOKEN}${token.access_token}`;
 
   return redis.hmset(key, token);
-};
+}
 
 /**
  * get access token info from redis cache
@@ -68,7 +68,7 @@ function getAccessTokenCache(access_token) {
   let key = `${PREFIX.ACCESS_TOKEN}${access_token}`;
 
   return redis.hmget(key);
-};
+}
 
 /**
  * set user and access token relation ship
@@ -88,7 +88,7 @@ function setUserAccessTokenRelation(user, token) {
       setUserInfoCache(user)
     ]);
   });
-};
+}
 
 exports.setUserInfoCache = setUserInfoCache;
 exports.updateUserInfoCache = updateUserInfoCache;

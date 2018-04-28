@@ -99,10 +99,10 @@ module.exports = function (app) {
         query = {uid1: uid1, uid2: uid2, chatFrom: from !== uid1};
       }
       else {
-        query = {$or: [{uid1: from, chatFrom: false}, {uid2: from, chatFrom: true}], groupId: groupId}
+        query = {$or: [{uid1: from, chatFrom: false}, {uid2: from, chatFrom: true}], groupId: groupId};
       }
       return ChatCollection.updateOne(query, {noRead: 0});
-    };
+    }
 
     static msgToChat(msg) {
       let {content, from, target, group, type} = msg;
@@ -161,5 +161,5 @@ module.exports = function (app) {
       };
     }
 
-  }
+  };
 };

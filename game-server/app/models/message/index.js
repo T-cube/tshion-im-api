@@ -49,13 +49,13 @@ module.exports = function(app) {
       // console.log(roomid,11111)
       pagesize = parseInt(pagesize);
       return Promise.all([MessageCollection.find(last && {
-          roomid,
-          timestamp: {
-            '$lt': parseInt(last)
-          }
-        } || {
-          roomid
-        }, {}).sort({ timestamp: -1 })
+        roomid,
+        timestamp: {
+          '$lt': parseInt(last)
+        }
+      } || {
+        roomid
+      }, {}).sort({timestamp: -1})
         .limit(pagesize).toArray().then(docs => {
           // console.log(docs);
           return {
@@ -94,8 +94,10 @@ module.exports = function(app) {
         }, {
           count: 0
         },
-        function(curr, result) { result.count++; }, true);
-    };
+        function (curr, result) {
+          result.count++;
+        }, true);
+    }
 
     static getLastMessage(rooms, self) {
       return Promise.all(rooms.map(room => MessageCollection.find({ roomid: room.roomid }).limit(1).sort({ timestamp: -1 }).toArray())).then(results => {

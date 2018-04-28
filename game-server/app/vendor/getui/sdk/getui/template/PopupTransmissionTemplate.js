@@ -76,7 +76,6 @@ PopupTransmissionTemplate.prototype.getActionChain = function() {
 };
 
 
-
 PopupTransmissionTemplate.prototype.getPushType = function() {
   return 'TransmissionMsg';
 };

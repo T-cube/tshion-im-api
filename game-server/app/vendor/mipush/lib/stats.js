@@ -1,11 +1,11 @@
 /**
  * Created by yiban on 2016/10/14.
  */
-"use strict";
+'use strict';
 
 const debug     = require('debug')('MiPush:stats'),
-      constants = require('./constants'),
-      request   = require('./request');
+  constants = require('./constants'),
+  request = require('./request');
 
 /***
  * 获取已发送推送的状态
@@ -30,10 +30,10 @@ Stats.prototype.getStats = function (startDate, endDate, callback) {
   debug('getStats:', startDate, endDate);
 
   var data = {
-    start_date             : startDate,
-    end_date               : endDate,
+    start_date: startDate,
+    end_date: endDate,
     restricted_package_name: this.packageName
-  }, url   = this.constants.statsUrl;
+  }, url = this.constants.statsUrl;
 
   this.request('GET', url, data, callback);
 };
@@ -42,9 +42,9 @@ Stats.prototype.getAliasesOf = function (regId, callback) {
   debug('getAliasesOf:', regId);
 
   var data = {
-    registration_id        : regId,
+    registration_id: regId,
     restricted_package_name: this.packageName
-  }, url   = this.constants.aliasStatsUrl;
+  }, url = this.constants.aliasStatsUrl;
 
   this.request('GET', url, data, callback);
 };
@@ -53,9 +53,9 @@ Stats.prototype.getTopicsOf = function (regId, callback) {
   debug('getAliasesOf:', regId);
 
   var data = {
-    registration_id        : regId,
+    registration_id: regId,
     restricted_package_name: this.packageName
-  }, url   = this.constants.topicStatsUrl;
+  }, url = this.constants.topicStatsUrl;
 
   this.request('GET', url, data, callback);
 };

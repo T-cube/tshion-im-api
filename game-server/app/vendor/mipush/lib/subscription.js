@@ -1,11 +1,11 @@
 /**
  * Created by yiban on 2016/10/14.
  */
-"use strict";
+'use strict';
 
 const debug     = require('debug')('MiPush:subscription'),
-      constants = require('./constants'),
-      request   = require('./request');
+  constants = require('./constants'),
+  request = require('./request');
 
 var Subscription = function (options) {
   debug('init subscription:', options);
@@ -26,7 +26,7 @@ Subscription.prototype.subscribeTopic = function (regIds, topic, category, callb
   debug('subscribeTopic:', regIds, topic, category);
 
   if (Array.isArray(regIds)) {
-    regIds = regIds.join(',')
+    regIds = regIds.join(',');
   }
 
   var data = {
@@ -42,7 +42,7 @@ Subscription.prototype.unSubscribeTopic = function (regIds, topic, category, cal
   debug('unSubscribeTopic:', regIds, topic, category);
 
   if (Array.isArray(regIds)) {
-    regIds = regIds.join(',')
+    regIds = regIds.join(',');
   }
 
   var data = {
@@ -58,7 +58,7 @@ Subscription.prototype.subscribeTopicByAlias = function (aliases, topic, categor
   debug('subscribeTopicByAlias:', aliases, topic, category);
 
   if (Array.isArray(aliases)) {
-    aliases = aliases.join(',')
+    aliases = aliases.join(',');
   }
 
   var data = {
@@ -74,7 +74,7 @@ Subscription.prototype.unSubscribeTopicByAlias = function (aliases, topic, categ
   debug('unSubscribeTopicByAlias:', aliases, topic, category);
 
   if (Array.isArray(aliases)) {
-    aliases = aliases.join(',')
+    aliases = aliases.join(',');
   }
 
   var data = {

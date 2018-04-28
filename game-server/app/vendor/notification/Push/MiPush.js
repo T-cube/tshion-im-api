@@ -18,7 +18,7 @@ class MiPushModule extends Push {
     message.restricted_package_nameApp = 'com.tlfapp';
     message.pass_through = 0;
     message.notify_type = -1;
-    message.notify_id = +(+new Date + '').substr(4)
+    message.notify_id = +(+new Date + '').substr(4);
     message.payload = alert;
 
     for (var key in extras) {

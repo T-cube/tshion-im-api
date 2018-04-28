@@ -1,10 +1,10 @@
 /**
  * Created by yiban on 2016/10/14.
  */
-"use strict";
+'use strict';
 
 const debug   = require('debug')('MiPush:request'),
-      request = require('request');
+  request = require('request');
 
 function _request(method, url, data, callback) {
   debug('_request:', method, url, data);

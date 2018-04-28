@@ -2,7 +2,7 @@
 
 var pomelo = require('pomelo');
 var routeUtil = require('./app/util/routeUtil');
-var fs = require('fs');
+
 /**
  * Init app for client.
  */
@@ -65,8 +65,6 @@ co(function*() {
 }).catch(e => {
   throw e;
 });
-
-
 
 
 process.on('uncaughtException', function(err) {

@@ -16,7 +16,7 @@ const ChatSchema = new SchemaObject({
 module.exports = function (chat) {
   let mChatSchema = new ChatSchema(chat);
   if (mChatSchema.isErrors()) {
-    throw new Error("Error: " + JSON.stringify(mChatSchema.getErrors()[0]));
+    throw new Error('Error: ' + JSON.stringify(mChatSchema.getErrors()[0]));
   }
   return mChatSchema.toObject();
 };

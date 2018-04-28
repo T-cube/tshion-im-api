@@ -58,7 +58,7 @@ prototype.bindChannel = function(uid, channelId, sid, flag, cb) {
 prototype.get = function(channelId, flag) {
   var users = [];
   let channel = this.channelService.getChannel(channelId, flag);
-  if (!!channel) {
+  if (channel) {
     let members = channel.getMembers();
     for (let i = 0; i < members.length; i++) {
       let mid = members[i].split('*')[0];
@@ -84,7 +84,7 @@ prototype.kickChannel = function(uid, channelId, sid, cb) {
   // console.log(channel.name, ':::::::::::::::;');
 
   // leave channel
-  if (!!channel) {
+  if (channel) {
     var { loginMap } = channel;
     // console.log(loginMap, ':::::::::::::::;');
     if (loginMap) {

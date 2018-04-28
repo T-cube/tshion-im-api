@@ -1,8 +1,7 @@
 'use strict';
 
 
-
-module.exports = function(app) {
+module.exports = function (app) {
   const ObjectID = app.get('ObjectID');
   const groupMemberCollection = app.db.collection('chat.group.member');
 
@@ -27,7 +26,7 @@ module.exports = function(app) {
     }
 
     static _find(query, fields) {
-      return groupMemberCollection.find(query, Object.assign({ name: 1, avatar: 1 }, fields)).toArray();
+      return groupMemberCollection.find(query, Object.assign({name: 1, avatar: 1}, fields)).toArray();
     }
 
     _update() {
@@ -41,7 +40,7 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static findGroupByUid(uid) {
-      return groupMemberCollection.find({ uid: ObjectID(uid) }, { group: 1 }).toArray();
+      return groupMemberCollection.find({uid: ObjectID(uid)}, {group: 1}).toArray();
     }
 
     /**
@@ -50,7 +49,7 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static getMembersByGroupId(group) {
-      return groupMemberCollection.find({ group: ObjectID(group) }, {
+      return groupMemberCollection.find({group: ObjectID(group)}, {
         uid: 1,
         name: 1,
         avatar: 1,
@@ -65,7 +64,7 @@ module.exports = function(app) {
      */
     static getMemberInfo(memberId) {
       let _id = ObjectID(memberId);
-      return Member._find({ _id }, {
+      return Member._find({_id}, {
         group: 1,
         uid: 1,
         name: 1,
@@ -75,37 +74,19 @@ module.exports = function(app) {
         type: 1,
         status: 1
       }).then(member => {
-        return User.findUser({ id: member.uid }, { name, avatar }).then(user => {
+        return User.findUser({id: member.uid}, {name: 1, avatar: 1}).then(user => {
           delete user._id;
           member = Object.assign(member, user);
 
-          return Member._update({ _id }, { $set: member }).then(result => member);
+          return Member._update({_id}, {$set: member}).then(result => member);
         });
       });
     }
 
-    /**
-     * 保存新成员
-     * @returns {Promise}
-     */
-    save() {
-      let { group, uid } = this;
-      uid = ObjectID(uid);
-      return User.findUser({ id: uid }, { avatar: 1, name: 1 }).then(user => {
-        delete user._id;
-        let query = { group: ObjectID(group), uid: ObjectID(uid) };
-        return this._update(query, { $set: Object.assign(this, user) }, { upsert: true });
-      });
-    }
-
     static updateById(_id, data) {
-      let query = { _id: ObjectID(_id) };
+      let query = {_id: ObjectID(_id)};
 
-      return Setting._update(query, { $set: data });
-    }
-
-    static _insertMany(members) {
-      return groupMemberCollection.insertMany(members).then(result => result.insertedIds);
+      return Setting._update(query, {$set: data});
     }
 
     /**
@@ -114,11 +95,15 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static memberCount(group_id) {
-      return groupMemberCollection.count({ group: ObjectID(group_id) });
+      return groupMemberCollection.count({group: ObjectID(group_id)});
+    }
+
+    static _insertMany(members) {
+      return groupMemberCollection.insertMany(members).then(result => result.insertedIds);
     }
 
     static getMembers(group_id) {
-      return Member._find({ group: ObjectID(group_id) });
+      return Member._find({group: ObjectID(group_id)});
     }
 
     /**
@@ -128,7 +113,7 @@ module.exports = function(app) {
      */
     static deleteMembers(memberIds) {
       let ids = memberIds.map(_id => ObjectID(_id));
-      return groupMemberCollection.deleteMany({ _id: { $in: ids } }).then(result => result.deletedCount);
+      return groupMemberCollection.deleteMany({_id: {$in: ids}}).then(result => result.deletedCount);
     }
 
     /**
@@ -152,14 +137,28 @@ module.exports = function(app) {
         if ((member_count + ids.length) > 100) {
           throw new Error('members out of limit, max member number is 100');
         }
-        return User.findMany({ _id: { $in: ids } }).then(members => {
+        return User.findMany({_id: {$in: ids}}).then(members => {
           console.log('members', members);
           return Member._insertMany(members.map(member => {
             var _id = member._id;
             delete member._id;
-            return Object.assign(member, defaultInfo, { create_at: new Date, uid: _id, group });
+            return Object.assign(member, defaultInfo, {create_at: new Date, uid: _id, group});
           }));
         });
+      });
+    }
+
+    /**
+     * 保存新成员
+     * @returns {Promise}
+     */
+    save() {
+      let {group, uid} = this;
+      uid = ObjectID(uid);
+      return User.findUser({id: uid}, {avatar: 1, name: 1}).then(user => {
+        delete user._id;
+        let query = {group: ObjectID(group), uid: ObjectID(uid)};
+        return this._update(query, {$set: Object.assign(this, user)}, {upsert: true});
       });
     }
   };

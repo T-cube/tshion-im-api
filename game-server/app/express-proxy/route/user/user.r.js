@@ -86,7 +86,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           var user = req.user;
-          console.log(req.params)
+          console.log(req.params);
           User.getGroupFriendsInfo(req.params.group_id, user.id).then(friends => {
             res.sendJson(friends);
           }).catch(next);

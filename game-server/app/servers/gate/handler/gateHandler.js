@@ -70,7 +70,7 @@ class gateHandler {
         next({ error: 'token no worked for this user' });
       }
     });
-  };
+  }
 
   tokenEntry(msg, session, next) {
     let self = this;

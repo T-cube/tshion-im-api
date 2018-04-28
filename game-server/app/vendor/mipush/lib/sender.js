@@ -1,7 +1,7 @@
 /**
  * Created by yiban on 2016/10/14.
  */
-"use strict";
+'use strict';
 
 const debug = require('debug')('MiPush:Sender'),
   constants = require('./constants'),
@@ -13,7 +13,7 @@ const debug = require('debug')('MiPush:Sender'),
  * @constructor
  */
 var Sender = function(options) {
-  debug("MiPush:Sender init:", options);
+  debug('MiPush:Sender init:', options);
 
   this.appSecret = options.appSecret;
   this.request = request;

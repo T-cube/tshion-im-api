@@ -3,14 +3,17 @@
   "description": "A simple chat room experiment using pomelo framework and html5. The chat server currently runs on nodejs v0.8, and should run fine on the latest stable as well.It requires the following npm libraries: - pomelo - express - crc",
   "version": "1.0.0",
   "main": "game-server/app.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-google": "^0.9.1"
+  },
   "scripts": {
     "start": "nodemon game-server/app",
     "installer": "npm install && cd game-server & npm install",
     "nodemon": "nodemon game-server/app",
     "dev": "NODE_ENV=development & nodemon game-server/app",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "buildApidoc": "apidoc -i  ./game-server/app/express-proxy/route/ -o ./apidoc/ -f \".*.js$\""
+    "eslint": "eslint ./game-server/"
   },
   "author": "xuezi",
   "license": "ISC",

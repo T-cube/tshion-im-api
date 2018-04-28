@@ -6,7 +6,7 @@ module.exports = function(req, res, next) {
       message = data ? data : '';
       data = status;
     }
-    var data = {
+    data = {
       status: 200,
       data,
       message

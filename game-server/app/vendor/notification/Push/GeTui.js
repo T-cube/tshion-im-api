@@ -92,7 +92,7 @@ class Getui extends Push {
       var target = new Target({
         appId: APPID,
         clientId: t
-          //        alias:'_lalala_'
+        //        alias:'_lalala_'
       });
       Batch.add(message, target);
     }
@@ -209,7 +209,6 @@ function getUserStatus() {
 }
 
 
-
 function pushMessageToList() {
   //process.env.gexin_pushList_needDetails = true;
   //process.env.gexin_pushList_needAsync=true;
@@ -231,7 +230,7 @@ function pushMessageToList() {
     var target1 = new Target({
       appId: APPID,
       clientId: CID
-        //            alias:'_lalala_'
+      //            alias:'_lalala_'
     });
 
     var targetList = [target1];

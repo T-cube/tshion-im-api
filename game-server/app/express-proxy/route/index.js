@@ -62,4 +62,4 @@ function readRoute(dir, app, exp) {
       Object.assign(apis, _apis);
     }
   });
-};
+}

@@ -74,7 +74,7 @@ prototype.roomInfo = function(uid, cid, cb) {
 prototype.get = function(cid, flag) {
   var users = [];
   let channel = this.channelService.getChannel('global', flag);
-  if (!!channel) {
+  if (channel) {
     let members = channel.getMembers();
     for (let i = 0; i < members.length; i++) {
       let mid = members[i].split('*')[0];

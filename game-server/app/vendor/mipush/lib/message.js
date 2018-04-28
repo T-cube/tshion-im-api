@@ -1,10 +1,10 @@
 /**
  //Created by yiban on 2016/10/14.
  */
-"use strict";
+'use strict';
 
 const debug = require('debug'),
-      qs    = require('querystring');
+  qs = require('querystring');
 
 var Message = function () {
   this.pass_through = 0;

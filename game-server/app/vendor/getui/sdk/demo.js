@@ -82,11 +82,11 @@ function getUserStatus() {
 
 function pushMessageToSingle() {
   var template = TransmissionTemplateDemo();
-//    var template = LinkTemplateDemo();
-//    var template = NotificationTemplateDemo();
-//    var template = NotyPopLoadTemplateDemo();
+  //    var template = LinkTemplateDemo();
+  //    var template = NotificationTemplateDemo();
+  //    var template = NotyPopLoadTemplateDemo();
 
-    //个推信息体
+  //个推信息体
   var message = new SingleMessage({
     isOffline: true,                        //是否离线
     offlineExpireTime: 3600 * 12 * 1000,    //离线时间
@@ -98,7 +98,7 @@ function pushMessageToSingle() {
   var target = new Target({
     appId: APPID,
     clientId: CID
-//        alias:'_lalala_'
+    //        alias:'_lalala_'
   });
     //target.setAppId(APPID).setClientId(CID);
 
@@ -120,11 +120,11 @@ function pushMessageToSingleBatch() {
   var Batch=gt.getBatch();
 
   var template = TransmissionTemplateDemo();
-//    var template = LinkTemplateDemo();
-//    var template = NotificationTemplateDemo();
-//    var template = NotyPopLoadTemplateDemo();
+  //    var template = LinkTemplateDemo();
+  //    var template = NotificationTemplateDemo();
+  //    var template = NotyPopLoadTemplateDemo();
 
-    //个推信息体
+  //个推信息体
   var message = new SingleMessage({
     isOffline: true,                        //是否离线
     offlineExpireTime: 3600 * 12 * 1000,    //离线时间
@@ -135,7 +135,7 @@ function pushMessageToSingleBatch() {
   var target = new Target({
     appId: APPID,
     clientId: CID
-//        alias:'_lalala_'
+    //        alias:'_lalala_'
   });
   Batch.add(message,target);
 
@@ -152,14 +152,14 @@ function pushMessageToSingleBatch() {
 }
 
 function pushMessageToList() {
-    //process.env.gexin_pushList_needDetails = true;
-    //process.env.gexin_pushList_needAsync=true;
-    //process.env.=true;
-    // var taskGroupName = 'test';
+  //process.env.gexin_pushList_needDetails = true;
+  //process.env.gexin_pushList_needAsync=true;
+  //process.env.=true;
+  // var taskGroupName = 'test';
   var taskGroupName = 'toList任务组名';
   var template = TransmissionTemplateDemo();
 
-    //个推信息体
+  //个推信息体
   var message = new ListMessage({
     isOffline: true,
     offlineExpireTime: 3600 * 12 * 1000,
@@ -168,15 +168,15 @@ function pushMessageToList() {
 
   gt.getContentId(message, taskGroupName, function (err, res) {
     var contentId = res;
-        //接收方1
+    //接收方1
     var target1 = new Target({
       appId: APPID,
       clientId: CID
-//            alias:'_lalala_'
+      //            alias:'_lalala_'
     });
 
     var targetList = [target1];
-//        gt.needDetails = true;
+    //        gt.needDetails = true;
 
     console.log('getContentId', res);
     gt.pushMessageToList(contentId, targetList, function (err, res) {
@@ -186,20 +186,20 @@ function pushMessageToList() {
 }
 
 function pushMessageToApp() {
-    // var taskGroupName = 'test';
+  // var taskGroupName = 'test';
   var taskGroupName = null;
   var template = TransmissionTemplateDemo();
 
-    //个推信息体
-    //基于应用消息体
+  //个推信息体
+  //基于应用消息体
   var message = new AppMessage({
     isOffline: false,
     offlineExpireTime: 3600 * 12 * 1000,
     data: template,
     appIdList: [APPID],
-//        phoneTypeList: ['IOS'],
-//        provinceList: ['浙江'],
-        //tagList: ['阿百川']
+    //        phoneTypeList: ['IOS'],
+    //        provinceList: ['浙江'],
+    //tagList: ['阿百川']
     speed: 10000
   });
 
@@ -305,11 +305,11 @@ function TransmissionTemplateDemo() {
     //
     //payload.alertMsg=alertMsg;
     //payload.badge=5;
-//    payload.contentAvailable =1;
-//    payload.category="";
-//    payload.sound="";
-//    payload.customMsg.payload1="payload";
-//    template.setApnInfo(payload);
+  //    payload.contentAvailable =1;
+  //    payload.category="";
+  //    payload.sound="";
+  //    payload.customMsg.payload1="payload";
+  //    template.setApnInfo(payload);
   return template;
 }
 

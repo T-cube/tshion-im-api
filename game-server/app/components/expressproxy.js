@@ -103,7 +103,6 @@ var ExpressProxy = function (app, opts) {
   });
 
 
-
   // oauth error handler
   console.log(this.exp.oauth.errorHandler.toString());
 

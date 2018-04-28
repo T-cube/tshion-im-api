@@ -1,7 +1,7 @@
 /**
  * Created by yiban on 2016/10/14.
  */
-"use strict";
+'use strict';
 
 /**
  * 常量定义
@@ -9,7 +9,7 @@
  * @name Constants
  * @desc 常量定义
  */
-const domain = "https://api.xmpush.xiaomi.com";
+const domain = 'https://api.xmpush.xiaomi.com';
 
 var Constants = function () {
   this.packageName = '';
