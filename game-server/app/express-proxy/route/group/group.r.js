@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(app) {
+module.exports = function (app) {
   const Group = require('../../../models/group')(app);
   const Setting = require('../../../models/group/setting')(app);
   const Member = require('../../../models/group/member')(app);
@@ -10,12 +10,10 @@ module.exports = function(app) {
       '': {
         docs: {
           name: '获取群组列表',
-          params: [
-            { query: 'user_id', type: 'String' },
-          ]
+          params: []
         },
         method(req, res, next) {
-          Group.getListByUid(req.query.user_id).then(groups => {
+          Group.getListByUid(req.user.id).then(groups => {
             res.sendJson(groups);
           }).catch(next);
         }
@@ -24,7 +22,7 @@ module.exports = function(app) {
         docs: {
           name: '获取群组信息',
           params: [
-            { param: 'group_id', type: 'String' }
+            {param: 'group_id', type: 'String'}
           ]
         },
         method(req, res, next) {
@@ -37,7 +35,7 @@ module.exports = function(app) {
         docs: {
           name: '获取群组内成员列表',
           params: [
-            { param: 'group_id', type: 'String' }
+            {param: 'group_id', type: 'String'}
           ]
         },
         method(req, res, next) {
@@ -50,11 +48,11 @@ module.exports = function(app) {
         docs: {
           name: '获取成员信息',
           params: [
-            { param: 'member_id', type: 'String' }
+            {param: 'member_id', type: 'String'}
           ]
         },
         method(req, res, next) {
-          let { member_id } = req.params;
+          let {member_id} = req.params;
 
           Member.getMemberInfo(member_id).then(info => {
             res.sendJson(info);
@@ -67,25 +65,30 @@ module.exports = function(app) {
         docs: {
           name: '创建群组',
           params: [
-            { key: 'members', type: 'Array' },
-            { key: 'creator', type: 'String' },
-            { key: 'name', type: 'String' }
+            {key: 'members', type: 'Array'},
+            {key: 'name', type: 'String'}
           ]
         },
         method(req, res, next) {
-          let { members } = req.body;
+          let {members} = req.body;
           console.log('body:', req.body);
+          if (typeof members === 'string') {
+            members = JSON.parse(members);
+          }
+          req.body.creator = req.user.id;
           new Group(req.body).save().then(newGroup => {
-            var group = newGroup._id;
+            let group = newGroup._id;
 
             return Promise.all([
-              new Setting({ group }).save(),
+              new Setting({group}).save(),
               Member.addMany(members, group)
             ]).then(() => {
               res.sendJson(newGroup);
+            }).catch(err => {
+              console.error(err);
             });
           }).catch(([errSetting, memberError]) => {
-            console.log(memberError,errSetting);
+            console.log(memberError, errSetting);
             next(req.apiError(400, errSetting || memberError));
           });
         }
@@ -96,13 +99,13 @@ module.exports = function(app) {
         docs: {
           name: '群组添加成员',
           params: [
-            { param: 'group_id', type: 'String' },
-            { key: 'members', type: 'Array' },
+            {param: 'group_id', type: 'String'},
+            {key: 'members', type: 'Array'},
           ]
         },
         method(req, res, next) {
-          let { members } = req.body;
-          let { group_id } = req.params;
+          let {members} = req.body;
+          let {group_id} = req.params;
 
           if (members instanceof String) members = [members];
 
@@ -117,13 +120,13 @@ module.exports = function(app) {
         docs: {
           name: '删除群组成员',
           params: [
-            { param: 'group_id', type: 'String' },
-            { key: 'members', type: 'Array' }
+            {param: 'group_id', type: 'String'},
+            {key: 'members', type: 'Array'}
           ]
         },
         method(req, res, next) {
-          let { members } = req.body;
-          let { group_id } = req.params;
+          let {members} = req.body;
+          let {group_id} = req.params;
 
           if (members instanceof String) members = [members];
 

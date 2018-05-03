@@ -40,7 +40,7 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static findGroupByUid(uid) {
-      return groupMemberCollection.find({uid: ObjectID(uid)}, {group: 1}).toArray();
+      return groupMemberCollection.find({uid: uid}, {group: 1}).toArray();
     }
 
     /**
@@ -123,7 +123,7 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static addMany(memberIds, group) {
-      let ids = memberIds.sort().map(_id => ObjectID(_id));
+      let ids = memberIds.sort();
 
       group = ObjectID(group);
       console.log('ids', ids);
@@ -137,12 +137,12 @@ module.exports = function (app) {
         if ((member_count + ids.length) > 100) {
           throw new Error('members out of limit, max member number is 100');
         }
-        return User.findMany({_id: {$in: ids}}).then(members => {
+        return User.findMany({id: {$in: ids}}).then(members => {
           console.log('members', members);
           return Member._insertMany(members.map(member => {
-            var _id = member._id;
-            delete member._id;
-            return Object.assign(member, defaultInfo, {create_at: new Date, uid: _id, group});
+            var id = member.id;
+            delete member.id;
+            return Object.assign(member, defaultInfo, {create_at: new Date, uid: String(id), group});
           }));
         });
       });
@@ -154,10 +154,9 @@ module.exports = function (app) {
      */
     save() {
       let {group, uid} = this;
-      uid = ObjectID(uid);
       return User.findUser({id: uid}, {avatar: 1, name: 1}).then(user => {
         delete user._id;
-        let query = {group: ObjectID(group), uid: ObjectID(uid)};
+        let query = {group: group, uid: uid};
         return this._update(query, {$set: Object.assign(this, user)}, {upsert: true});
       });
     }

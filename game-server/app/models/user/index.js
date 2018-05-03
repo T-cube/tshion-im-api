@@ -24,7 +24,11 @@ module.exports = function (app) {
      */
     static findUser(query, fields) {
       // return userCollection.findOne(query, fields);
-      return tlf2_db.find('tlf_user', query, fields);
+      return tlf2_db.find('tlf_user', query, fields).then(res => {
+        return new Promise(resolve => {
+          resolve(res[0]);
+        });
+      });
     }
 
     /**
@@ -33,6 +37,7 @@ module.exports = function (app) {
      */
     static user(user_id) {
       return tlf2_db.find('tlf_user', {id: user_id}, {
+        id: 1,
         name: 1,
         mobile: 1,
         birthdate: 1,
@@ -49,7 +54,7 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static findMany(query, fields) {
-      return tlf2_db.find('tlf_user', query, Object.assign({name: 1, avatar: 1}, fields), 'order by id');
+      return tlf2_db.find('tlf_user', query, Object.assign({name: 1, avatar: 1, id: 1}, fields), 'order by id');
     }
 
     /**
@@ -97,7 +102,7 @@ module.exports = function (app) {
         }
 
         query['$nor'].push({id: user_id});
-        return tlf2_db.find('tlf_user', query, {avatar: 1, email: 1, mobile: 1, name: 1, sex: 1});
+        return tlf2_db.find('tlf_user', query, {id: 1, avatar: 1, email: 1, mobile: 1, name: 1, sex: 1});
       });
     }
 
@@ -153,6 +158,8 @@ module.exports = function (app) {
     /**
      * 获取好友请求
      * @param {{}} query
+     * @param page
+     * @param pagesize
      * @returns {Promise}
      */
     static getFriendRequest(query, {page = 0, pagesize = 20}) {
@@ -349,6 +356,7 @@ module.exports = function (app) {
      */
     static _getUserInfoByIds(_ids) {
       return userCollection.find({_id: {$in: _ids}}, {
+        id: 1,
         avatar: 1,
         name: 1,
         mobile: 1,
