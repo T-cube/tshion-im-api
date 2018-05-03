@@ -70,7 +70,7 @@ prototype.get = function(channelId, flag) {
 
 prototype.getUserChannelId = function(uid, cb) {
   let [user] = uid.split('*');
-  console.log('getUserChannelId:::::::::',user,this.userChannelMap);
+  console.log('getUserChannelId:::::::::', user, this.userChannelMap);
   let channelId = this.userChannelMap.get(user);
   cb(null, channelId);
 };
@@ -121,6 +121,8 @@ prototype.channelPushMessage = function(channelId, params, cb) {
  * @param {Function} cb
  */
 prototype.channelPushMessageByUid = function(params, target, cb) {
+  if (target instanceof Array) return this.cahnnelPushMessageByUids(params, target, cb);
+
   var channelId = this.userChannelMap.get(target);
   var channel = this.channelService.getChannel(channelId);
   console.log(target, channel, this.userChannelMap);
@@ -146,4 +148,17 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
 
   this.channelService.pushMessageByUids(params, clients);
   cb();
+};
+
+/**
+ * send message by target uids
+ * @param {{}} params
+ * @param {Array} targets
+ * @param {Function} cb
+ */
+prototype.cahnnelPushMessageByUids = function(params, targets, cb) {
+  Promise.all(targets.map(target =>
+      new Promise(resolve =>
+        this.channelPushMessageByUid(params, target, resolve))))
+    .then(() => cb());
 };

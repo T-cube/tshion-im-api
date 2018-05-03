@@ -97,6 +97,10 @@ module.exports = function(app) {
         function(curr, result) { result.count++; }, true);
     };
 
+    static getOfflineMessage(query) {
+      return OfflineMessageCollection.find(query).sort({timestamp: -1}).limit(150).toArray();
+    }
+
     static getLastMessage(rooms, self) {
       return Promise.all(rooms.map(room => MessageCollection.find({ roomid: room.roomid }).limit(1).sort({ timestamp: -1 }).toArray())).then(results => {
         let r = results.map((messages, index) => {

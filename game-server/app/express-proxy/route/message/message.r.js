@@ -22,6 +22,20 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
+      'offline/new/:roomid': {
+        docs: {
+          name: '获取离线消息',
+          params: [
+            { param: 'target', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          const user = req.user;
+          Message.getList({ target: user._id.toHexString(), roomid: req.params.roomid }).then(result => {
+            res.sendJson(result);
+          }).catch(next);
+        }
+      },
       'offline/:target': {
         docs: {
           name: '获取离线消息统计',
@@ -30,7 +44,8 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          Message.offlineMessageCount(req.params).then(counts => {
+          const user = req.user;
+          Message.offlineMessageCount({ target: user._id.toHexString() }).then(counts => {
             res.sendJson(counts);
           }).catch(next);
         }

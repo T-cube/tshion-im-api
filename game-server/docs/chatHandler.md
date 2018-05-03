@@ -68,7 +68,7 @@ on 'onChat' event receive data
 }
 ```
 
-## chat.chatHandler.initGroup
+## [*discard*] chat.chatHandler.initGroup
 *user init group before chat in group*
 ```javascript
 {
@@ -91,7 +91,7 @@ on 'groupInit' event reveive data
 }
 ```
 
-## chat.chatHandler.addGroupMember
+## [*discard*] chat.chatHandler.addGroupMember
 *user add a member to group*
 ```javascript
 {
@@ -116,7 +116,7 @@ on 'addMember' event receive data
 ```
 
 
-## chat.chatHandler.removeGroupMember
+## [*discard*] chat.chatHandler.removeGroupMember
 *user remove a member from group*
 ```javascript
 {
@@ -152,6 +152,7 @@ on 'leaveGroup' event receive data
 *user send a message in group*
 ```javascript
 {
+  roomid: String,
   group: String,
   content: String,    // optional, if type text
   type: Enum,         // text, image, file
@@ -160,7 +161,7 @@ on 'leaveGroup' event receive data
 ```
 request return
 ```javascript
-{}
+GroupMessage
 ```
 on 'groupChat' event receive data
 ```javascript
