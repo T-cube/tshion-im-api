@@ -3,6 +3,7 @@ const knowError = {
   200: 'OK',
   400: 'bad_request',
   401: 'unauthorized',
+  402: 'no_authority:',
   403: 'forbidden',
   404: 'not_found',
   500: 'internel_server_error',

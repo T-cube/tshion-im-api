@@ -111,9 +111,23 @@ module.exports = function (app) {
      * @param {Array} memberIds
      * @returns {Promise}
      */
-    static deleteMembers(memberIds) {
-      let ids = memberIds.map(_id => ObjectID(_id));
-      return groupMemberCollection.deleteMany({_id: {$in: ids}}).then(result => result.deletedCount);
+    static deleteMembers(memberIds, group_id) {
+      let ids = memberIds;
+      return groupMemberCollection.deleteMany({
+        uid: {$in: ids},
+        group: ObjectID(group_id)
+      }).then(result => result.deletedCount);
+    }
+
+    /**
+     * delete group all members
+     * @param {Array} memberIds
+     * @returns {Promise}
+     */
+    static deleteGroup(group_id) {
+      return groupMemberCollection.deleteMany({
+        group: ObjectID(group_id)
+      }).then(result => result.deletedCount);
     }
 
     /**

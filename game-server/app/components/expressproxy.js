@@ -115,7 +115,7 @@ var ExpressProxy = function (app, opts) {
     let json = {
       status: status,
       message: err.message,
-      stack: err.stack
+      // stack: err.stack
     };
     res.json(json);
     logger.error(err.stack);

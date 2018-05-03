@@ -98,6 +98,14 @@ module.exports = function (app) {
       });
     }
 
+    /**
+     * 删除群
+     * @param group_id
+     */
+    static deletGroup(group_id) {
+      return groupCollection.deleteMany({_id: ObjectID(group_id)});
+    }
+
     save() {
       // console.log(this.creator);
       if (!this.name) return Promise.reject('name cant be null');

@@ -107,9 +107,11 @@ module.exports = function (app) {
           let {members} = req.body;
           let {group_id} = req.params;
 
-          if (members instanceof String) members = [members];
+          if (typeof members === 'string') {
+            members = JSON.parse(members);
+          }
 
-          Member.addMany(members, group).then(result => {
+          Member.addMany(members, group_id).then(result => {
             res.sendJson(result);
           }).catch(next);
         }
@@ -128,11 +130,26 @@ module.exports = function (app) {
           let {members} = req.body;
           let {group_id} = req.params;
 
-          if (members instanceof String) members = [members];
+          if (typeof members === 'string') {
+            members = JSON.parse(members);
+          }
 
-          Member.deleteMembers(members).then(result => {
-            res.sendJson(result);
-          }).catch(next);
+          Group.info(req.params.group_id).then(info => {
+            if (info.owner === req.user.id) {
+              if (members.some(item => item === req.user.id)) {
+                next(req.apiError(402, '不能删除群主'));
+              }
+              else {
+                Member.deleteMembers(members, group_id).then(result => {
+                  res.sendJson(result);
+                }).catch(next);
+              }
+            }
+            else {
+              next(req.apiError(402, '只有群主才能删除群组成员'));
+            }
+          });
+
         }
       },
       'quit/:group_id': {
@@ -140,7 +157,37 @@ module.exports = function (app) {
           name: '退出群组'
         },
         method(req, res, next) {
-
+          let {group_id} = req.params;
+          Group.info(group_id).then(info => {
+            if (info.owner === req.user.id) {
+              next(req.apiError(402, '群主无法退出群'));
+            }
+            else {
+              Member.deleteMembers([req.user.id], group_id).then(result => {
+                res.sendJson(result);
+              }).catch(next);
+            }
+          });
+        }
+      },
+      ':group_id': {
+        docs: {
+          name: '删除解散群'
+        },
+        method(req, res, next) {
+          let {group_id} = req.params;
+          Group.info(group_id).then(info => {
+            if (info.owner === req.user.id) {
+              Group.deletGroup(group_id).then(result => {
+                Member.deleteGroup(group_id).then(result => {
+                  res.sendJson(result);
+                }).catch(next);
+              });
+            }
+            else {
+              next(req.apiError(402, '群主才能解散群'));
+            }
+          }).catch(next);
         }
       }
     }
