@@ -4,6 +4,7 @@ const crypto = require('crypto');
 
 const _ = require('../../../libs/util'),
   schema = require('./schema');
+const {MemberType} = require('../../shared/constant');
 
 module.exports = function (app) {
   const ObjectID = app.get('ObjectID');
@@ -106,6 +107,15 @@ module.exports = function (app) {
       return groupCollection.deleteMany({_id: ObjectID(group_id)});
     }
 
+    /**
+     * 更新群信息
+     * @param group_id
+     * @param update
+     */
+    static updateGroup(group_id, update) {
+      return groupCollection.updateOne({_id: ObjectID(group_id)}, update);
+    }
+
     save() {
       // console.log(this.creator);
       if (!this.name) return Promise.reject('name cant be null');
@@ -113,8 +123,7 @@ module.exports = function (app) {
 
       return groupCollection.insertOne(this).then(result => {
         this._id = result.insertedId;
-        return new Member({group: this._id, uid: this.creator, type: 'owner'}).save().then(() => this);
-
+        return new Member({group: this._id, uid: this.creator, type: MemberType.owner}).save().then(() => this);
       });
     }
   };

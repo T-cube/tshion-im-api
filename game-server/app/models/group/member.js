@@ -6,10 +6,11 @@ module.exports = function (app) {
   const groupMemberCollection = app.db.collection('chat.group.member');
 
   const User = require('../user')(app);
+  const {MemberType, MemberStatus} = require('../../shared/constant');
 
   const defaultInfo = {
-    type: 'normal',
-    status: 'normal',
+    type: MemberType.normal,
+    status: MemberStatus.normal,
     create_at: new Date
   };
 
@@ -128,6 +129,16 @@ module.exports = function (app) {
       return groupMemberCollection.deleteMany({
         group: ObjectID(group_id)
       }).then(result => result.deletedCount);
+    }
+
+    /**
+     * 设置群成员类型
+     * @param group_id
+     * @param uid
+     * @param type
+     */
+    static setMemberType(group_id, uid, type) {
+      return groupMemberCollection.updateOne({group: ObjectID(group_id), uid: uid}, {$set: {type: type}});
     }
 
     /**

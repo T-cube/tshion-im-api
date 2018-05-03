@@ -8,6 +8,7 @@ const ChatSchema = new SchemaObject({
   groupId: {type: String},//群id
   chatFrom: {type: Boolean, required: true},//消息1->2 true 2-> 1 false;
   noRead: {type: Number, required: true},//未读消息数
+  topTime: {type: Number, default: () => 0},//会话置顶时间
   timestamp: {type: Number, default: () => +new Date},
   type: {type: String, default: 'text', enum: ['text', 'audio', 'video', 'file', 'image', 'link']},
   content: String,

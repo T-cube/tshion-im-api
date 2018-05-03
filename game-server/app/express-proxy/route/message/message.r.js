@@ -86,7 +86,21 @@ module.exports = function (app) {
             res.sendJson({num: result});
           }).catch(next);
         }
-      }
+      },
+      'top/:chat_id': {
+        docs: {
+          name: '会话取消置顶',
+          params: [
+            {param: 'chat_id', type: 'String'},
+          ]
+        },
+        method(req, res, next) {
+          let {chat_id} = req.params;
+          Chat.setTopTime(chat_id, 0).then(result => {
+            res.sendJson({num: result.matchedCount});
+          }).catch(next);
+        }
+      },
     },
     put: {
       'readChat': {
@@ -103,6 +117,23 @@ module.exports = function (app) {
           let {target, group} = req.params;
           Chat.readChat(user_id, target, group).then(result => {
             res.sendJson(result);
+          }).catch(next);
+        }
+      },
+    },
+    post: {
+      'top/:chat_id': {
+        docs: {
+          name: '会话置顶',
+          params: [
+            {param: 'chat_id', type: 'String'},
+          ]
+        },
+        method(req, res, next) {
+          let {chat_id} = req.params;
+          let topTime = Date.now();
+          Chat.setTopTime(chat_id, topTime).then(result => {
+            res.sendJson({num: result.matchedCount, topTime: topTime});
           }).catch(next);
         }
       },

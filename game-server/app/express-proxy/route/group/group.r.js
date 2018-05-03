@@ -4,6 +4,7 @@ module.exports = function (app) {
   const Group = require('../../../models/group')(app);
   const Setting = require('../../../models/group/setting')(app);
   const Member = require('../../../models/group/member')(app);
+  const {MemberType} = require('../../../shared/constant');
 
   return {
     get: {
@@ -115,6 +116,39 @@ module.exports = function (app) {
             res.sendJson(result);
           }).catch(next);
         }
+      },
+      'transfer/:group_id': {
+        docs: {
+          name: '群主转让',
+          params: [
+            {param: 'group_id', type: 'String'},
+            {key: 'member', type: 'String'},
+          ]
+        },
+        method(req, res, next) {
+          let {member} = req.body;
+          let {group_id} = req.params;
+          Group.info(req.params.group_id).then(info => {
+            if (info.owner === req.user.id) {
+              Member.setMemberType(group_id, member, MemberType.owner).then(result => {
+                if (result.matchedCount === 0) {
+                  next(req.apiError(402, 'member_id不是群成员'));
+                }
+                else {
+                  Member.setMemberType(group_id, req.user.id, MemberType.normal).then(result => {
+                    Group.updateGroup(group_id, {owner: member}).then(result => {
+                      res.sendJson(result);
+                    });
+                  });
+                }
+              }).catch(next);
+            }
+            else {
+              next(req.apiError(402, '只有群主才能转让'));
+            }
+          });
+
+        }
       }
     },
     delete: {
@@ -154,7 +188,10 @@ module.exports = function (app) {
       },
       'quit/:group_id': {
         docs: {
-          name: '退出群组'
+          name: '退出群组',
+          params: [
+            {param: 'group_id', type: 'String'},
+          ]
         },
         method(req, res, next) {
           let {group_id} = req.params;

@@ -5,6 +5,7 @@ let schema = require('./schema');
 
 module.exports = function (app) {
   const ChatCollection = app.db.collection('chat');
+  const ObjectID = app.get('ObjectID');
 
   return class Chat {
     constructor() {
@@ -61,7 +62,10 @@ module.exports = function (app) {
      */
     static findUserChat(userId) {
       return new Promise((resolve, reject) => {
-        ChatCollection.find({$or: [{uid1: userId}, {uid2: userId}]}).toArray().then(docs => {
+        ChatCollection.find({$or: [{uid1: userId}, {uid2: userId}]}).sort({
+          topTime: 1,
+          timestamp: 1
+        }).toArray().then(docs => {
           if (!docs) {
             reject(docs);
           }
@@ -101,7 +105,17 @@ module.exports = function (app) {
       else {
         query = {$or: [{uid1: from, chatFrom: false}, {uid2: from, chatFrom: true}], groupId: groupId};
       }
-      return ChatCollection.updateOne(query, {noRead: 0});
+      return ChatCollection.updateOne(query, {$set: {noRead: 0}});
+    }
+
+    /**
+     * 设置会话置顶
+     * @param chat_id
+     * @param topTime
+     * @returns {Promise}
+     */
+    static setTopTime(chat_id, topTime) {
+      return ChatCollection.updateOne({_id: ObjectID(chat_id)}, {$set: {topTime: topTime}});
     }
 
     static msgToChat(msg) {
@@ -134,7 +148,7 @@ module.exports = function (app) {
      * @returns {{from: *, target: *, group: null, noRead: *, timestamp: *, type: *, content: *}}
      */
     static chatToMsg(chat, getUid) {
-      let {uid1, uid2, groupId, chatFrom, noRead, timestamp, type, content} = chat;
+      let {uid1, uid2, groupId, chatFrom, noRead, timestamp, type, content, _id, topTime} = chat;
       let from, target;
 
       if (chatFrom) {
@@ -150,6 +164,7 @@ module.exports = function (app) {
         noRead = 0;
       }
       return {
+        _id: _id.toHexString(),
         from: from,
         target: target,
         group: !groupId ? null : groupId,
@@ -157,6 +172,7 @@ module.exports = function (app) {
         chatFrom: chatFrom,
         timestamp: timestamp,
         type: type,
+        topTime: topTime,
         content: content,
       };
     }
