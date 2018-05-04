@@ -29,7 +29,7 @@ class Mysql {
       idleTimeoutMillis: 30000,
       log: false
     });
-  };
+  }
 
 
   query(sql, args) {
@@ -39,7 +39,7 @@ class Mysql {
     }
     return new Promise((resolve, reject) => {
       this._pool.acquire((err, client) => {
-        if (!!err) {
+        if (err) {
           console.error('[sqlqueryErr] ' + err.stack);
           reject(err);
           return;
@@ -56,9 +56,9 @@ class Mysql {
       });
     });
 
-  };
+  }
 
-  dealItem(key, itme,) {
+  dealItem(key, itme) {
     let queryItem = [], values = [];
     if (typeof itme === 'object') {
       let valueKeys = Object.keys(itme);
@@ -66,10 +66,16 @@ class Mysql {
         switch (key2) {
           case '$in':
             let arr = itme[key2];
+
+            if (arr.length === 0) {
+              arr.push(Date.now());
+            }
+
             values.push(...arr);
             queryItem.push(key + ' in (' + arr.map(m => {
-              return '?'
+              return '?';
             }).join(',') + ')');
+
             break;
           case '$regex':
             values.push(itme[key2]);
@@ -83,7 +89,7 @@ class Mysql {
       queryItem.push(key + ' = ?');
     }
     return {queryItem: queryItem.join(' and '), values: values};
-  };
+  }
 
   /**
    * 生成sql查询语句
@@ -129,7 +135,7 @@ class Mysql {
                 $orQuery.push(queryItem);
               });
             });
-            if($orQuery.length > 0){
+            if ($orQuery.length > 0) {
               queryArr.push('(' + $orQuery.join(' or ') + ')');
             }
             break;
@@ -142,7 +148,7 @@ class Mysql {
                 $norQuery.push(queryItem);
               });
             });
-            if($norQuery.length > 0){
+            if ($norQuery.length > 0) {
               queryArr.push('!(' + $norQuery.join(' or ') + ')');
             }
             break;
@@ -164,7 +170,7 @@ class Mysql {
     let sql = 'select ' + fieldSql + ' from ' + tableName + ' ' + querySql + optSql + ';';
     console.log('sql : ' + sql);
     return this.query(sql, valueArr);
-  };
+  }
 
 }
 

@@ -8,3 +8,17 @@ export enum MemberType {
 export enum MemberStatus {
     normal
 }
+
+//好友邀请
+export enum FriendRequest {
+    agree,//接受
+    reject,//拒绝
+}
+
+//好友邀请
+export enum FriendRequestStatue {
+    PADDING,//赘语
+    AGREE,//拒绝
+    REJECT,//拒绝
+    IGNORE,//拒绝
+}

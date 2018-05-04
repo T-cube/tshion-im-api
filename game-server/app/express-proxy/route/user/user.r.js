@@ -1,14 +1,14 @@
 'use strict';
 
-module.exports = function(app) {
+module.exports = function (app) {
   const User = require('../../../models/user')(app);
   return {
     get: {
-      ':user_id': {
+      'info/:user_id': {
         docs: {
           name: '获取用户详情',
           params: [
-            { param: 'user_id', type: 'String' }
+            {param: 'user_id', type: 'String'}
           ]
         },
         method(req, res, next) {
@@ -17,19 +17,19 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
-      '': {
+      'find': {
         docs: {
-          name: '获取用户信息',
+          name: '查找非好友用户',
           params: [
-            { query: 'name', type: 'String' },
-            { query: 'keyword', type: 'String|Number' },
-            { query: 'mobile', type: 'Number' }
+            {query: 'name', type: 'String'},
+            {query: 'keyword', type: 'String|Number'},
+            {query: 'mobile', type: 'Number'}
           ]
         },
         method(req, res, next) {
           var user = req.user;
           // console.log('/user',user);
-          User.find(Object.assign(req.query, { user: user.id })).then(users => {
+          User.find(Object.assign(req.query, {user: user.id})).then(users => {
             res.sendJson(users);
           }).catch(next);
         }
@@ -46,28 +46,26 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
-      'friend-request/receiver/:receiver': {
+      'friend-request/receiver': {
         docs: {
           name: '获取收到的好友请求',
           params: [
-            { param: 'receiver', type: 'String' },
-            { query: 'page', type: 'Number' },
-            { query: 'pagesize', type: 'Number' }
+            {param: 'receiver', type: 'String'},
+            {query: 'page', type: 'Number'},
+            {query: 'pagesize', type: 'Number'}
           ]
         },
         method(req, res, next) {
           var user = req.user;
-          User.getFriendRequest({ receiver: user.id }, req.query).then(requests => {
+          User.getFriendRequest({receiver: user.id}, req.query).then(requests => {
             res.sendJson(requests);
           }).catch(next);
         }
       },
-      'friends/info/:user_id': {
+      'friends/info/': {
         docs: {
           name: '获取所有好友信息',
-          params: [
-            { param: 'user_id', type: 'String' }
-          ]
+          params: []
         },
         method(req, res, next) {
           var user = req.user;
@@ -80,8 +78,8 @@ module.exports = function(app) {
         docs: {
           name: '获取分组好友信息',
           params: [
-            { param: 'user_id', type: 'String' },
-            { param: 'group_id', type: 'String' }
+            {param: 'user_id', type: 'String'},
+            {param: 'group_id', type: 'String'}
           ]
         },
         method(req, res, next) {
@@ -92,11 +90,11 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
-      'friends/:user_id': {
+      'friends': {
         docs: {
           name: '获取好友列表',
           params: [
-            { param: 'user_id', type: 'String' }
+            {param: 'user_id', type: 'String'}
           ]
         },
         method(req, res, next) {
@@ -112,7 +110,7 @@ module.exports = function(app) {
         docs: {
           name: '创建好友分组',
           params: [
-            { key: 'name', type: 'String' }
+            {key: 'name', type: 'String'}
           ]
         },
         method(req, res, next) {
@@ -127,21 +125,25 @@ module.exports = function(app) {
         docs: {
           name: '添加好友请求',
           params: [
-            { key: 'user_id', type: 'String' },
-            { key: 'from', type: 'String' },
-            { key: 'mark', type: 'String' }
+            {key: 'user_id', type: 'String'},
+            // { key: 'from', type: 'String' },
+            {key: 'mark', type: 'String'}
           ]
         },
         method(req, res, next) {
-          var user = req.user;
-          var { user_id } = req.body;
-          if (user.id == user_id)
+          let user = req.user;
+          let {user_id} = req.body;
+          if (user.id === user_id)
             return next(req.apiError(400, 'can not add self as a friend '));
 
-          User.sendRequest(Object.assign(req.body, { from: user.id })).then(request => {
+          User.sendRequest(Object.assign(req.body, {from: user.id})).then(request => {
             res.sendJson(request);
             // var { from, user_id: target } = req.body;
-            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', { request: request._id, from: user._id.toHexString(), type: request.update_at ? 'update' : 'new' }, user_id, function(err) {
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
+              request: request._id,
+              from: user.id,
+              type: request.update_at ? 'update' : 'new'
+            }, user_id, function (err) {
               if (err) {
                 console.error('notify error:', err);
               }
@@ -149,11 +151,11 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
-      'friend-request/:status': {
+      'friend-request/:request_id': {
         docs: {
           name: '接受/拒绝好友请求',
           params: [
-            { key: 'request_id', type: 'String' },
+            {key: 'request_id', type: 'String'},
             {
               param: 'status',
               enum: {
@@ -163,8 +165,8 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          var { request_id } = req.body;
-          var { status } = req.params;
+          var {request_id} = req.params;
+          var {status} = req.body;
           var user = req.user;
           User.handleFriendRequest(status, request_id, user.id).then(result => {
             res.sendJson(result);
@@ -174,12 +176,13 @@ module.exports = function(app) {
               receiver: result.receiver,
               from: result.from,
               type: status
-            }, req.from, function(err){
-              if(err) {
+            }, req.from, function (err) {
+              if (err) {
                 console.error('resolve notify error:', err);
               }
             });
-          }).catch(next);
+          }).catch(
+            next);
         }
       }
     },
@@ -188,8 +191,8 @@ module.exports = function(app) {
         docs: {
           name: '修改好友信息',
           params: [
-            { param: 'friend_id', type: 'String' },
-            { key: 'nickname', type: 'String' }
+            {param: 'friend_id', type: 'String'},
+            {key: 'nickname', type: 'String'}
           ]
         },
         method(req, res, next) {
@@ -206,7 +209,7 @@ module.exports = function(app) {
         docs: {
           name: '删除好友请求',
           params: [
-            { param: 'request_id', type: 'String' }
+            {param: 'request_id', type: 'String'}
           ]
         },
         method(req, res, next) {
