@@ -1,10 +1,11 @@
 'use strict';
 const chatRemote = require('../remote/chatRemote');
 const _ = require('../../../../libs/util');
-module.exports = function(app) {
+const {MsgTitle} = require('../../../shared/constant');
+module.exports = function (app) {
   return new Handler(app);
 };
-var Handler = function(app) {
+var Handler = function (app) {
   this.app = app;
   this.channelService = app.get('channelService');
   // app.roomMap = new Map();
@@ -14,27 +15,27 @@ var prototype = Handler.prototype;
 /**
  * Join chatRoom
  */
-prototype.joinRoom = function(msg, session, next) {
+prototype.joinRoom = function (msg, session, next) {
   let self = this;
-  let { target, target_cid } = msg;
+  let {target, target_cid} = msg;
   let [uid] = session.uid.split('*');
   let param = {
-    route: 'joinRoom',
+    route: MsgTitle.joinRoom,
     from: uid,
   };
   console.log(msg);
   console.log(target);
-  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(fcid) {
-    self.app.rpc.channel.channelRemote.getUserChannelId(session, target, function(err, channelId) {
-      self.app.rpc.account.accountRemote.getDeviceToken(session, { uid: target }, function(err, tokens) {
+  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function (fcid) {
+    self.app.rpc.channel.channelRemote.getUserChannelId(session, target, function (err, channelId) {
+      self.app.rpc.account.accountRemote.getDeviceToken(session, {uid: target}, function (err, tokens) {
         let token = tokens[0];
         if (token) {
-          let { cid } = tokens[0];
+          let {cid} = tokens[0];
           target_cid = cid;
         }
         // if (!target || !target_cid) return next({ code: 400, error: 'target can not be null,target_cid can not be null' });
-        if (!target) return next({ code: 400, error: 'target can not be null' });
-        self.app.rpc.account.accountRemote.bindRoom(session, { uid, target, fcid, target_cid }, function(err, room) {
+        if (!target) return next({code: 400, error: 'target can not be null'});
+        self.app.rpc.account.accountRemote.bindRoom(session, {uid, target, fcid, target_cid}, function (err, room) {
           if (err) return next(err);
           console.log(':::::::::::::::;channelId', channelId);
           let msg = room;
@@ -49,7 +50,7 @@ prototype.joinRoom = function(msg, session, next) {
             next(msg);
           } else {
             // roomid save 2 people channelid
-            self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, Object.assign(param, room), target, function(err, result) {
+            self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, Object.assign(param, room), target, function (err, result) {
               next(null, msg);
             });
           }
@@ -60,11 +61,11 @@ prototype.joinRoom = function(msg, session, next) {
 };
 
 
-prototype.unActiveRoom = function(msg, session, next) {
+prototype.unActiveRoom = function (msg, session, next) {
   let self = this;
-  let { roomid } = msg;
-  if (!roomid) return next({ error: 'roomid error' });
-  self.app.rpc.account.accountRemote.unActiveRoom(session, roomid, function(err, result) {
+  let {roomid} = msg;
+  if (!roomid) return next({error: 'roomid error'});
+  self.app.rpc.account.accountRemote.unActiveRoom(session, roomid, function (err, result) {
     if (err) return next(err);
     next(null, result);
   });
@@ -76,9 +77,9 @@ prototype.unActiveRoom = function(msg, session, next) {
  * @param {String} options.cid
  * @param {Object} options.param
  */
-prototype.notifyGroup = function(options) {
+prototype.notifyGroup = function (options) {
   let self = this;
-  let { members, cid, param } = options;
+  let {members, cid, param} = options;
   let channel = self.channelService.getChannel('global');
 
   if (!channel) return;
@@ -86,7 +87,7 @@ prototype.notifyGroup = function(options) {
   for (let member of members) {
     let uid = `${member}*${cid}`;
     let _member = channel.getMember(uid);
-    if (_member) users.push({ uid, sid: _member['sid'] });
+    if (_member) users.push({uid, sid: _member['sid']});
   }
   users.length && self.channelService.pushMessageByUids(param, users);
 };
@@ -97,23 +98,23 @@ prototype.notifyGroup = function(options) {
  * @param {String} msg.group
  * @param {Function} next
  */
-prototype.initGroup = function(msg, session, next) {
+prototype.initGroup = function (msg, session, next) {
   let self = this;
-  let { members, group } = msg;
+  let {members, group} = msg;
   let [creator, cid] = session.uid.split('*');
   let channel = self.channelService.getChannel('global');
   !channel.groupMap && (channel.groupMap = new Map());
   let map = channel.groupMap;
   let info = map.get(group);
   if (info) {
-    return next(null, { roomid: info.roomid });
+    return next(null, {roomid: info.roomid});
   }
-  self.app.rpc.group.groupRemote.init(session, creator, group, members, function(err, result) {
+  self.app.rpc.group.groupRemote.init(session, creator, group, members, function (err, result) {
     if (err) return next(err);
     console.log(result);
-    let { roomid } = result;
-    map.set(group, { members, roomid: result.roomid });
-    self.notifyGroup({ members, cid, param: { route: 'groupInit', roomid, group } });
+    let {roomid} = result;
+    map.set(group, {members, roomid: result.roomid});
+    self.notifyGroup({members, cid, param: {route: 'groupInit', roomid, group}});
     next(null, result);
   });
 };
@@ -125,11 +126,11 @@ prototype.initGroup = function(msg, session, next) {
  * @param {Object} session
  * @param {Function} next
  */
-prototype.addGroupMember = function(msg, session, next) {
+prototype.addGroupMember = function (msg, session, next) {
   let self = this;
-  let { members, group } = msg;
+  let {members, group} = msg;
   let [creator, cid] = session.uid.split('*');
-  self.app.rpc.group.groupRemote.insertMembers(session, creator, group, members, function(err, result) {
+  self.app.rpc.group.groupRemote.insertMembers(session, creator, group, members, function (err, result) {
     if (err) return next(err);
     let channel = self.channelService.getChannel('global');
 
@@ -137,7 +138,7 @@ prototype.addGroupMember = function(msg, session, next) {
     let info = map.get(group);
     info.members = result.members;
     map.set(group, info);
-    self.notifyGroup({ members: info.members, cid, param: { group, members, route: 'addMember', from: creator } });
+    self.notifyGroup({members: info.members, cid, param: {group, members, route: 'addMember', from: creator}});
     next(null, result);
   });
 };
@@ -149,20 +150,20 @@ prototype.addGroupMember = function(msg, session, next) {
  * @param {Object} session
  * @param {Function} next
  */
-prototype.removeGroupMember = function(msg, session, next) {
+prototype.removeGroupMember = function (msg, session, next) {
   let self = this;
-  let { members, group } = msg;
+  let {members, group} = msg;
   let [creator, cid] = session.uid.split('*');
-  if (members.indexOf(creator) > -1) return next({ code: 400, error: 'you can not remove youself from group' });
-  self.app.rpc.group.groupRemote.removeMembers(session, creator, group, members, function(err, result) {
+  if (members.indexOf(creator) > -1) return next({code: 400, error: 'you can not remove youself from group'});
+  self.app.rpc.group.groupRemote.removeMembers(session, creator, group, members, function (err, result) {
     if (err) return next(err);
     let channel = self.channelService.getChannel('global');
     let map = channel.groupMap;
     let info = map.get(group);
     info.members = result.members;
     map.set(group, info);
-    self.notifyGroup({ members: info.members, cid, param: { group, members, route: 'removeMember', from: creator } });
-    self.notifyGroup({ members, cid, param: { group, route: 'leaveGroup', from: creator } });
+    self.notifyGroup({members: info.members, cid, param: {group, members, route: 'removeMember', from: creator}});
+    self.notifyGroup({members, cid, param: {group, route: 'leaveGroup', from: creator}});
     next(null, result);
   });
 };
@@ -172,16 +173,16 @@ prototype.removeGroupMember = function(msg, session, next) {
  * @param {Object} session
  * @param {Function} next
  */
-prototype.sendGroup = function(msg, session, next) {
+prototype.sendGroup = function (msg, session, next) {
   let self = this;
-  let { group } = msg;
+  let {group} = msg;
   let [from, cid] = session.uid.split('*');
   let channel = self.channelService.getChannel('global');
   let map = self.groupMap;
   let info = map.get(group);
-  if (!info) return next({ code: 500, error: 'service no found this group' });
-  let { roomid, members } = info;
-  if (members.indexOf(from) < 0) return next({ code: 400, error: 'you have not in this group' });
+  if (!info) return next({code: 500, error: 'service no found this group'});
+  let {roomid, members} = info;
+  if (members.indexOf(from) < 0) return next({code: 400, error: 'you have not in this group'});
   let param = Object.assign(msg, {
     route: 'groupChat',
     roomid,
@@ -196,13 +197,13 @@ prototype.sendGroup = function(msg, session, next) {
     if (!_member) offlineUsers.push(member);
     else {
       users.push(member);
-      notifyUsers.push({ uid, sid: _member['sid'] });
+      notifyUsers.push({uid, sid: _member['sid']});
     }
   }
   self.channelService.pushMessageByUids(param, notifyUsers);
-  self.app.rpc.message.messageRemote.saveGroupMessage(session, param, offlineUsers, function(err) {
+  self.app.rpc.message.messageRemote.saveGroupMessage(session, param, offlineUsers, function (err) {
     if (err) return next(err);
-    next(null, { route: param.route });
+    next(null, {route: param.route});
   });
 };
 /**
@@ -210,16 +211,22 @@ prototype.sendGroup = function(msg, session, next) {
  * @param {Object} msg
  * @param {String} msg.deviceToken
  */
-prototype.deviceToken = function(msg, session, next) {
+prototype.deviceToken = function (msg, session, next) {
   let self = this;
-  let [uid, client] = session.uid.split('*'), { deviceToken, brand } = msg;
+  let [uid, client] = session.uid.split('*'), {deviceToken, brand} = msg;
   if (client) {
     session.set('deviceToken', deviceToken);
     // console.log('.........', client, deviceToken, '.............');
     if (!deviceToken) return;
-    self.app.onlineRedis.getChannelId(session, session.uid, function(err, cid) {
+    self.app.onlineRedis.getChannelId(session, session.uid, function (err, cid) {
 
-      self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken, brand }, function(err, value) {
+      self.app.rpc.account.accountRemote.saveDeviceToken(null, {
+        uid,
+        cid,
+        client,
+        deviceToken,
+        brand
+      }, function (err, value) {
         if (err) console.error(err);
         console.log('save device token:', value);
         next(null, {});
@@ -235,20 +242,20 @@ prototype.deviceToken = function(msg, session, next) {
  * @param  {Function} next next stemp callback
  *
  */
-prototype.send = function(msg, session, next) {
+prototype.send = function (msg, session, next) {
   let self = this;
-  let { target, roomid, content, type, from_name } = msg;
+  let {target, roomid, content, type, from_name} = msg;
 
   if (type == 'text') {
     content = content.replace(/&nbsp;/g, ' ');
-    if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
+    if (_.isBlank(content)) return next({code: 400, error: 'chat content can not be blank'});
   }
 
-  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(fcid) {
+  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function (fcid) {
 
     var [from] = session.uid.split('*');
     var param = Object.assign(msg, {
-      route: 'onChat',
+      route: MsgTitle.onChat,
       roomid,
       from,
       target
@@ -259,51 +266,51 @@ prototype.send = function(msg, session, next) {
 
       result.from_name = from_name;
       param = Object.assign(param, result);
-      console.log('jelll;;;;;;;;',param,result);
-      self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
+      console.log('jelll;;;;;;;;', param, result);
+      self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function (err, res) {
         if (err == 'user offline') {
-          self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+          self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function (err) {
             err && console.error(err);
-            next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
+            next(null, {route: param.route, msg: param, code: 404, error: 'user offline'});
           });
         } else {
-          next(null, { route: param.route, msg: param });
+          next(null, {route: param.route, msg: param});
         }
       });
 
-      self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
+      self.app.rpc.push.pushRemote.pushMessageOne(null, result, function (err, result) {
         if (err) console.warn(err);
       });
 
-      self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
+      self.app.rpc.account.accountRemote.activeRoom(session, roomid, function (err) {
         err && console.log(err);
       });
     });
   });
 };
 
-prototype.saveOfflineMessage = function(msg, session, next) {
+prototype.saveOfflineMessage = function (msg, session, next) {
   let self = this;
-  let { message_id } = msg;
+  let {message_id} = msg;
 
   if (message_id) {
-    self.app.rpc.message.messageRemote.getMessage(session, message_id, function(err, message) {
+    self.app.rpc.message.messageRemote.getMessage(session, message_id, function (err, message) {
       if (err) return next(err);
 
-      self.app.rpc.message.messageRemote.saveOfflineMessage(session, message, function(err) {
+      self.app.rpc.message.messageRemote.saveOfflineMessage(session, message, function (err) {
         if (err) return next(err);
 
-        next({ code: 200 });
+        next({code: 200});
       });
     });
   } else {
-    next({ code: 400, error: 'missing message_id' });
+    next({code: 400, error: 'missing message_id'});
   }
 };
 
 prototype.checkOnline = function (msg, session, next) {
   let {uid} = msg;
-  this.app.rpc.channel.channelRemote.isOnline(session,uid, function (res) {
+  this.app.rpc.channel.channelRemote.isOnline(session, uid, function (res) {
     next({code: 200, online: res});
   });
 

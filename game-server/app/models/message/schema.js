@@ -1,7 +1,7 @@
 'use strict';
 
 const SchemaObject = require('schema-object');
-
+const {MessageType} = require('../../shared/constant');
 const MessageSchema = new SchemaObject({
   content: String,
   from: {type: String, required: true},
@@ -10,7 +10,11 @@ const MessageSchema = new SchemaObject({
   route: String,
   group: String,
   timestamp: {type: Number, default: () => +new Date},
-  type: {type: String, default: 'text', enum: ['text', 'audio', 'video', 'file', 'image', 'link']},
+  type: {
+    type: Number,
+    default: MessageType.text,
+    enum: [MessageType.text, MessageType.audio, MessageType.video, MessageType., 'image', 'link']
+  },
   audio: String,
   file: String,
   image: String,

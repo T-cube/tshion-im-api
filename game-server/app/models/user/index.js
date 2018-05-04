@@ -34,29 +34,29 @@ module.exports = function (app) {
      */
     static user(user_id) {
       //Do: 频繁接口需要改为redis获取用户信息
-      // return tlf2_db.find('tlf_user', {id: user_id}, {
-      //   id: 1,
-      //   name: 1,
-      //   mobile: 1,
-      //   birthdate: 1,
-      //   email: 1,
-      //   sex: 1,
-      //   avatar: 1
+      return tlf2_db.find('tlf_user', {id: user_id}, {
+        id: 1,
+        name: 1,
+        mobile: 1,
+        birthdate: 1,
+        email: 1,
+        sex: 1,
+        avatar: 1
+      }).then(res => res.length > 0 ? res[0] : null);
+      // return app.Redis.get('user_' + user_id).then(user => {
+      //   if (user) {
+      //     user = JSON.parse(user);
+      //     delete user.createDate;
+      //     delete user.updateDate;
+      //     delete user.delFlag;
+      //     delete user.mongodbId;
+      //     delete user.registerIp;
+      //     delete user.lastLoginIp;
+      //     delete user.loginCount;
+      //     delete user.password;
+      //   }
+      //   return user;
       // });
-      return app.Redis.get('user_' + user_id).then(user => {
-        if (user) {
-          user = JSON.parse(user);
-          delete user.createDate;
-          delete user.updateDate;
-          delete user.delFlag;
-          delete user.mongodbId;
-          delete user.registerIp;
-          delete user.lastLoginIp;
-          delete user.loginCount;
-          delete user.password;
-        }
-        return user;
-      });
     }
 
     /**
@@ -320,8 +320,8 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static handleFriendRequest(status, request_id, receiver) {
-      if (status == FriendRequest.reject) return User._rejectFriendRequest(request_id, receiver);
-      if (status == FriendRequest.agree) return User._agreeFriendRequest(request_id, receiver);
+      if (status === FriendRequest.reject) return User._rejectFriendRequest(request_id, receiver);
+      if (status === FriendRequest.agree) return User._agreeFriendRequest(request_id, receiver);
       return Promise.reject('');
     }
 

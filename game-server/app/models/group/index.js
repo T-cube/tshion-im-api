@@ -9,6 +9,7 @@ const {MemberType} = require('../../shared/constant');
 module.exports = function (app) {
   const ObjectID = app.get('ObjectID');
   const groupCollection = app.db.collection('chat.group');
+  const groupNoticeCollection = app.db.collection('chat.group.notice');
 
   const Member = require('./member')(app);
   const Setting = require('./setting')(app);

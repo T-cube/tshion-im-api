@@ -1,5 +1,5 @@
 'use strict';
-
+const {MsgTitle} = require('../../../shared/constant');
 module.exports = function (app) {
   const User = require('../../../models/user')(app);
   return {
@@ -139,7 +139,7 @@ module.exports = function (app) {
           User.sendRequest(Object.assign(req.body, {from: user.id})).then(request => {
             res.sendJson(request);
             // var { from, user_id: target } = req.body;
-            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, MsgTitle.friendRequest, {
               request: request._id,
               from: user.id,
               type: request.update_at ? 'update' : 'new'
@@ -171,12 +171,12 @@ module.exports = function (app) {
           User.handleFriendRequest(status, request_id, user.id).then(result => {
             res.sendJson(result);
 
-            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, MsgTitle.friendRequest, {
               request: request_id,
               receiver: result.receiver,
               from: result.from,
               type: status
-            }, req.from, function (err) {
+            }, request_id, function (err) {
               if (err) {
                 console.error('resolve notify error:', err);
               }
