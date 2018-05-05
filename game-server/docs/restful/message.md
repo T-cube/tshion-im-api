@@ -20,6 +20,7 @@ returns
   [
     {
       from: String,
+      roomid: String,
       count: Number,
     },
     ...
