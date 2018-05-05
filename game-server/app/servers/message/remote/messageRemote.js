@@ -32,6 +32,15 @@ prototype.saveOfflineMessage = function(msg, cb) {
   });
 };
 
+prototype.saveOfflineMessages = function(msg, uids, cb) {
+  let msgs = uids.map(uid => {
+    msg.target = uid;
+    return new this.Message(msg);
+  });
+
+  this.Message.saveOfflineMessages(msgs).then(cb).catch(cb);
+};
+
 prototype.getOfflineMessage = function(target, cb) {
   this.Message.offlineMessageCount({ target }).then(result => {
     cb(null, result);

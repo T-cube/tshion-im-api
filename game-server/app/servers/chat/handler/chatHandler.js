@@ -166,6 +166,7 @@ prototype.removeGroupMember = function(msg, session, next) {
     next(null, result);
   });
 };
+
 /**
  * send group msg
  * @param {Object} msg
@@ -174,8 +175,47 @@ prototype.removeGroupMember = function(msg, session, next) {
  */
 prototype.sendGroup = function(msg, session, next) {
   let self = this;
-  let { group } = msg;
-  let [from, cid] = session.uid.split('*');
+  let { roomid, content, type, from_name, group } = msg;
+
+  if (type == 'text') {
+    content = content.replace(/&nbsp;/g, ' ');
+    if (_.isBlank(content)) return next({ code: 400, error: 'content can not be blank' });
+  }
+
+  let [from] = session.uid.split('*');
+  var param = Object.assign(msg, {
+    route: 'onChat.group',
+    roomid,
+    from
+  });
+
+  self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
+    if (err) return next(err);
+
+    result.from_name = from_name;
+
+    self.app.rpc.group.groupRemote.getMemberIds(null, group, from, function(err, uids) {
+      if (err) return next(err);
+
+      param = Object.assign(param, result);
+      self.app.rpc.channel.channelRemote.cahnnelPushMessageByUids(session, param, uids, function(err, offlines) {
+
+        next(null, { route: param.route, mag, param });
+
+        self.app.rpc.push.pushRemote.pushMessageMany(null, param, uids, () => {});
+
+        self.app.rpc.message.messageRemote.saveOfflineMessages(null, param, offlines, () => {});
+
+        self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
+          err && console.log(err);
+        });
+      });
+    });
+  });
+
+
+
+
   let channel = self.channelService.getChannel('global');
   let map = self.groupMap;
   let info = map.get(group);
@@ -205,6 +245,7 @@ prototype.sendGroup = function(msg, session, next) {
     next(null, { route: param.route });
   });
 };
+
 /**
  * Add deviceToken to session
  * @param {Object} msg
@@ -244,40 +285,36 @@ prototype.send = function(msg, session, next) {
     if (_.isBlank(content)) return next({ code: 400, error: 'chat content can not be blank' });
   }
 
-  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(fcid) {
+  var [from] = session.uid.split('*');
+  var param = Object.assign(msg, {
+    route: 'onChat',
+    roomid,
+    from,
+    target
+  });
 
-    var [from] = session.uid.split('*');
-    var param = Object.assign(msg, {
-      route: 'onChat',
-      roomid,
-      from,
-      target
+  self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
+    if (err) return next(err);
+
+    result.from_name = from_name;
+    param = Object.assign(param, result);
+    self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
+      if (err == 'user offline') {
+        self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+          err && console.error(err);
+          next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
+        });
+      } else {
+        next(null, { route: param.route, msg: param });
+      };
     });
 
-    self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
-      if (err) return next(err);
+    self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
+      if (err) console.warn(err);
+    });
 
-      result.from_name = from_name;
-      param = Object.assign(param, result);
-      console.log('jelll;;;;;;;;',param,result);
-      self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
-        if (err == 'user offline') {
-          self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-            err && console.error(err);
-            next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
-          });
-        } else {
-          next(null, { route: param.route, msg: param });
-        };
-      });
-
-      self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
-        if (err) console.warn(err);
-      });
-
-      self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
-        err && console.log(err);
-      });
+    self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
+      err && console.log(err);
     });
   });
 };

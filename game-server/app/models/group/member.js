@@ -45,6 +45,16 @@ module.exports = function(app) {
     }
 
     /**
+     * get a group member by uid and group id
+     * @param {String} uid
+     * @param {String} group
+     * @returns {Promise}
+     */
+    static findGroupByUidAndGroupId(uid, group) {
+      return groupMemberCollection.findOne({uid: ObjectID(uid), group: ObjectID(group)});
+    }
+
+    /**
      * get member list by group id
      * @param {String} group
      * @returns {Promise}

@@ -8,9 +8,23 @@ const groupRemote = function(app) {
   this.app = app;
   this.channelService = app.get('channelService');
   this.Group = require('../../../models/group')(app);
+  this.Member = require('../../../models/group/member')(app);
 };
 
 const prototype = groupRemote.prototype;
+
+prototype.getMemberIds = function(group, uid, cb) {
+  this.Member.findGroupByUidAndGroupId(uid, group).then(member => {
+    if (!member) return cb('user not in the group');
+
+    return this.Member.getMembersByGroupId(group).then(members => {
+      let uids = members.map(mem => mem._id.toHexString());
+
+      cb(null, uids);
+    });
+  }).catch(cb);
+};
+
 
 prototype.init = function(creator, group, members, cb) {
   let self = this;

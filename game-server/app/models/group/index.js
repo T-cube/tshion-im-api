@@ -41,6 +41,10 @@ module.exports = function(app) {
       return groupCollection.findOne({_id: ObjectID(_id), owner: ObjectID(owner)});
     }
 
+    static findOne(query) {
+      return groupCollection.findOne(query);
+    }
+
     /**
      * 获取某个用户所在的所有群组
      * @param {String} user_id

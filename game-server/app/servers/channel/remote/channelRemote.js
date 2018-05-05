@@ -157,8 +157,12 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
  * @param {Function} cb
  */
 prototype.cahnnelPushMessageByUids = function(params, targets, cb) {
+  let offlines = [];
   Promise.all(targets.map(target =>
       new Promise(resolve =>
-        this.channelPushMessageByUid(params, target, resolve))))
-    .then(() => cb());
+        this.channelPushMessageByUid(params, target, function(err) {
+          if (err === 'user offline') offlines.push(target);
+          resolve();
+        }))))
+    .then(() => cb(null, offlines));
 };

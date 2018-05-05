@@ -40,6 +40,12 @@ module.exports = function(app) {
       return OfflineMessageCollection.insertOne(self.msg);
     }
 
+
+    static saveOfflineMessages(msgs) {
+      return OfflineMessageCollection.insert(msgs);
+    }
+
+
     /**
      * 获取消息列表
      * @param {*} query

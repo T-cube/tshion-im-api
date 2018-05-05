@@ -16,8 +16,7 @@ prototype.notifyClient = function(route, msg, target, cb) {
   this.app.rpc.channel.channelRemote.channelPushMessageByUid(null, param, target, cb);
 };
 
-
-prototype.pushMessageOne = function(msg, cb) {
+prototype.setMessageContent = function(msg) {
   if (!msg.content) {
     let content;
     switch (msg.type) {
@@ -35,6 +34,25 @@ prototype.pushMessageOne = function(msg, cb) {
     }
     msg.content = `[${content}]`;
   }
+
+  return msg;
+};
+
+
+prototype.pushMessageMany = function(msg, uids, cb) {
+  msg = this.setMessageContent(msg);
+
+  uids.map(uid=>{
+    msg.target = uid;
+
+    this.Notification.createNotification(msg);
+  });
+  cb();
+};
+
+prototype.pushMessageOne = function(msg, cb) {
+  msg = this.setMessageContent(msg);
+
   this.Notification.createNotification(msg);
   cb();
 };
