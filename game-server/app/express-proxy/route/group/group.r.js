@@ -5,6 +5,8 @@ module.exports = function (app) {
   const Setting = require('../../../models/group/setting')(app);
   const Member = require('../../../models/group/member')(app);
   const {MemberType} = require('../../../shared/constant');
+  const Notice = require('../../../models/group/notice');
+  const mNotice = new Notice(app);
 
   return {
     get: {
@@ -59,7 +61,23 @@ module.exports = function (app) {
             res.sendJson(info);
           }).catch(next);
         }
-      }
+      },
+      'notice/:group_id': {
+        docs: {
+          name: '获取群公告',
+          params: [
+            {param: 'group_id', type: 'String'},
+            {param: 'last', type: 'Number'}
+          ]
+        },
+        method(req, res, next) {
+          let {group_id, last} = req.params;
+
+          mNotice.findList(group_id, last).then(list => {
+            res.sendJson(list);
+          }).catch(next);
+        }
+      },
     },
     post: {
       '': {
@@ -77,6 +95,7 @@ module.exports = function (app) {
             members = JSON.parse(members);
           }
           req.body.creator = req.user.id;
+
           new Group(req.body).save().then(newGroup => {
             let group = newGroup._id;
 
@@ -98,11 +117,31 @@ module.exports = function (app) {
         docs: {
           name: '创建群公告',
           params: [
+            {param: 'group_id', type: 'String'},
             {key: 'title', type: 'String'},
             {key: 'content', type: 'String'}
           ]
         },
         method(req, res, next) {
+          let {title, content} = req.body;
+          let {group_id} = req.params;
+          let uid = req.user.id;
+
+          Group.info(group_id).then(info => {
+            if (info.owner !== uid) {
+              next(req.apiError(402, '只有群主才能创建群公告'));
+            }
+            else {
+              mNotice.insert({
+                groupId: group_id,
+                title: title,
+                content: content,
+                sender: uid
+              }).then(result => {
+                res.sendJson(result);
+              }).catch(next);
+            }
+          }).catch(next);
 
         }
       }
@@ -169,107 +208,157 @@ module.exports = function (app) {
 
           }
         },
-      "notice/:group_id/:notice_id": {
+      "notice/:notice_id": {
         docs: {
           name: '修改群公告',
           params: [
+            {param: 'notice_id', type: 'String'},
             {key: 'title', type: 'String'},
             {key: 'content', type: 'String'}
           ]
         },
         method(req, res, next) {
+          let {title, content} = req.body;
+          let {notice_id} = req.params;
+          let uid = req.user.id;
+
+          mNotice.findOne(notice_id).then(result => {
+            Group.info(result.groupId).then(info => {
+              if (info.owner !== uid) {
+                next(req.apiError(402, '只有群主才能修改群公告'));
+              }
+              else {
+                let setObj = {};
+                if (title) {
+                  setObj.title = title;
+                }
+                if (content) {
+                  setObj.content = content;
+                }
+                mNotice.update(notice_id, setObj).then(result => {
+                  res.sendJson(result);
+                }).catch(next);
+              }
+            }).catch(next);
+          });
 
         }
       }
-      ,
-      delete:
-        {
-          'member/:group_id':
-            {
-              docs: {
-                name: '删除群组成员',
-                params:
-                  [
-                    {param: 'group_id', type: 'String'},
-                    {key: 'members', type: 'Array'}
-                  ]
-              }
-              ,
-              method(req, res, next) {
-                let {members} = req.body;
-                let {group_id} = req.params;
-
-                if (typeof members === 'string') {
-                  members = JSON.parse(members);
-                }
-
-                Group.info(req.params.group_id).then(info => {
-                  if (info.owner === req.user.id) {
-                    if (members.some(item => item === req.user.id)) {
-                      next(req.apiError(402, '不能删除群主'));
-                    }
-                    else {
-                      Member.deleteMembers(members, group_id).then(result => {
-                        res.sendJson(result);
-                      }).catch(next);
-                    }
-                  }
-                  else {
-                    next(req.apiError(402, '只有群主才能删除群组成员'));
-                  }
-                });
-
-              }
+    }
+    ,
+    delete:
+      {
+        'member/:group_id':
+          {
+            docs: {
+              name: '删除群组成员',
+              params:
+                [
+                  {param: 'group_id', type: 'String'},
+                  {key: 'members', type: 'Array'}
+                ]
             }
-          ,
-          'quit/:group_id':
-            {
-              docs: {
-                name: '退出群组',
-                params:
-                  [
-                    {param: 'group_id', type: 'String'},
-                  ]
+            ,
+            method(req, res, next) {
+              let {members} = req.body;
+              let {group_id} = req.params;
+
+              if (typeof members === 'string') {
+                members = JSON.parse(members);
               }
-              ,
-              method(req, res, next) {
-                let {group_id} = req.params;
-                Group.info(group_id).then(info => {
-                  if (info.owner === req.user.id) {
-                    next(req.apiError(402, '群主无法退出群'));
+
+              Group.info(req.params.group_id).then(info => {
+                if (info.owner === req.user.id) {
+                  if (members.some(item => item === req.user.id)) {
+                    next(req.apiError(402, '不能删除群主'));
                   }
                   else {
-                    Member.deleteMembers([req.user.id], group_id).then(result => {
+                    Member.deleteMembers(members, group_id).then(result => {
                       res.sendJson(result);
                     }).catch(next);
                   }
-                });
-              }
+                }
+                else {
+                  next(req.apiError(402, '只有群主才能删除群组成员'));
+                }
+              });
+
             }
-          ,
-          ':group_id':
-            {
-              docs: {
-                name: '删除解散群'
-              }
-              ,
-              method(req, res, next) {
-                let {group_id} = req.params;
-                Group.info(group_id).then(info => {
-                  if (info.owner === req.user.id) {
-                    Group.deletGroup(group_id).then(result => {
-                      Member.deleteGroup(group_id).then(result => {
-                        res.sendJson(result);
-                      }).catch(next);
-                    });
-                  }
-                  else {
-                    next(req.apiError(402, '群主才能解散群'));
-                  }
-                }).catch(next);
-              }
+          }
+        ,
+        'quit/:group_id':
+          {
+            docs: {
+              name: '退出群组',
+              params:
+                [
+                  {param: 'group_id', type: 'String'},
+                ]
             }
+            ,
+            method(req, res, next) {
+              let {group_id} = req.params;
+              Group.info(group_id).then(info => {
+                if (info.owner === req.user.id) {
+                  next(req.apiError(402, '群主无法退出群'));
+                }
+                else {
+                  Member.deleteMembers([req.user.id], group_id).then(result => {
+                    res.sendJson(result);
+                  }).catch(next);
+                }
+              });
+            }
+          }
+        ,
+        ':group_id':
+          {
+            docs: {
+              name: '删除解散群'
+            }
+            ,
+            method(req, res, next) {
+              let {group_id} = req.params;
+              Group.info(group_id).then(info => {
+                if (info.owner === req.user.id) {
+                  Group.deletGroup(group_id).then(result => {
+                    Member.deleteGroup(group_id).then(result => {
+                      res.sendJson(result);
+                    }).catch(next);
+                  });
+                }
+                else {
+                  next(req.apiError(402, '群主才能解散群'));
+                }
+              }).catch(next);
+            }
+          },
+        "notice/:notice_id": {
+          docs: {
+            name: '删除群公告',
+            params: [
+              {param: 'notice_id', type: 'String'},
+            ]
+          },
+          method(req, res, next) {
+            let {group_id, notice_id} = req.params;
+            let uid = req.user.id;
+            mNotice.findOne(notice_id).then(result => {
+              Group.info(result.groupId).then(info => {
+                if (info.owner !== uid) {
+                  next(req.apiError(402, '只有群主才能删除群公告'));
+                }
+                else {
+                  mNotice.update(notice_id, setObj).then(result => {
+                    res.sendJson(result);
+                  }).catch(next);
+                }
+              }).catch(next);
+            }).catch(next);
+
+          }
         }
-    }
+      }
+
   };
 };

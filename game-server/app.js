@@ -63,6 +63,7 @@ co(function*() {
   app.start(require('../shared/fixChannelMap')(app));
 
 }).catch(e => {
+  console.error(app.getServerType());
   throw e;
 });
 

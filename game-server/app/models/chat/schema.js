@@ -19,5 +19,8 @@ module.exports = function (chat) {
   if (mChatSchema.isErrors()) {
     throw new Error('Error: ' + JSON.stringify(mChatSchema.getErrors()[0]));
   }
+  if (chat.uid1 > chat.uid2) {
+    throw new Error('Error: chat.uid1 > chat.uid2');
+  }
   return mChatSchema.toObject();
 };

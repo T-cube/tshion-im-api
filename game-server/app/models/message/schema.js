@@ -13,7 +13,7 @@ const MessageSchema = new SchemaObject({
   type: {
     type: Number,
     default: MessageType.text,
-    enum: [MessageType.text, MessageType.audio, MessageType.video, MessageType., 'image', 'link']
+    enum: [MessageType.text, MessageType.audio, MessageType.video, MessageType.file, MessageType.image, MessageType.link, MessageType.notice]
   },
   audio: String,
   file: String,

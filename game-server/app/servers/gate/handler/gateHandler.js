@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const TOKEN_EXPIRE = 60 * 60 * 24 * 7;
 // const TOKEN_EXPIRE = 60 * 30;
 
-module.exports = function(app) {
+module.exports = function (app) {
   return new gateHandler(app);
 };
 
@@ -23,9 +23,9 @@ class gateHandler {
    */
   queryEntry(msg, session, next) {
     let self = this;
-    let { token, uid } = msg;
+    let {token} = msg;
     console.log('your are here:', msg);
-    if (!token) return next(null, { code: 500, message: 'token can not be null' });
+    if (!token) return next(null, {code: 500, message: 'token can not be null'});
     // get all connectors
     let connectors = this.app.getServersByType('connector');
     if (!connectors || connectors.length === 0) {
@@ -36,54 +36,50 @@ class gateHandler {
       return;
     }
     // 在这里向后台发送登陆服务请求
-    self.app.rpc.account.accountRemote.login(null, token, function(err, data) {
+    self.app.rpc.account.accountRemote.login(null, token, function (err, data) {
       // console.log('end rpc=======', data);
 
       if (err) return next(err);
 
 
-      let { user_id } = data;
-      if (user_id == uid) {
-        const init_token = crypto.createHash('sha1').update(`${uid}:${+new Date}`).digest('hex');
-        // select connector
-        var res = dispatcher.dispatch(uid, connectors);
-        // console.log(res);
-        self.app.tokenRedis.setex(init_token, TOKEN_EXPIRE, JSON.stringify({
-          uid,
+      let {user_id} = data;
+      const init_token = crypto.createHash('sha1').update(`${user_id}:${+new Date}`).digest('hex');
+      // select connector
+      var res = dispatcher.dispatch(user_id, connectors);
+      // console.log(res);
+      self.app.tokenRedis.setex(init_token, TOKEN_EXPIRE, JSON.stringify({
+        user_id,
+        hostname: res.hostname,
+        host: res.host,
+        port: res.clientPort
+      })).then(result => {
+        console.log(result);
+        next(null, {
+          code: 200,
           hostname: res.hostname,
           host: res.host,
-          port: res.clientPort
-        })).then(result => {
-          console.log(result);
-          next(null, {
-            code: 200,
-            hostname: res.hostname,
-            host: res.host,
-            port: res.clientPort,
-            init_token
-          });
-        }).catch(e => {
-          console.error(e);
-          next({ error: 'server redis error' });
+          port: res.clientPort,
+          init_token
         });
-      } else {
-        next({ error: 'token no worked for this user' });
-      }
+      }).catch(e => {
+        console.error(e);
+        next({error: 'server redis error'});
+      });
     });
   }
 
   tokenEntry(msg, session, next) {
     let self = this;
 
-    let { init_token, uid } = msg;
+    let {init_token, uid} = msg;
 
     console.log('init_tokeb::::::::::::', init_token);
     self.app.tokenRedis.get(init_token).then(result => {
-      if (!result) return next({ error: 'init_token expired or no exists' });
+      if (!result) return next({error: 'init_token expired or no exists'});
 
       const json = JSON.parse(result);
 
-      if (json.uid != uid) return next({ error: 'init_token no worked for this user' });
+      if (json.uid != uid) return next({error: 'init_token no worked for this user'});
 
       next(null, {
         code: 200,
@@ -92,7 +88,7 @@ class gateHandler {
       });
     }).catch(e => {
       console.error(e);
-      next({ error: 'server redis error' });
+      next({error: 'server redis error'});
     });
   }
 }

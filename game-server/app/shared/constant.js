@@ -1,4 +1,4 @@
-// content.js
+// constant.js
 // Created by fanyingmao 五月/04/2018
 //与客户端共享枚举常量
 
@@ -44,5 +44,12 @@ module.exports.MsgTitle = {
   joinRoom: 'joinRoom',//if some ont want to chat with you, will send message to this event before chat
   onLeave: 'onLeave',//when a friend offline,will emit this event
   friendRequest: 'friendRequest'//好友请求处理
+};
+
+// 客户端类型
+module.exports.ClientType = {
+  android: 'android',
+  ios: 'ios',
+  web: 'web',
 };
 

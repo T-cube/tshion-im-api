@@ -106,6 +106,8 @@ var ExpressProxy = function (app, opts) {
   // oauth error handler
   console.log(this.exp.oauth.errorHandler.toString());
 
+  this.exp.use(this.exp.oauth.errorHandler());
+
   /**
    * error handler
    */
@@ -121,7 +123,7 @@ var ExpressProxy = function (app, opts) {
     logger.error(err.stack);
   });
 
-  this.exp.use(this.exp.oauth.errorHandler());
+
   this.start(function () {
     console.log('express started');
   });
