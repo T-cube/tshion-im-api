@@ -212,38 +212,6 @@ prototype.sendGroup = function(msg, session, next) {
       });
     });
   });
-
-
-
-
-  let channel = self.channelService.getChannel('global');
-  let map = self.groupMap;
-  let info = map.get(group);
-  if (!info) return next({ code: 500, error: 'service no found this group' });
-  let { roomid, members } = info;
-  if (members.indexOf(from) < 0) return next({ code: 400, error: 'you have not in this group' });
-  let param = Object.assign(msg, {
-    route: 'groupChat',
-    roomid,
-    from
-  });
-  let users = [];
-  let offlineUsers = [];
-  let notifyUsers = [];
-  for (let member of members) {
-    let uid = `${member}*${cid}`;
-    let _member = channel.getMember(uid);
-    if (!_member) offlineUsers.push(member);
-    else {
-      users.push(member);
-      notifyUsers.push({ uid, sid: _member['sid'] });
-    }
-  }
-  self.channelService.pushMessageByUids(param, notifyUsers);
-  self.app.rpc.message.messageRemote.saveGroupMessage(session, param, offlineUsers, function(err) {
-    if (err) return next(err);
-    next(null, { route: param.route });
-  });
 };
 
 /**
