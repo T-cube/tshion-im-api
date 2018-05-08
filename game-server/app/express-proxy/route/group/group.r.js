@@ -321,7 +321,7 @@ module.exports = function (app) {
               let {group_id} = req.params;
               Group.info(group_id).then(info => {
                 if (info.owner === req.user.id) {
-                  Group.deletGroup(group_id).then(result => {
+                  Group.deleteGroup(group_id).then(result => {
                     Member.deleteGroup(group_id).then(result => {
                       res.sendJson(result);
                     }).catch(next);

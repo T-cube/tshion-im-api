@@ -41,14 +41,13 @@ class gateHandler {
 
       if (err) return next(err);
 
-
       let {user_id} = data;
       const init_token = crypto.createHash('sha1').update(`${user_id}:${+new Date}`).digest('hex');
       // select connector
       var res = dispatcher.dispatch(user_id, connectors);
       // console.log(res);
       self.app.tokenRedis.setex(init_token, TOKEN_EXPIRE, JSON.stringify({
-        user_id,
+        uid: user_id,
         hostname: res.hostname,
         host: res.host,
         port: res.clientPort

@@ -13,6 +13,7 @@ module.exports = function (app) {
   const Member = require('./member')(app);
   const Setting = require('./setting')(app);
   const User = require('../user')(app);
+  const groupRedis = app.groupRedis;
 
   return class Group {
     constructor(info) {
@@ -59,6 +60,15 @@ module.exports = function (app) {
       });
     }
 
+    static findGroup(group_id) {
+      return groupCollection.findOne({_id: ObjectID(group_id)}).then(group => {
+        if (!group) {
+          throw new Error('group no exist');
+        }
+        return group;
+      });
+    }
+
     static exists(group) {
       return groupCollection.findOne(group, {date_create: 1, roomid: 1});
     }
@@ -78,6 +88,7 @@ module.exports = function (app) {
           returnOriginal: false,
           returnNewDocument: true
         }).then(result => {
+          Group.clearRedis(group);
           return result.value;
         });
       });
@@ -94,6 +105,7 @@ module.exports = function (app) {
           returnOriginal: false,
           returnNewDocument: true
         }).then(result => {
+          Group.clearRedis(group);
           return result.value;
         });
       });
@@ -103,8 +115,18 @@ module.exports = function (app) {
      * 删除群
      * @param group_id
      */
-    static deletGroup(group_id) {
+    static deleteGroup(group_id) {
+      Group.clearRedis(group_id);
       return groupCollection.deleteMany({_id: ObjectID(group_id)});
+    }
+
+    /**
+     * 清除redis群数据
+     * @param group_id
+     */
+    static clearRedis(group_id) {
+      groupRedis.del(group_id);
+      groupRedis.del('members_' + group_id);
     }
 
     /**

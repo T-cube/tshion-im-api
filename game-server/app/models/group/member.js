@@ -99,6 +99,15 @@ module.exports = function (app) {
       return groupMemberCollection.count({group: ObjectID(group_id)});
     }
 
+    /**
+     * 获取群成员
+     * @param {String} group_id
+     * @returns {Promise}
+     */
+    static findMember(group_id) {
+      return groupMemberCollection.find({group: ObjectID(group_id)}).toArray();
+    }
+
     static _insertMany(members) {
       return groupMemberCollection.insertMany(members).then(result => result.insertedIds);
     }

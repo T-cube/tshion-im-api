@@ -315,3 +315,9 @@ prototype.checkOnline = function (msg, session, next) {
   });
 
 };
+
+prototype.test = function (msg, session, next) {
+  this.app.rpc.group.groupRemote.getGroupInfo(session, msg.groupId, function (data) {
+    next({code: 200, data: data});
+  });
+};
