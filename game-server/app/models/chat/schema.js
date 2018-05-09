@@ -1,6 +1,7 @@
 'use strict';
 
 const SchemaObject = require('schema-object');
+const {MessageType, ClientType} = require('../../shared/constant');
 //记录每个聊天会话信息，对最后一条聊天数据数据存储
 const ChatSchema = new SchemaObject({
   uid1: {type: String, required: true},//uid1 < uid2 保证会话唯一性
@@ -10,7 +11,8 @@ const ChatSchema = new SchemaObject({
   noRead: {type: Number, required: true},//未读消息数
   topTime: {type: Number, default: () => 0},//会话置顶时间
   timestamp: {type: Number, default: () => +new Date},
-  type: {type: String, default: 'text', enum: ['text', 'audio', 'video', 'file', 'image', 'link']},
+  roomid: {type: String, required: true},
+  enum: [MessageType.text, MessageType.audio, MessageType.video, MessageType.file, MessageType.image, MessageType.link, MessageType.notice],
   content: String,
 });
 

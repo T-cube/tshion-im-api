@@ -51,6 +51,11 @@ prototype.removeMembers = function (creator, group, members, cb) {
   });
 };
 
+/**
+ * 获取群信息，先从缓存中取缓存中没有从数据库取
+ * @param groupId 群id
+ * @param cb
+ */
 prototype.getGroupInfo = function (groupId, cb) {
   Promise.all([this.groupRedis.hmget(groupId, 'roomid')
     , this.groupRedis.smembers('members_' + groupId)])

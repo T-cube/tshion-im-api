@@ -206,6 +206,7 @@ prototype.sendGroup = function (msg, session, next) {
     next(null, {route: param.route});
   });
 };
+
 /**
  * Add deviceToken to session
  * @param {Object} msg
@@ -288,6 +289,62 @@ prototype.send = function (msg, session, next) {
     });
   });
 };
+
+/**
+ * 系统发送消息：包括审批，请假等
+ *
+ * @param {Object} msg message from client
+ * @param {Object} session
+ * @param  {Function} next next stemp callback
+ *
+ */
+prototype.systemSend = function (msg, session, next) {
+  let self = this;
+  let {target, roomid, content, type, from_name} = msg;
+
+  if (type == 'text') {
+    content = content.replace(/&nbsp;/g, ' ');
+    if (_.isBlank(content)) return next({code: 400, error: 'chat content can not be blank'});
+  }
+
+  self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function (fcid) {
+
+    var [from] = session.uid.split('*');
+    var param = Object.assign(msg, {
+      route: MsgTitle.onChat,
+      roomid,
+      from,
+      target
+    });
+
+    self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
+      if (err) return next(err);
+
+      result.from_name = from_name;
+      param = Object.assign(param, result);
+      console.log('jelll;;;;;;;;', param, result);
+      self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function (err, res) {
+        if (err == 'user offline') {
+          self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function (err) {
+            err && console.error(err);
+            next(null, {route: param.route, msg: param, code: 404, error: 'user offline'});
+          });
+        } else {
+          next(null, {route: param.route, msg: param});
+        }
+      });
+
+      self.app.rpc.push.pushRemote.pushMessageOne(null, result, function (err, result) {
+        if (err) console.warn(err);
+      });
+
+      self.app.rpc.account.accountRemote.activeRoom(session, roomid, function (err) {
+        err && console.log(err);
+      });
+    });
+  });
+};
+
 
 prototype.saveOfflineMessage = function (msg, session, next) {
   let self = this;

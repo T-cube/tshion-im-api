@@ -119,7 +119,7 @@ module.exports = function (app) {
     }
 
     static msgToChat(msg) {
-      let {content, from, target, group, type} = msg;
+      let {content, from, target, group, type, roomid} = msg;
       let uid1, uid2, chatFrom;
       if (from < target) {
         uid1 = from;
@@ -137,7 +137,8 @@ module.exports = function (app) {
         chatFrom: chatFrom,
         content: content,
         groupId: group,
-        type: type
+        type: type,
+        roomid: roomid
       };
     }
 
