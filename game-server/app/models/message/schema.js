@@ -5,6 +5,7 @@ const SchemaObject = require('schema-object');
 const MessageSchema = new SchemaObject({
   content: String,
   from: String,
+  sourceid: String,
   target: String,
   roomid: String,
   route: String,

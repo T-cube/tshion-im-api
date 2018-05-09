@@ -135,16 +135,22 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           var { user_id } = req.body;
-          if (user._id == user_id)
+          let self = user._id.toHexString();
+          if (self == user_id)
             return next(req.apiError(400, 'can not add self as a friend '));
 
           User.sendRequest(Object.assign(req.body, { from: user._id })).then(request => {
             res.sendJson(request);
             // var { from, user_id: target } = req.body;
-            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', { request: request._id, from: user._id.toHexString(), type: request.update_at ? 'update' : 'new' }, user_id, function(err) {
-              if (err) {
-                console.error('notify error:', err);
-              }
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
+              request: request._id,
+              from: user._id.toHexString(),
+              type: request.update_at ? 'update' : 'new' },
+              user_id,
+              function(err) {
+                if (err) {
+                  console.error('notify error:', err);
+                }
             });
           }).catch(next);
         }
@@ -174,7 +180,7 @@ module.exports = function(app) {
               receiver: result.receiver,
               from: result.from,
               type: status
-            }, req.from, function(err){
+            }, result.from, function(err){
               if(err) {
                 console.error('resolve notify error:', err);
               }

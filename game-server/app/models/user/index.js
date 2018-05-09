@@ -295,7 +295,7 @@ module.exports = function(app) {
 
 
         return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
-          return { result: 'ok', from: request.from, receiver: request.receiver };
+          return { result: 'ok', from: String(request.from), receiver: String(request.receiver) };
         });
       });
     }
@@ -311,7 +311,7 @@ module.exports = function(app) {
       if (status == 'reject') return User._rejectFriendRequest(request_id, receiver);
       if (status == 'agree') {
         return User._agreeFriendRequest(request_id, receiver).then(result => {
-          let { from: receiver } = result;
+          let { from, receiver } = result;
           const roomInfo = Room.createRoomInfo(from, receiver)
 
           return new Room(roomInfo).save().then(() => {
