@@ -19,46 +19,47 @@ module.exports = function (app) {
           }).catch(next);
         }
       },
-      ':roomid': {
-        docs: {
-          name: '获取聊天日志',
-          params: [
-            {param: 'roomid', type: 'String'},
-            {query: 'last', type: 'String'},
-            {query: 'pagesize', type: 'Number'}
-          ]
-        },
-        method(req, res, next) {
-          // console.log('123456789123456789', req.query);
-          Message.getList(Object.assign(req.params, req.query)).then(result => {
-            // console.log(123,result.list.length)
-            res.sendJson(result);
-          }).catch(next);
-        }
-      },
-      'offline/:target': {
-        docs: {
-          name: '获取离线消息统计',
-          params: [
-            {param: 'target', type: 'String'}
-          ]
-        },
-        method(req, res, next) {
-          Message.offlineMessageCount(req.params).then(counts => {
-            res.sendJson(counts);
-          }).catch(next);
-        }
-      },
-      ':roomid/newly': {
+      // ':target': {
+      //   docs: {
+      //     name: '获取聊天日志',
+      //     params: [
+      //       {param: 'target', type: 'String'},
+      //       {query: 'last', type: 'String'},
+      //       {query: 'pagesize', type: 'Number'}
+      //     ]
+      //   },
+      //   method(req, res, next) {
+      //     // console.log('123456789123456789', req.query);
+      //     Message.getList(Object.assign(req.params, req.query)).then(result => {
+      //       // console.log(123,result.list.length)
+      //       res.sendJson(result);
+      //     }).catch(next);
+      //   }
+      // },
+      // 'offline/:target': {
+      //   docs: {
+      //     name: '获取离线消息统计',
+      //     params: [
+      //       {param: 'target', type: 'String'}
+      //     ]
+      //   },
+      //   method(req, res, next) {
+      //     Message.offlineMessageCount(req.params).then(counts => {
+      //       res.sendJson(counts);
+      //     }).catch(next);
+      //   }
+      // },
+      'record': {
         docs: {
           name: '获取最新的聊天记录',
           params: [
-            {param: 'roomid', type: 'String'},
-            {query: 'index', type: 'String'}
+            {query: 'chatType', type: 'Number'},
+            {query: 'targetId', type: 'String'},
+            {query: 'last', type: 'Number'}
           ],
         },
         method(req, res, next) {
-          Message.getNewLyList(Object.assign(req.params, req.query)).then(result => {
+          Message.getList(Object.assign({userId: req.user.id}, req.query)).then(result => {
             // console.log(result)
             res.sendJson(result);
           }).catch(next);

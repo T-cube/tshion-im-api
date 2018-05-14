@@ -30,7 +30,7 @@ co(function*() {
     // route configures
     app.route('chat', routeUtil.chat);
     app.set('connectorConfig', {
-      connector: pomelo.connectors.sioconnector,
+      connector: pomelo.connectors.hybridconnector,
       // 'websocket', 'polling-xhr', 'polling-jsonp', 'polling'
       transports: ['websocket','polling-xhr', 'polling',],
       // transports: ['polling-xhr','websocket', 'polling',],

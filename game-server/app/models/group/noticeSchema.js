@@ -14,7 +14,7 @@ const NoticeSchema = new SchemaObject({
 module.exports = function (notice) {
   let mNoticeSchema = new NoticeSchema(notice);
   if (mNoticeSchema.isErrors()) {
-    throw new Error('Error: ' + JSON.stringify(mNoticeSchema.getErrors()[0]));
+    throw new Error(mNoticeSchema.getErrors()[0].errorMessage);
   }
   return mNoticeSchema.toObject();
 };

@@ -47,7 +47,7 @@ prototype.login = function (token, cb) {
 
 prototype.getChannelId = function (uid, cb) {
   this.app.onlineRedis.get(uid).then(lastcid => {
-    cb(null, lastcid);
+    cb(lastcid);
   }).catch(cb);
 };
 
@@ -108,6 +108,7 @@ prototype.getDeviceToken = function (info, cb) {
 prototype.revokeDeviceToken = function (info, cb) {
   let self = this;
   self.Account.delDeviceToken(info).then(result => cb(null, result)).catch(cb);
+  this.unbindChannel(info);//断线删除用户在线id
 };
 
 prototype.findFriends = function (uid) {

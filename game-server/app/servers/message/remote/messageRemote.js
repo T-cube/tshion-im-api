@@ -15,12 +15,13 @@ const prototype = MessageRemote.prototype;
 prototype.saveMessage = function (msg, cb) {
   let self = this;
 
-  new this.Message(msg).save().then(result => {
-    this.Chat.insertOrUpdate(msg);
+
+  this.Chat.insertOrUpdate(msg).then(res => {
+    return new this.Message(msg).save()
+  }).then(result => {
     cb(null, result);
   }).catch(e => {
     console.error(e);
-    cb(e);
   });
 };
 

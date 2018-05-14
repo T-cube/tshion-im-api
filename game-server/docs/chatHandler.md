@@ -44,7 +44,17 @@ on 'joinRoom' event receive data
 ```javascript
 {
   target: String,
-  roomid: String,
+  content: String,    // optional, if type text
+  type: Enum,         // text, image, file
+  url: String         // optional, if type is image or file
+}
+```
+## chat.chatHandler.sendSystem
+*java system send message*
+```javascript
+{
+  targets: Array,
+  system: String,
   content: String,    // optional, if type text
   type: Enum,         // text, image, file
   url: String         // optional, if type is image or file

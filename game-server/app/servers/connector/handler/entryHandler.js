@@ -96,7 +96,7 @@ class entryHandler {
               }).then(res => {
                 self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function (err, status) {
                   if (err) return next(err);
-                  next(null, res);
+                  next(null, Object.assign(res, {code: 200}));
                 });
               }).catch(next);
             });
@@ -104,7 +104,7 @@ class entryHandler {
 
       }).catch(e => {
         console.error(e);
-        next({error: 'server redis error'});
+        next({code: 500, error: 'server redis error'});
       });
     });
   }
@@ -125,7 +125,7 @@ var userLeaveCallback = function (client, uid, next) {
       next(null, {});
     });
   }
-
+  console.error("userLeaveCallback : " + uid);
   next(null, {});
 };
 

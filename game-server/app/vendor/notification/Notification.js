@@ -28,8 +28,8 @@ module.exports = function(app) {
     key: `${pem_dir}apn-dev-key.pem`,
     passphrase: '19491001'
   };
-
-  const apnService = new apn.Provider(provider);
+  //Todo:证书过期先注释
+  // const apnService = new apn.Provider(provider);
   const androidPush = new AndroidPush(jpushConfig);
 
 
@@ -109,13 +109,13 @@ module.exports = function(app) {
         if (iosTokens.length) {
           let message = this._generateMessageIOS(notification);
 
-          apnService.send(message, iosTokens).then(result => {
-            console.log('.................:', result);
-            console.log('sent:', result.sent.length);
-            console.log('failed:', result.failed.length);
-            console.log(result.failed);
-            resolve(result);
-          });
+          // apnService.send(message, iosTokens).then(result => {
+          //   console.log('.................:', result);
+          //   console.log('sent:', result.sent.length);
+          //   console.log('failed:', result.failed.length);
+          //   console.log(result.failed);
+          //   resolve(result);
+          // });
         } else resolve(null);
       }),
       new Promise((resolve, reject) => {

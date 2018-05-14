@@ -123,7 +123,7 @@ prototype.channelPushMessage = function(channelId, params, cb) {
 prototype.channelPushMessageByUid = function(params, target, cb) {
   var channelId = this.userChannelMap.get(target);
   var channel = this.channelService.getChannel(channelId);
-  console.log(target, channel, this.userChannelMap);
+  // console.log(target, channel, this.userChannelMap);
 
   if (!channel) {
     return cb('user offline');
@@ -144,15 +144,4 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
 
   this.channelService.pushMessageByUids(params, clients);
   cb();
-};
-
-/**
- * 获取玩家是否在线
- * @param target 玩家id
- * @param cb
- */
-prototype.isOnline = function(uid, cb) {
-  var channelId = this.userChannelMap.get(uid);
-  var channel = this.channelService.getChannel(channelId);
-  cb(!!channel);
 };

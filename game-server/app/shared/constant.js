@@ -26,6 +26,13 @@ module.exports.FriendRequestStatue = {
   IGNORE: 3,//忽略
 };
 
+//会话类型
+module.exports.ChatType = {
+  single: 0,//单聊
+  group: 1,//群聊
+  system: 3,//系统消息
+};
+
 //会话消息类型
 module.exports.MessageType = {
   text: 0,//普通文本消息
@@ -51,5 +58,6 @@ module.exports.ClientType = {
   android: 'android',
   ios: 'ios',
   web: 'web',
+  server: 'server',
 };
 
