@@ -53,8 +53,8 @@ on 'joinRoom' event receive data
 *java system send message*
 ```javascript
 {
-  targets: Array,
-  system: String,
+  targets: Array,    //target userId Array
+  system: String,     //system message type id
   content: String,    // optional, if type text
   type: Enum,         // text, image, file
   url: String         // optional, if type is image or file
