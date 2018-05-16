@@ -19,7 +19,6 @@
   "license": "ISC",
   "dependencies": {
     "apn": "^2.1.4",
-    "body-parser": "^1.17.1",
     "canvas": "^2.0.0-alpha.11",
     "co": "^4.6.0",
     "connect-multiparty": "^2.1.0",
@@ -33,6 +32,7 @@
     "mipush": "^1.1.0",
     "mongodb": "^2.2.24",
     "morgan": "^1.9.0",
+    "multer": "^1.3.0",
     "mysql": "^2.15.0",
     "oauth2-server": "^2.4.1",
     "pomelo": "2.2.x",

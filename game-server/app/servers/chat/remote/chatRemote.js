@@ -1,10 +1,12 @@
 'use strict';
 
-module.exports = function(app) {
+module.exports = function (app) {
   return new ChatRemote(app);
 };
 
-var ChatRemote = function(app) {
+const {MsgTitle, ChatType} = require('../../../shared/constant');
+
+var ChatRemote = function (app) {
   this.app = app;
   this.Room = require('../../../models/room')(app);
   this.channelService = app.get('channelService');
@@ -21,9 +23,9 @@ let prototype = ChatRemote.prototype;
  * @param {boolean} flag channel parameter
  *
  */
-prototype.add = function(uid, sid, cid, flag, cb) {
+prototype.add = function (uid, sid, cid, flag, cb) {
 
-  this.app.rpc.channel.channelRemote.bindChannel(null, uid, cid, sid, flag, function(err, result) {
+  this.app.rpc.channel.channelRemote.bindChannel(null, uid, cid, sid, flag, function (err, result) {
     cb(null, result);
   });
 
@@ -52,7 +54,7 @@ prototype.add = function(uid, sid, cid, flag, cb) {
  * @param {String} uid
  * @param {Function} cb
  */
-prototype.roomInfo = function(uid, cid, cb) {
+prototype.roomInfo = function (uid, cid, cb) {
   this.Room.getUserRoomMap(uid, cid).then(map => {
     map.forEach(room => this.app.roomMap.set(room.roomid, room.room));
     cb(null, map);
@@ -71,7 +73,7 @@ prototype.roomInfo = function(uid, cid, cb) {
  * @return {Array} users uids in channel
  *
  */
-prototype.get = function(cid, flag) {
+prototype.get = function (cid, flag) {
   var users = [];
   let channel = this.channelService.getChannel('global', flag);
   if (channel) {
@@ -92,8 +94,8 @@ prototype.get = function(cid, flag) {
  * @param {String} name channel name
  *
  */
-prototype.kick = function(uid, sid, cb) {
-  this.app.rpc.channel.channelRemote.kickChannel(null, uid, sid, function(err) {
+prototype.kick = function (uid, sid, cb) {
+  this.app.rpc.channel.channelRemote.kickChannel(null, uid, sid, function (err) {
     cb && cb();
   });
   // var param = {
@@ -110,7 +112,7 @@ prototype.kick = function(uid, sid, cb) {
   // });
 };
 
-prototype.channelPushMessage = function(channelId, params, cb) {
+prototype.channelPushMessage = function (channelId, params, cb) {
   var self = this;
 
   var channel = self.channelService.getChannel(channelId);
@@ -127,18 +129,18 @@ prototype.channelPushMessage = function(channelId, params, cb) {
  * @param {String} target
  * @param {Function} cb
  */
-prototype.channelPushMessageByUid = function(channelId, params, target, cb) {
+prototype.channelPushMessageByUid = function (channelId, params, target, cb) {
   let self = this;
 
   var channel = self.channelService.getChannel(channelId, false);
 
-  let { loginMap } = channel;
+  let {loginMap} = channel;
   let loginer = loginMap.get(target);
 
   let clients = [];
   for (let tuid in loginer) {
     let sid = loginer[tuid];
-    clients.push({ uid: tuid, sid });
+    clients.push({uid: tuid, sid});
   }
 
   if (!clients.length) {
@@ -149,10 +151,90 @@ prototype.channelPushMessageByUid = function(channelId, params, target, cb) {
   cb(null);
 };
 
-prototype.channelPushMessageByUids = function(params, clients, cb) {
+prototype.channelPushMessageByUids = function (params, clients, cb) {
   var self = this;
 
   self.channelService.pushMessageByUids(params, clients);
 
   cb(null);
 };
+/**
+ * 发送消息
+ * @param msg
+ * @param cb
+ */
+prototype.sendSysMsg = function (msg, cb) {
+  let self = this;
+
+  let {targets, content, type, system} = msg;
+
+  delete msg[targets];
+
+  targets.forEach(target => {
+    let param = Object.assign(msg, {
+      uid1: target,
+      target,
+      route: MsgTitle.onChat,
+      system,
+      chatType: ChatType.system
+    });
+
+    self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
+      if (err) return cb(err);
+      param = Object.assign(param, result);
+      console.log('jelll;;;;;;;;', param, result);
+      self.app.rpc.account.accountRemote.getChannelId(null, target, function (fcid) {//通过redis获取用户在线状态
+        self.app.rpc.channel.channelRemote.channelPushMessageByUid(null, param, target, function (err, res) {
+          if (!fcid && fcid !== 0) {//通过fcid判断在线状态
+            self.app.rpc.push.pushRemote.pushMessageOne(null, result, function (err, result) {
+              if (err) console.warn(err);
+            });
+          } else {
+          }
+        });
+      });
+    });
+  });
+  cb(null, {route: msg, msg: msg});
+};
+
+/**
+ * 更新原消息
+ * @param msg
+ * @param cb
+ */
+prototype.updateSysMsg = function (msg, cb) {
+  let self = this;
+
+  let {_ids, content, type, system} = msg;
+
+  delete msg[_ids];
+
+  _ids.forEach(_id => {
+    let param = Object.assign(msg, {
+      _id: _id,
+      route: MsgTitle.onChat,
+      system,
+      chatType: ChatType.system
+    });
+    msg._id = _id;
+    self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
+      if (err) return cb(err);
+      param = Object.assign(param, result);
+      console.log('jelll;;;;;;;;', param, result);
+      self.app.rpc.account.accountRemote.getChannelId(null, msg.uid1, function (fcid) {//通过redis获取用户在线状态
+        self.app.rpc.channel.channelRemote.channelPushMessageByUid(null, param, param.uid1, function (err, res) {
+          if (!fcid && fcid !== 0) {//通过fcid判断在线状态
+            self.app.rpc.push.pushRemote.pushMessageOne(null, result, function (err, result) {
+              if (err) console.warn(err);
+            });
+          } else {
+          }
+        });
+      });
+    });
+  });
+  cb(null, {route: msg, msg: msg});
+};
+
+

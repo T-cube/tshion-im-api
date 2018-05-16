@@ -12,18 +12,33 @@ var MessageRemote = function (app) {
 
 const prototype = MessageRemote.prototype;
 
+prototype.insertOrUpdateMsg = async function (msg) {
+  let _id = msg._id, res;
+  if (_id) {
+    let findMsg = await this.Message.getMessage(msg._id);
+    if (!findMsg) {
+      throw new Error("no found findMsg _id:" + msg._id);
+    }
+    msg.target = findMsg.uid1;
+    msg = await this.Chat.insertOrUpdate(msg);
+    res = await this.Message.updateMessage(_id, msg);
+  }
+  else {
+    msg = await this.Chat.insertOrUpdate(msg);
+    res = await (new this.Message(msg)).save();
+  }
+  return res;
+};
+
 prototype.saveMessage = function (msg, cb) {
-  let self = this;
 
-
-  this.Chat.insertOrUpdate(msg).then(res => {
-    return new this.Message(msg).save()
-  }).then(result => {
+  this.insertOrUpdateMsg(msg).then(result => {
     cb(null, result);
   }).catch(e => {
     console.error(e);
-  });
+  })
 };
+
 
 prototype.saveOfflineMessage = function (msg, cb) {
   new this.Message(msg).saveOffline().then(result => {

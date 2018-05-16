@@ -5,6 +5,9 @@ const http = require('http');
 
 const config = require('../../../../config/config');
 const fileFilter = require('../../middleware/file-filter');
+var multer = require('multer')
+var upload = multer({dest: 'uploads/'})
+
 module.exports = function(app) {
 
   const fileHash = require('../../middleware/file-hash')(app);

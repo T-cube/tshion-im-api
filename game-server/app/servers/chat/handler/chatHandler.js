@@ -277,9 +277,9 @@ prototype.send = function (msg, session, next) {
           self.app.rpc.push.pushRemote.pushMessageOne(session, result, function (err, result) {
             if (err) console.warn(err);
           });
-          next(null, {route: param.route, msg: param, online: false});
+          next(null, {code: 200, route: param.route, msg: param, online: false});
         } else {
-          next(null, {route: param.route, msg: param, online: true});
+          next(null, {code: 200, route: param.route, msg: param, online: true});
         }
       });
     });
@@ -311,52 +311,6 @@ prototype.sendGroup = function (msg, session, next) {
 
 };
 
-
-/**
- * 系统发送消息：包括审批，请假等
- *
- * @param {Object} msg message from client
- * @param {Object} session
- * @param  {Function} next next stemp callback
- *
- */
-prototype.sendSystem = function (msg, session, next) {
-  let self = this;
-  let {targets, content, type, system} = msg;
-  let [from] = session.uid.split('*');
-
-  if (!session.uid) {
-    next({error: '用户未认证'});
-    return;
-  }
-
-  targets.forEach(target => {
-    let param = Object.assign(msg, {
-      route: MsgTitle.onChat,
-      system,
-      target,
-      chatType: ChatType.system
-    });
-
-    self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
-      if (err) return next(err);
-      param = Object.assign(param, result);
-      console.log('jelll;;;;;;;;', param, result);
-      self.app.rpc.account.accountRemote.getChannelId(session, target, function (fcid) {//通过redis获取用户在线状态
-        self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function (err, res) {
-          if (!fcid && fcid !== 0) {//通过fcid判断在线状态
-            self.app.rpc.push.pushRemote.pushMessageOne(session, result, function (err, result) {
-              if (err) console.warn(err);
-            });
-          } else {
-          }
-        });
-      });
-    });
-  });
-
-  next(null, {route: msg, msg: msg});
-};
 
 
 // prototype.saveOfflineMessage = function (msg, session, next) {

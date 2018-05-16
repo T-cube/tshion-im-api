@@ -91,7 +91,6 @@ var ExpressProxy = function (app, opts) {
   });
 
   this.exp.use('/api', require('../express-proxy/middleware/oauth-check')());
-
   require('../express-proxy/route')(this.exp, this.app);
   // router
   this.exp.all('/api/123', function (req, res) {

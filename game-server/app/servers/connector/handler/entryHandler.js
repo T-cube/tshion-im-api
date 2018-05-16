@@ -40,7 +40,7 @@ class entryHandler {
         // var sessionService = self.app.get('sessionService');
 
         // uid += `*${cid}`;
-        client && (uid += `*${client}`);
+        // client && (uid += `*${client}`);
         //duplicate log in
         // if (!!sessionService.getByUid(uid)) {
         //   console.log('rrrrrrrrrrrrrrrr')
@@ -52,12 +52,12 @@ class entryHandler {
         // }
 
         session.bind(uid);
-        session.set('cid', cid);
-        session.push('cid', function (err) {
-          if (err) {
-            console.error('set cid for session service failed! error is : %j', err.stack);
-          }
-        });
+        // session.set('cid', cid);
+        // session.push('cid', function (err) {
+        //   if (err) {
+        //     console.error('set cid for session service failed! error is : %j', err.stack);
+        //   }
+        // });
 
         session.on('closed', onUserLeave.bind(null, self.app, session, userLeaveCallback.bind(self, client, uid, next)));
         //put user into channel

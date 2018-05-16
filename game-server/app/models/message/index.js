@@ -101,6 +101,13 @@ module.exports = function (app) {
       });
     }
 
+    static updateMessage(_id, message) {
+      message = schema(message);
+      return MessageCollection.updateOne({_id: ObjectID(_id)}, message).then(res => {
+        return message;
+      });
+    }
+
     /**
      * 存储离线消息
      */
@@ -115,9 +122,9 @@ module.exports = function (app) {
     save() {
       let message = this.msg;
       return MessageCollection.insertOne(message).then(res => {
-        message._id = res.insertedId;
         return message;
       });
     }
+
   };
 };

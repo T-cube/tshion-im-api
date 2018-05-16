@@ -41,7 +41,7 @@ module.exports = function (app) {
         chat.noRead = 1;
         schemaChat = schema(chat);
         await ChatCollection.insertOne(schemaChat).finally();
-        return 0;
+        return schemaChat;
       }
       else if (docs.length === 1) {
         if (docs[0].chatFrom !== chat.chatFrom) {
@@ -52,7 +52,7 @@ module.exports = function (app) {
         }
         schemaChat = schema(chat);
         await ChatCollection.updateOne({_id: docs[0]._id}, schemaChat);
-        return 0;
+        return schemaChat;
       }
       else {
         throw Error('insertOrUpdate more then one ' + __filename);
@@ -94,25 +94,15 @@ module.exports = function (app) {
      * @param userId
      * @returns {Promise}
      */
-    static findUserChat(userId) {
-      return new Promise((resolve, reject) => {
-        ChatCollection.find({$or: [{uid1: userId}, {uid2: userId}]}).sort({
-          topTime: 1,
-          timestamp: 1
-        }).toArray().then(docs => {
-          if (!docs) {
-            reject(docs);
-          }
-          else {
-            resolve(docs.map(item => {
-              return Chat.chatToMsg(item, userId);
-            }));
-          }
-        }).catch(e => {
-          reject(e);
-        });
-      }).catch(e => {
-        throw e;
+    static async findUserChat(userId) {
+
+      let docs = await ChatCollection.find({$or: [{uid1: userId}, {uid2: userId}]}).sort({
+        topTime: 1,
+        timestamp: 1
+      }).toArray();
+
+      return docs.map(item => {
+        return Chat.chatToMsg(item, userId);
       });
     }
 

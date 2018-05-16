@@ -8,6 +8,7 @@ const MessageSchema = new SchemaObject({
   uid2: {type: String, required: true},
   group: {type: String},
   system: {type: String},
+  chatFrom: {type: Boolean, required: true},//消息1->2 true 2-> 1 false; 群与系统消息为2
   chatType: {type: Number, default: ChatType.single, enum: [ChatType.single, ChatType.group, MessageType.system]},//会话类型群聊，
   route: String,
   timestamp: {type: Number, default: () => +new Date},
