@@ -281,7 +281,8 @@ module.exports = function (app) {
                 else {
                   next(req.apiError(402, '只有群主才能删除群组成员'));
                 }
-              });
+              })
+              .catch(next);
 
             }
           }

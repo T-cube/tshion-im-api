@@ -75,6 +75,7 @@ module.exports = function (app) {
         type: 1,
         status: 1
       }).then(member => {
+        member = member[0];
         return User.findUser({id: member.uid}, {name: 1, avatar: 1}).then(user => {
           delete user._id;
           member = Object.assign(member, user);
