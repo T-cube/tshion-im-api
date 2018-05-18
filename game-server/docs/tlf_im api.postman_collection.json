@@ -1,0 +1,821 @@
+{
+  "variables": [],
+  "info": {
+    "name": "tlf_im api",
+    "_postman_id": "6667e66f-2e22-194b-72da-b4f6786bce08",
+    "description": "",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "群接口",
+      "description": "",
+      "item": [
+        {
+          "name": "删除群成员",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "创建群",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "获取群组列表",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "获取群组信息",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group/5afbe1bae5e60c21b51643a0",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "获取群组内成员列表",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group/members/5afbe1bae5e60c21b51643a0",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "获取成员信息",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group/5afbe1bae5e60c21b51643a0",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "群组添加成员",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group/member/add/5afbe1bae5e60c21b51643a0",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "members",
+                  "value": "[\"1141\",\"1142\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "删除解散群",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group/5afbe1bae5e60c21b51643a0",
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "公告",
+      "description": "",
+      "item": [
+        {
+          "name": "创建群公告",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "修改群公告",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group/notice/5afcd99e1bb9652638cc8e6e",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "title",
+                  "value": "22222",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "3333333",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "获取群公告",
+          "request": {
+            "url": {
+              "raw": "http://127.0.0.1:9999/api/group/notice/5afbe1bae5e60c21b51643a0?last=1526520237656",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "9999",
+              "path": [
+                "api",
+                "group",
+                "notice",
+                "5afbe1bae5e60c21b51643a0"
+              ],
+              "query": [
+                {
+                  "key": "last",
+                  "value": "1526520237656",
+                  "equals": true,
+                  "description": ""
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": null
+          },
+          "response": []
+        },
+        {
+          "name": "删除群公告",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/group/notice/5afcd99e1bb9652638cc8e6e",
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "消息会话",
+      "description": "",
+      "item": [
+        {
+          "name": "获取最近联系人",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/message/lastList",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "文件上传",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/file/",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": "",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "value": "",
+                  "description": "",
+                  "type": "file"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "会话置顶",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/message/top/5afbd3f1d1fba7219011efd1",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "取消置顶",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/message/top/5afbd3f1d1fba7219011efd1",
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {},
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "好友",
+      "description": "",
+      "item": [
+        {
+          "name": "获取所有好友信息",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/user/friends/info/",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "获取好友列表",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/user/friends/info/",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "添加好友请求",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/user/friend-request",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "user_id",
+                  "value": "552",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "mark",
+                  "value": "你好",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "获取收到的好友请求",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/user/friend-request/receiver",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test552",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "user_id",
+                  "value": "552",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "mark",
+                  "value": "你好",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "接受/拒绝好友请求",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/user/friend-request/5afd43f1f61aec2abfee292c",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test552",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "status",
+                  "value": "0",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "其它接口",
+      "description": "",
+      "item": [
+        {
+          "name": "获取用户信息",
+          "request": {
+            "url": "http://127.0.0.1:9999/api/message/lastList",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded",
+                "description": ""
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer test41",
+                "description": ""
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "teact",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "members",
+                  "value": "[\"1135\",\"1234\"]",
+                  "description": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
