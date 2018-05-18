@@ -32,31 +32,35 @@ module.exports = function (app) {
      * 获取用户详情
      * @param {*} user_id
      */
-    static user(user_id) {
+    static async user(user_id) {
       //Do: 频繁接口需要改为redis获取用户信息
-      return tlf2_db.find('tlf_user', {id: user_id}, {
-        id: 1,
-        name: 1,
-        mobile: 1,
-        birthdate: 1,
-        email: 1,
-        sex: 1,
-        avatar: 1
-      }).then(res => res.length > 0 ? res[0] : null);
-      // return app.Redis.get('user_' + user_id).then(user => {
-      //   if (user) {
-      //     user = JSON.parse(user);
-      //     delete user.createDate;
-      //     delete user.updateDate;
-      //     delete user.delFlag;
-      //     delete user.mongodbId;
-      //     delete user.registerIp;
-      //     delete user.lastLoginIp;
-      //     delete user.loginCount;
-      //     delete user.password;
-      //   }
-      //   return user;
-      // });
+      let user = {};
+      let userTem = await app.Redis.get('user_' + user_id);
+      if (userTem) {
+        userTem = JSON.parse(userTem);
+        user.id = userTem.id;
+        user.name = userTem.name;
+        user.mobile = userTem.mobile;
+        user.birthdate = userTem.birthdate;
+        user.email = userTem.email;
+        user.sex = userTem.sex;
+        user.avatar = userTem.avatar;
+      }
+      else {
+        userTem = await tlf2_db.find('tlf_user', {id: user_id}, {
+          id: 1,
+          name: 1,
+          mobile: 1,
+          birthdate: 1,
+          email: 1,
+          sex: 1,
+          avatar: 1
+        });
+        if (userTem.length > 0) {
+          user = userTem[0];
+        }
+      }
+      return user;
     }
 
     /**
@@ -198,7 +202,7 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static _rejectFriendRequest(request_id, receiver) {
-      return User._updateFriendRequest({id: request_id, receiver}, {status: FriendRequestStatue.REJECT});
+      return User._updateFriendRequest({_id: ObjectID(request_id)}, {status: FriendRequestStatue.REJECT});
     }
 
     /**
@@ -290,7 +294,7 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static _agreeFriendRequest(request_id, receiver) {
-      return requestCollection.findOne({_id: ObjectID(request_id)}).then(request => {
+      return requestCollection.findOneAndUpdate({_id: ObjectID(request_id)}, {$set: {status: FriendRequestStatue.AGREE}}).then(request => {
         if (!request) throw new Error('request not found');
 
         let {from: user_a, receiver: user_b} = request;
@@ -367,15 +371,15 @@ module.exports = function (app) {
      * @param {String[]} _ids
      */
     static _getUserInfoByIds(_ids) {
-      return userCollection.find({id: {$in: _ids}}, {
+      return tlf2_db.find('tlf_user', {id: {$in: _ids}}, {
         id: 1,
         avatar: 1,
         name: 1,
         mobile: 1,
         email: 1,
         sex: 1,
-        birthday: 1
-      }).toArray();
+        birthdate: 1
+      });
     }
 
     /**
@@ -420,7 +424,8 @@ module.exports = function (app) {
      */
     static getAllFriendsInfo(user_id) {
       return friendCollection.findOne({user: user_id}).then(result => {
-        return User._getFriendsInfo(result.friends);
+        let res = result === null ? [] : result.friends;
+        return User._getFriendsInfo(res);
       });
     }
 

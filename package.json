@@ -45,7 +45,7 @@
     "socket.io": "^2.1.0",
     "uuid": "^3.1.0",
     "ym-android-push": "^0.1.4",
-    "ym-mogodb-sql": "^1.0.0",
+    "ym-mongodb-sql": "^1.0.2",
     "ym-qiniu": "^0.3.11",
     "ym-redis": "^0.9.2",
     "ym-rpc": "^0.7.1"

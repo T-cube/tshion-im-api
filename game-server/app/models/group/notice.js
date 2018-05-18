@@ -28,9 +28,9 @@ class Notice {
     }
     return this.groupNoticeCollection.find({
       groupId: groupId, timestamp: {
-        '$lt': parseInt(last)
+        '$lt': last
       }
-    }.sort({timestamp: -1}).limit(20));
+    }).sort({timestamp: -1}).limit(20).toArray();
   }
 
   findOne(_id) {

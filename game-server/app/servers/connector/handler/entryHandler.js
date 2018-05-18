@@ -25,12 +25,13 @@ class entryHandler {
     new Promise((resolve, reject) => {
       if (cid) return resolve(cid);
 
-      self.app.rpc.channel.channelRemote.generateChannelId(null, function (err, channelId) {
-        if (err) return reject(err);
-        console.log('channelId:::::::::;', channelId);
-        resolve(channelId);
-      });
-    }).then(cid => {
+      //   self.app.rpc.channel.channelRemote.generateChannelId(null, function (err, channelId) {
+      //     if (err) return reject(err);
+      //     console.log('channelId:::::::::;', channelId);
+      //     resolve(channelId);
+      //   });
+      // }).then(cid => {
+      cid = self.app.curServer.id;
       self.app.tokenRedis.get(init_token).then(result => {
         if (!result) return next({code: 404, error: 'init_token expired or no exists'});
 

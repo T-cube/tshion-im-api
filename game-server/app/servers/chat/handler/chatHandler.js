@@ -268,7 +268,6 @@ prototype.send = function (msg, session, next) {
 
   self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
     if (err) return next(err);
-    result.from_name = from_name;
     param = Object.assign(param, result);
     console.log('jelll;;;;;;;;', param, result);
     self.app.rpc.account.accountRemote.getChannelId(session, target, function (fcid) {//通过redis获取用户在线状态
@@ -297,21 +296,65 @@ prototype.send = function (msg, session, next) {
  */
 prototype.sendGroup = function (msg, session, next) {
   let self = this;
-  let {target, content, type, from_name} = msg;
+  let {group, content, type} = msg;
 
   if (!session.uid) {
     next({error: '用户未认证'});
     return;
   }
 
+  let [from] = session.uid.split('*');
+
+  let param = Object.assign(msg, {
+    route: MsgTitle.onChat,
+    from,
+    chatType: ChatType.group
+  });
+
   if (type === ChatType.text) {
     content = content.replace(/&nbsp;/g, ' ');
     if (_.isBlank(content)) return next({code: 400, error: 'chat content can not be blank'});
   }
 
+
+  self.app.rpc.message.messageRemote.saveGroupMessage(session, msg, function (result) {
+    if (result.code !== 200) {
+      next(result);
+      return;
+    }
+
+    let members = result.members.filter(item => item !== msg.from);
+
+    self.app.onlineRedis.mget(members).then(res => {
+      let onlineUsers = [], offlineUsers = [];
+      for (let i = 0; i < res.length; i++) {
+        if (res[i]) {
+          onlineUsers.push({
+            uid: members[i],
+            sid: res[i]
+          })
+        }
+        else {
+          offlineUsers.push(members[i]);
+        }
+      }
+      if (onlineUsers.length > 0) {
+        self.channelService.pushMessageByUids(MsgTitle.onChat, result.msg, onlineUsers, function (res) {
+          console.log(res);
+        });
+      }
+
+      offlineUsers.forEach(uid => {//离线推送
+        self.app.rpc.push.pushRemote.pushMessageOne(session, msg, function (err, result) {
+          if (err) console.warn(err);
+        });
+      })
+    });
+
+    next(result);
+  });
+
 };
-
-
 
 // prototype.saveOfflineMessage = function (msg, session, next) {
 //   let self = this;
@@ -340,8 +383,5 @@ prototype.checkOnline = function (msg, session, next) {
 
 };
 
-prototype.test = function (msg, session, next) {
-  this.app.rpc.group.groupRemote.getGroupInfo(session, msg.groupId, function (data) {
-    next({code: 200, data: data});
-  });
-};
+
+

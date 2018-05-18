@@ -2,6 +2,5 @@
 	"name": "chatofpomelo",
 	"version": "0.0.1",
 	"private": false,
-	"dependencies": {
-	}
+  "dependencies": {}
 }

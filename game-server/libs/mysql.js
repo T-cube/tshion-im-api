@@ -3,7 +3,7 @@
 // mysql 工具类
 
 let _poolModule = require('generic-pool');
-let mongodb_sql = require('ym-mogodb-sql');
+let mongodb_sql = require('ym-mongodb-sql');
 class Mysql {
   constructor(config) {
     this._pool = this.createMysqlPool(config);

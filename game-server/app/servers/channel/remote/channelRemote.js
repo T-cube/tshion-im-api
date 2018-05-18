@@ -145,3 +145,29 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
   this.channelService.pushMessageByUids(params, clients);
   cb();
 };
+
+
+prototype.channelPushMessageByUid = function (route, msg, uids, cb) {
+  var channelId = this.userChannelMap.get(target);
+  var channel = this.channelService.getChannel(channelId);
+  // console.log(target, channel, this.userChannelMap);
+
+  if (!channel) {
+    return cb('user offline');
+  }
+  var {loginMap} = channel;
+  console.log(target, loginMap);
+  var loginer = loginMap.get(target);
+
+  var clients = [];
+  for (let uid in loginer) {
+    let sid = loginer[uid];
+    clients.push({uid, sid});
+  }
+
+  if (!clients.length) {
+    return cb('user offline');
+  }
+
+  this.channelService.pushMessageByUids(route, msg, clients, cb);
+};

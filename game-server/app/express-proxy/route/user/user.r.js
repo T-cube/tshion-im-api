@@ -1,5 +1,5 @@
 'use strict';
-const {MsgTitle} = require('../../../shared/constant');
+const {MsgTitle, FriendRequest} = require('../../../shared/constant');
 module.exports = function (app) {
   const User = require('../../../models/user')(app);
   return {
@@ -159,7 +159,7 @@ module.exports = function (app) {
             {
               param: 'status',
               enum: {
-                values: ['reject', 'agree']
+                values: [FriendRequest.agree, FriendRequest.reject]
               }
             }
           ]
@@ -168,6 +168,12 @@ module.exports = function (app) {
           var {request_id} = req.params;
           var {status} = req.body;
           var user = req.user;
+
+          status = parseInt(status);
+          if ([FriendRequest.agree, FriendRequest.reject].every(item => item !== status)) {
+            return next(req.apiError(400, 'status not in enum'));
+          }
+
           User.handleFriendRequest(status, request_id, user.id).then(result => {
             res.sendJson(result);
 
@@ -181,8 +187,7 @@ module.exports = function (app) {
                 console.error('resolve notify error:', err);
               }
             });
-          }).catch(
-            next);
+          }).catch(next);
         }
       }
     },

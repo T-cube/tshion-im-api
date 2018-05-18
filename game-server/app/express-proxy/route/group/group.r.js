@@ -71,8 +71,9 @@ module.exports = function (app) {
           ]
         },
         method(req, res, next) {
-          let {group_id, last} = req.params;
-
+          let {group_id} = req.params;
+          let {last} = req.query;
+          last = parseInt(last);
           mNotice.findList(group_id, last).then(list => {
             res.sendJson(list);
           }).catch(next);
@@ -136,7 +137,8 @@ module.exports = function (app) {
                 groupId: group_id,
                 title: title,
                 content: content,
-                sender: uid
+                sender: uid,
+                timestamp: Date.now()
               }).then(result => {
                 res.sendJson(result);
               }).catch(next);
@@ -342,7 +344,7 @@ module.exports = function (app) {
             ]
           },
           method(req, res, next) {
-            let {group_id, notice_id} = req.params;
+            let {notice_id} = req.params;
             let uid = req.user.id;
             mNotice.findOne(notice_id).then(result => {
               Group.info(result.groupId).then(info => {
@@ -350,7 +352,7 @@ module.exports = function (app) {
                   next(req.apiError(402, '只有群主才能删除群公告'));
                 }
                 else {
-                  mNotice.update(notice_id, setObj).then(result => {
+                  mNotice.delete(notice_id).then(result => {
                     res.sendJson(result);
                   }).catch(next);
                 }

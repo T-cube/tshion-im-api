@@ -97,8 +97,8 @@ module.exports = function (app) {
     static async findUserChat(userId) {
 
       let docs = await ChatCollection.find({$or: [{uid1: userId}, {uid2: userId}]}).sort({
-        topTime: 1,
-        timestamp: 1
+        topTime: -1,
+        timestamp: -1
       }).toArray();
 
       return docs.map(item => {
