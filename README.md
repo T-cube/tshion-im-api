@@ -34,4 +34,4 @@ Both of them can be installed via 'sh npm-install.sh' (it will install a local c
 基本上涉及到用户数据的就这些
 
 ## 接口postman测试
-(tlf_im)[./game-server/docs/tlf_im api.postman_collection.json]
+[tlf_im](./game-server/docs/tlf_im api.postman_collection.json)
