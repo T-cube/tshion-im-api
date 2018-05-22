@@ -206,7 +206,7 @@ module.exports = function (app) {
               else {
                 next(req.apiError(402, '只有群主才能转让'));
               }
-            });
+            }).catch(next);
 
           }
         },

@@ -221,6 +221,24 @@ module.exports = function (app) {
           var user = req.user;
 
           User.devareRequest(req.params.request_id, user.id).then(result => {
+            if (result.deletedCount === 0) {
+              return next(req.apiError(400, 'request_id no exist'));
+            }
+            res.sendJson(result);
+          }).catch(next);
+        }
+      },
+      'friend/:friend_id': {
+        docs: {
+          name: '删除好友好友',
+          params: [
+            { param: 'request_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+
+          User.delFriend(req.params.friend_id, user.id).then(result => {
             res.sendJson(result);
           }).catch(next);
         }
