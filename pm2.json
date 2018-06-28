@@ -7,7 +7,7 @@
     "node_args": [
     ],
     "env": {
-      "NODE_ENV": "developerment"
+      "NODE_ENV": "development"
     }
   }]
 }

@@ -36,7 +36,7 @@ module.exports = function(app) {
 
     static createRoomInfo() {
       const members = Array.from(arguments);
-      const roomid = crypto.createHash('sha1').update(members.sort().join('')).digest('hex');
+      const roomid = crypto.createHash('sha1').update(members.sort().join('*')).digest('hex');
       return {roomid, members};
     }
 
