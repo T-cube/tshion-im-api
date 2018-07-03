@@ -22,11 +22,11 @@ module.exports = function(app) {
   const provider = process.env.NODE_ENV === 'production' ? {
     cert: `${pem_dir}apn-cert.pem`,
     key: `${pem_dir}apn-key.pem`,
-    passphrase: '19491001'
+    passphrase: '19901104'
   } : {
     cert: `${pem_dir}apn-dev-cert.pem`,
     key: `${pem_dir}apn-dev-key.pem`,
-    passphrase: '19491001'
+    passphrase: '19901104'
   };
 
   const apnService = new apn.Provider(provider);
@@ -176,7 +176,7 @@ module.exports = function(app) {
     let data = {
       sound: 'ping.aiff',
       alert: {
-        title: from_name || 'T立方',
+        title: from_name || 'Tillo',
         body: content
       },
       payload: {
@@ -188,7 +188,7 @@ module.exports = function(app) {
 
     if (!isNaN(badge)) data.badge = badge;
     let notification = new apn.Notification(data);
-    notification.topic = 'com.tlfapp';
+    notification.topic = 'com.dream.tillo';
 
     return notification;
   };
@@ -198,7 +198,7 @@ module.exports = function(app) {
 
     let notification = {
       alert: content,
-      title: from_name || 'T立方',
+      title: from_name || 'Tillo',
       builder_id: 0,
       priority: 2,
       extras: {

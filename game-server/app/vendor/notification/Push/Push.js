@@ -7,7 +7,7 @@ module.exports = class Push {
     var { alert, title, extras = {} } = notification;
     message.title = title;
     message.description = alert;
-    message.restrictedPackageName = 'com.tlfapp';
+    message.restrictedPackageName = 'com.dream.tillo';
     message.passThrough = 0;
     message.notifyType = -1;
     message.payload = alert;

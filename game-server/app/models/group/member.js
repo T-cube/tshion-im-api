@@ -30,6 +30,10 @@ module.exports = function(app) {
       return groupMemberCollection.find(query, Object.assign({ name: 1, avatar: 1 }, fields)).toArray();
     }
 
+    static _findOne(query, fields) {
+      return groupMemberCollection.findOne(query, Object.assign({ name: 1, avatar: 1 }, fields));
+    }
+
     _update() {
       return Member._update.apply(this, arguments);
     }
@@ -50,7 +54,7 @@ module.exports = function(app) {
      * @param {String} group
      * @returns {Promise}
      */
-    static findGroupByUidAndGroupId(uid, group) {
+    static findMemberByUidAndGroupId(uid, group) {
       return groupMemberCollection.findOne({uid: ObjectID(uid), group: ObjectID(group)});
     }
 
@@ -75,7 +79,7 @@ module.exports = function(app) {
      */
     static getMemberInfo(memberId) {
       let _id = ObjectID(memberId);
-      return Member._find({ _id }, {
+      return Member._findOne({ _id }, {
         group: 1,
         uid: 1,
         name: 1,
@@ -85,7 +89,7 @@ module.exports = function(app) {
         type: 1,
         status: 1
       }).then(member => {
-        return User.findUser({ _id: member.uid }, { name, avatar }).then(user => {
+        return User.findUser({ _id: member.uid }, { name: 1, avatar: 1 }).then(user => {
           delete user._id;
           member = Object.assign(member, user);
 
@@ -137,8 +141,12 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static deleteMembers(memberIds) {
-      let ids = memberIds.map(_id => ObjectID(_id));
-      return groupMemberCollection.deleteMany({ _id: { $in: ids } }).then(result => result.deletedCount);
+      let ids = memberIds.map(_id => ObjectID(_id ? _id : undefined));
+      return Member._find({type:'owner', _id: {$in: ids}}).then(members=>{
+        if (members.length) throw new Error('cannot remove owner from group');
+
+        return groupMemberCollection.deleteMany({ _id: { $in: ids } }).then(result => result.deletedCount);
+      });
     }
 
     /**
@@ -162,13 +170,22 @@ module.exports = function(app) {
         if ((member_count + ids.length) > 100) {
           throw new Error('members out of limit, max member number is 100');
         }
-        return User.findMany({ _id: { $in: ids } }).then(members => {
-          console.log('members', members);
-          return Member._insertMany(members.map(member => {
-            var _id = member._id;
-            delete member._id;
-            return Object.assign(member, defaultInfo, { create_at: new Date, uid: _id, group });
-          }));
+
+        return Promise.all(ids.map(user => Member._findOne({uid: user}, {_id: 1}))).then(exists=>{
+          let _ids = [];
+          exists.forEach((exist,index)=>{
+            if(!exist) _ids.push(ids[index]);
+          });
+
+          if(!_ids.length) return [];
+
+          return User.findMany({ _id: { $in: _ids } }).then(members => {
+            return Member._insertMany(members.map(member => {
+              var _id = member._id;
+              delete member._id;
+              return Object.assign(member, defaultInfo, { create_at: new Date, uid: _id, group });
+            }));
+          });
         });
       });
     }

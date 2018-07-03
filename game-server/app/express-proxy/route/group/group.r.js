@@ -4,6 +4,7 @@ module.exports = function(app) {
   const Group = require('../../../models/group')(app);
   const Setting = require('../../../models/group/setting')(app);
   const Member = require('../../../models/group/member')(app);
+  const User = require('../../../models/user')(app);
 
   return {
     get: {
@@ -15,7 +16,8 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          Group.getListByUid(req.query.user_id).then(groups => {
+          let user = req.user;
+          Group.getListByUid(user._id).then(groups => {
             res.sendJson(groups);
           }).catch(next);
         }
@@ -54,10 +56,12 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
+          let user = req.user;
           let { member_id } = req.params;
-
           Member.getMemberInfo(member_id).then(info => {
-            res.sendJson(info);
+            return User.user(info.uid, user._id).then(friend => {
+              res.sendJson(Object.assign(info, friend));
+            });
           }).catch(next);
         }
       }

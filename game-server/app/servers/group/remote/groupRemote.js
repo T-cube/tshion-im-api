@@ -14,7 +14,7 @@ const groupRemote = function(app) {
 const prototype = groupRemote.prototype;
 
 prototype.getMemberIds = function(group, uid, cb) {
-  this.Member.findGroupByUidAndGroupId(uid, group).then(member => {
+  this.Member.findMemberByUidAndGroupId(uid, group).then(member => {
     if (!member) return cb('user not in the group');
 
     return this.Member.getMembersByGroupId(group).then(members => {

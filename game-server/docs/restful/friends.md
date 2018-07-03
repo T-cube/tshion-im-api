@@ -85,7 +85,7 @@ param|name|type|des
 -----|----|----|---
 param|user_id|String|user id
 
-## 获取某个好友的信息
+## 获取所有好友的信息
 GET /user/friends/info/:user_id
 
 param|name|type|des

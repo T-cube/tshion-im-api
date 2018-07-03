@@ -2,7 +2,7 @@
 const _ = require('../../../libs/util');
 const FriendInfoSchema = require('./friend-info');
 
-module.exports = function(app) {
+module.exports = function (app) {
   const Room = require('../room')(app);
 
   const ObjectID = app.get('ObjectID');
@@ -15,7 +15,6 @@ module.exports = function(app) {
   const friendCollection = db.collection('friend');
   const friendInfoCollection = db.collection('friend.info');
   const friendGroupCollection = db.collection('friend.group');
-
 
   const STATUS_FRIEND_REQUEST_PADDING = 'STATUS_FRIEND_REQUEST_PADDING';
   const STATUS_FRIEND_REQUEST_AGREE = 'STATUS_FRIEND_REQUEST_AGREE';
@@ -36,15 +35,31 @@ module.exports = function(app) {
      * 获取用户详情
      * @param {*} user_id
      */
-    static user(user_id) {
-      return userCollection.findOne({ _id: ObjectID(user_id) }, {
-        name: 1,
-        mobile: 1,
-        age: 1,
-        birthday: 1,
-        email: 1,
-        sex: 1,
-        avatar: 1
+    static user(user_id, user) {
+      return Promise.all([
+        userCollection.findOne({
+          _id: ObjectID(user_id)
+        }, {
+          name: 1,
+          mobile: 1,
+          age: 1,
+          birthday: 1,
+          email: 1,
+          sex: 1,
+          avatar: 1
+        }),
+        friendInfoCollection.findOne({
+          user: ObjectID(user),
+          friend: ObjectID(user_id)
+        }, {
+          _id: 0,
+          friend: 0,
+          user: 0
+        })
+      ]).then(([info, friend]) => {
+        console.log(info, friend)
+        info = Object.assign(info, friend || {});
+        return info;
       });
     }
 
@@ -55,7 +70,12 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static findMany(query, fields) {
-      return userCollection.find(query, Object.assign({ name: 1, avatar: 1 }, fields)).sort({ _id: 1 }).toArray();
+      return userCollection.find(query, Object.assign({
+        name: 1,
+        avatar: 1
+      }, fields))
+        .sort({_id: 1})
+        .toArray();
     }
 
     /**
@@ -63,75 +83,126 @@ module.exports = function(app) {
      * @param {*} param0
      * @param {String} param0.user 发起查找的用户
      */
-    static find({ name, mobile, email, keyword, user }) {
+    static find({name, mobile, email, keyword, user}) {
       var query = {};
       var $or = [];
       if (name) {
-        query['name'] = { $regex: name, $options: 'g' };
+        query['name'] = {
+          $regex: name,
+          $options: 'g'
+        };
       }
       if (mobile) {
-        query['mobile'] = { $regex: mobile, $options: 'g' };
+        query['mobile'] = {
+          $regex: mobile,
+          $options: 'g'
+        };
       }
       if (email) {
-        query['email'] = { $regex: email, $options: 'g' };
+        query['email'] = {
+          $regex: email,
+          $options: 'g'
+        };
       }
       if (keyword) {
         if (_.isEmail(keyword)) {
-          $or.push({ email: { $regex: keyword, $options: 'g' } });
+          $or.push({
+            email: {
+              $regex: keyword,
+              $options: 'g'
+            }
+          });
         } else if (_.isMobile(mobile)) {
-          $or.push({ mobile: { $regex: keyword, $options: 'g' } });
+          $or.push({
+            mobile: {
+              $regex: keyword,
+              $options: 'g'
+            }
+          });
         } else {
-          $or.push({ name: { $regex: keyword, $options: 'g' } });
+          $or.push({
+            name: {
+              $regex: keyword,
+              $options: 'g'
+            }
+          });
           if (_.isNumber(keyword)) {
-            $or.push({ mobile: { $regex: keyword, $options: 'g' } });
+            $or.push({
+              mobile: {
+                $regex: keyword,
+                $options: 'g'
+              }
+            });
           }
         }
       }
       if ($or.length) {
         query['$or'] = $or;
       }
-      if (!Object.getOwnPropertyNames(query).length) return Promise.resolve([]);
+      if (!Object.getOwnPropertyNames(query).length)
+        return Promise.resolve([]);
 
-      return friendCollection.findOne({ user: ObjectID(user) }).then(doc => {
-        let friends = [];
-        if (doc) {
-          friends = doc.friends;
-        }
-        query['$nor'] = [];
-        if (friends.length) {
-          query['$nor'] = friends.map(_id => ({ _id }));
-        }
+      return friendCollection
+        .findOne({user: ObjectID(user)})
+        .then(doc => {
+          let friends = [];
+          if (doc) {
+            friends = doc.friends;
+          }
+          query['$nor'] = [];
+          if (friends.length) {
+            query['$nor'] = friends.map(_id => ({_id}));
+          }
 
-        query['$nor'].push({ _id: ObjectID(user) });
-        return userCollection.find(query, { avatar: 1, email: 1, mobile: 1, name: 1, sex: 1 }).toArray();
-      });
+          query['$nor'].push({_id: ObjectID(user)});
+          return userCollection
+            .find(query, {
+            avatar: 1,
+            email: 1,
+            mobile: 1,
+            name: 1,
+            sex: 1
+          })
+            .toArray();
+        });
     }
 
     /**
      * 发送添加好友请求
      * @param {*} param0
      */
-    static sendRequest({ user_id, from, mark }) {
-      return requestCollection.findOne({ receiver: user_id, from, status: STATUS_FRIEND_REQUEST_AGREE }).then(doc => {
-        if (doc) return null;
+    static sendRequest({user_id, from, mark}) {
+      return requestCollection
+        .findOne({receiver: user_id, from, status: STATUS_FRIEND_REQUEST_AGREE})
+        .then(doc => {
+          if (doc)
+            return null;
 
-        let receiver = ObjectID(user_id);
-        return requestCollection.findOne({ receiver, from }).then(doc => {
-          if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT)) return User._updateFriendRequest({
-            receiver,
-            from,
-            status: doc.status
-          }, {
-            mark,
-            update_at: new Date
-          });
-          let data = { receiver, from, mark, create_at: new Date, status: STATUS_FRIEND_REQUEST_PADDING };
-          return requestCollection.insertOne(data).then(value => {
-            data._id = value.insertedId;
-            return data;
-          });
+          let receiver = ObjectID(user_id);
+          return requestCollection
+            .findOne({receiver, from})
+            .then(doc => {
+              if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT))
+                return User._updateFriendRequest({
+                  receiver,
+                  from,
+                  status: doc.status
+                }, {mark, update_at: new Date});
+              let data = {
+                receiver,
+                from,
+                mark,
+                create_at: new Date,
+                status: STATUS_FRIEND_REQUEST_PADDING
+              };
+              return requestCollection
+                .insertOne(data)
+                .then(value => {
+                  data._id = value.insertedId;
+                  return data;
+                });
+            });
         });
-      });
     }
 
     /**
@@ -141,7 +212,7 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static deleteRequest(request_id, receiver) {
-      return requestCollection.remove({ _id: ObjectID(request_id), receiver });
+      return requestCollection.remove({_id: ObjectID(request_id), receiver});
     }
 
     /**
@@ -150,7 +221,11 @@ module.exports = function(app) {
      * @param {*} data
      */
     static _updateFriendRequest(query, data) {
-      return requestCollection.findOneAndUpdate(query, { $set: data }, { upsert: false }, {
+      return requestCollection.findOneAndUpdate(query, {
+        $set: data
+      }, {
+        upsert: false
+      }, {
         returnOriginal: false,
         returnNewDocument: true
       }).then(result => result.value);
@@ -161,20 +236,38 @@ module.exports = function(app) {
      * @param {{}} query
      * @returns {Promise}
      */
-    static getFriendRequest(query, { page = 0, pagesize = 20 }) {
+    static getFriendRequest(query, {
+      page = 0,
+      pagesize = 20
+    }) {
       pagesize = parseInt(pagesize);
       page = parseInt(page);
 
-      return requestCollection.find(query)
-        .sort({ create_at: -1, update_at: -1 })
+      return requestCollection
+        .find(query)
+        .sort({create_at: -1, update_at: -1})
         .skip(page * pagesize)
         .limit(pagesize)
-        .toArray().then(docs => {
+        .toArray()
+        .then(docs => {
           let froms = docs.map(doc => ObjectID(doc.from));
 
-          return userCollection.find({ _id: { $in: froms } }, { name: 1, avatar: 1, mobile: 1 }).toArray().then(users => {
-            return docs.map((doc, index) => ({...users.find(user => user._id.toString() == doc.from), ...doc }));
-          });
+          return userCollection.find({
+            _id: {
+              $in: froms
+            }
+          }, {
+              name: 1,
+              avatar: 1,
+              mobile: 1
+            })
+            .toArray()
+            .then(users => {
+              return docs.map((doc, index) => ({
+                ...users.find(user => user._id.toString() == doc.from),
+                ...doc
+              }));
+            });
         });
     }
 
@@ -185,7 +278,10 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static _rejectFriendRequest(request_id, receiver) {
-      return User._updateFriendRequest({ _id: ObjectID(request_id), receiver }, { status: STATUS_FRIEND_REQUEST_REJECT });
+      return User._updateFriendRequest({
+        _id: ObjectID(request_id),
+        receiver
+      }, {status: STATUS_FRIEND_REQUEST_REJECT});
     }
 
     /**
@@ -196,7 +292,9 @@ module.exports = function(app) {
      */
     static _addFriend(query, friends) {
       if (friends instanceof Array) {
-        friends = { $each: friends }
+        friends = {
+          $each: friends
+        }
       }
 
       return friendCollection.findOneAndUpdate(query, {
@@ -204,7 +302,9 @@ module.exports = function(app) {
         $addToSet: {
           friends
         }
-      }, { upsert: true }, {
+      }, {
+        upsert: true
+      }, {
         returnOriginal: false,
         returnNewDocument: true
       }).then(result => result.value);
@@ -218,7 +318,9 @@ module.exports = function(app) {
      */
     static _addGroupFriend(query, friends) {
       if (friends instanceof Array) {
-        friends = { $each: friends }
+        friends = {
+          $each: friends
+        }
       }
 
       return friendGroupCollection.findOneAndUpdate(query, {
@@ -226,7 +328,9 @@ module.exports = function(app) {
         $addToSet: {
           members: friends
         }
-      }, { upsert: true }, {
+      }, {
+        upsert: true
+      }, {
         returnOriginal: false,
         returnNewDocument: true
       }).then(result => result.value);
@@ -241,11 +345,11 @@ module.exports = function(app) {
     static _createFriend(user, friend) {
       let query = {
         user,
-        friend,
+        friend
       };
 
       return friendInfoCollection.findOneAndUpdate(query, {
-        $set: Object.assign(query, { nickname: '' })
+        $set: Object.assign(query, {nickname: ''})
       }, {
         upsert: true,
         returnOriginal: false
@@ -265,9 +369,7 @@ module.exports = function(app) {
         user: ObjectID(user)
       }, {
         $set: FriendInfoSchema(info)
-      }, {
-        returnOriginal: false
-      });
+      }, {returnOriginal: false});
     }
 
     /**
@@ -277,26 +379,53 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static _agreeFriendRequest(request_id, receiver) {
-      return requestCollection.findOne({ _id: ObjectID(request_id), receiver }).then(request => {
-        if (!request) throw new Error('request not found');
+      return requestCollection.findOne({_id: ObjectID(request_id), receiver}).then(request => {
+        if (!request)
+          throw new Error('request not found');
 
-        let { from: user_a, receiver: user_b } = request;
-        user_a = ObjectID(user_a), user_b = ObjectID(user_b);
+        let {from: user_a, receiver: user_b} = request;
+        user_a = ObjectID(user_a),
+        user_b = ObjectID(user_b);
 
-        let promise_a = User._addFriend({ user: user_a }, user_b);
-        let promise_a_group = User._addGroupFriend({ user: user_a, type: 'default' }, user_b);
+        let promise_a = User._addFriend({
+          user: user_a
+        }, user_b);
+        let promise_a_group = User._addGroupFriend({
+          user: user_a,
+          type: 'default'
+        }, user_b);
         let promise_a_info = User._createFriend(user_a, user_b);
 
-        let promise_b = User._addFriend({ user: user_b }, user_a);
-        let promise_b_group = User._addGroupFriend({ user: user_b, type: 'default' }, user_a);
+        let promise_b = User._addFriend({
+          user: user_b
+        }, user_a);
+        let promise_b_group = User._addGroupFriend({
+          user: user_b,
+          type: 'default'
+        }, user_a);
         let promise_b_info = User._createFriend(user_b, user_a);
 
-        let promise_request = User._updateFriendRequest({ _id: ObjectID(request_id) }, { status: STATUS_FRIEND_REQUEST_AGREE });
+        let promise_request = User._updateFriendRequest({
+          _id: ObjectID(request_id)
+        }, {status: STATUS_FRIEND_REQUEST_AGREE});
 
-
-        return Promise.all([promise_a, promise_a_group, promise_a_info, promise_b, promise_b_group, promise_request, promise_b_info]).then(() => {
-          return { result: 'ok', from: String(request.from), receiver: String(request.receiver) };
-        });
+        return Promise
+          .all([
+          promise_a,
+          promise_a_group,
+          promise_a_info,
+          promise_b,
+          promise_b_group,
+          promise_request,
+          promise_b_info
+        ])
+          .then(() => {
+            return {
+              result: 'ok',
+              from: String(request.from),
+              receiver: String(request.receiver)
+            };
+          });
       });
     }
 
@@ -308,22 +437,27 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static handleFriendRequest(status, request_id, receiver) {
-      if (status == 'reject') return User._rejectFriendRequest(request_id, receiver);
+      if (status == 'reject')
+        return User._rejectFriendRequest(request_id, receiver);
       if (status == 'agree') {
-        return User._agreeFriendRequest(request_id, receiver).then(result => {
-          let { from, receiver } = result;
-          const roomInfo = Room.createRoomInfo(from, receiver)
+        return User
+          ._agreeFriendRequest(request_id, receiver)
+          .then(result => {
+            let {from, receiver} = result;
+            const roomInfo = Room.createRoomInfo(from, receiver)
 
-          return new Room(roomInfo).save().then(() => {
-            return result;
+            return new Room(roomInfo)
+              .save()
+              .then(() => {
+                return result;
+              });
           });
-        });
       }
       return Promise.reject('');
     }
 
     static _countFriendGroup(user_id) {
-      return friendGroupCollection.count({ user: ObjectID(user_id) });
+      return friendGroupCollection.count({user: ObjectID(user_id)});
     }
 
     /**
@@ -333,21 +467,25 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static createFriendGroup(name, user) {
-      return User._countFriendGroup(user).then(count => {
-        if (count >= 50) {
-          throw new Error('user friend\'s group number max 50');
-        }
-        let info = {
-          name,
-          user,
-          members: [],
-          type: 'custom'
-        };
-        return friendGroupCollection.insert(info).then(res => {
-          info._id = res.insertedId;
-          return info;
+      return User
+        ._countFriendGroup(user)
+        .then(count => {
+          if (count >= 50) {
+            throw new Error('user friend\'s group number max 50');
+          }
+          let info = {
+            name,
+            user,
+            members: [],
+            type: 'custom'
+          };
+          return friendGroupCollection
+            .insert(info)
+            .then(res => {
+              info._id = res.insertedId;
+              return info;
+            });
         });
-      });
     }
 
     /**
@@ -356,7 +494,12 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static getFriendGroupList(user_id) {
-      return friendGroupCollection.find({ user: ObjectID(user_id) }, { name: 1, type: 1 }).toArray();
+      return friendGroupCollection.find({
+        user: ObjectID(user_id)
+      }, {
+        name: 1,
+        type: 1
+      }).toArray();
     }
 
     /**
@@ -364,7 +507,18 @@ module.exports = function(app) {
      * @param {String[]} _ids
      */
     static _getUserInfoByIds(_ids) {
-      return userCollection.find({ _id: { $in: _ids } }, { avatar: 1, name: 1, mobile: 1, email: 1, sex: 1, birthday: 1 }).toArray();
+      return userCollection.find({
+        _id: {
+          $in: _ids
+        }
+      }, {
+        avatar: 1,
+        name: 1,
+        mobile: 1,
+        email: 1,
+        sex: 1,
+        birthday: 1
+      }).toArray();
     }
 
     /**
@@ -372,20 +526,32 @@ module.exports = function(app) {
      * @param {*} group_id
      */
     static getGroupFriendsInfo(group_id, user) {
-      return friendGroupCollection.findOne({ _id: ObjectID(group_id), user: ObjectID(user) }).then(result => {
-        if (!result) return [];
-        return User._getFriendsInfo(result.members).then(members => {
-          const uid = user.toString();
-          console.log(uid)
-          return Promise.all(members.map(member => {
-            return Room.findRoom({ members: { $all: [member._id.toHexString(), uid] } }).then(room => {
-              if (room) {
-                member.roomid = room.roomid;
-              }
-              return member;
-            });
-          }));
-        });
+      return friendGroupCollection.findOne({_id: ObjectID(group_id), user: ObjectID(user)}).then(result => {
+        if (!result)
+          return [];
+        return User
+          ._getFriendsInfo(result.members)
+          .then(members => {
+            const uid = user.toString();
+            console.log(uid)
+            return Promise.all(members.map(member => {
+              return Room.findRoom({
+                members: {
+                  $all: [
+                    member
+                      ._id
+                      .toHexString(),
+                    uid
+                  ]
+                }
+              }).then(room => {
+                if (room) {
+                  member.roomid = room.roomid;
+                }
+                return member;
+              });
+            }));
+          });
       });
     }
 
@@ -395,22 +561,35 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static _getFriendsInfo(ids) {
-      return User._getUserInfoByIds(ids).then(users => {
-        let query = users.map(member => member._id);
+      return User
+        ._getUserInfoByIds(ids)
+        .then(users => {
+          let query = users.map(member => member._id);
 
-        return friendInfoCollection.find({ friend: { $in: query } }, {
-          nickname: 1,
-          setting: 1
-        }).toArray().then(friends => {
-          return users.map((member, index) => {
-            let friend = friends[index];
-            delete friend._id;
-            if (!friend) return member;
+          return friendInfoCollection.find({
+            friend: {
+              $in: query
+            }
+          }, {
+              nickname: 1,
+              setting: 1
+            })
+            .toArray()
+            .then(friends => {
+              return users.map((member, index) => {
+                let friend = friends[index];
+                delete friend._id;
+                if (!friend)
+                  return member;
 
-            return Object.assign(member, friend, { showname: friend.nickname ? friend.nickname : member.name });
-          });
-        })
-      });
+                return Object.assign(member, friend, {
+                  showname: friend.nickname
+                    ? friend.nickname
+                    : member.name
+                });
+              });
+            })
+        });
     }
 
     /**
@@ -418,9 +597,11 @@ module.exports = function(app) {
      * @param {*} user_id
      */
     static getAllFriendsInfo(user_id) {
-      return friendCollection.findOne({ user: ObjectID(user_id) }).then(result => {
-        return User._getFriendsInfo(result.friends);
-      });
+      return friendCollection
+        .findOne({user: ObjectID(user_id)})
+        .then(result => {
+          return User._getFriendsInfo(result.friends);
+        });
     }
 
     /**
@@ -429,11 +610,11 @@ module.exports = function(app) {
      */
     static getFriends(user_id) {
       return Promise.all([
-        friendCollection.findOne({ user: ObjectID(user_id) }),
+        friendCollection.findOne({user: ObjectID(user_id)}),
         User.getFriendGroupList(user_id)
       ]).then(([friends, groups]) => {
         if (!friends) {
-          return { groups: [] };
+          return {groups: []};
         }
         friends.groups = groups;
         return friends;

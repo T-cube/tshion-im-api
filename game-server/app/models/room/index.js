@@ -20,7 +20,6 @@ module.exports = function(app) {
         returnOriginal: false,
         returnNewDocument: true
       }).then(doc => {
-        // console.log(121233333344,doc)
         if (doc && doc.value) return doc.value;
 
         return RoomCollection.insertOne(self).then(result => {
@@ -30,7 +29,7 @@ module.exports = function(app) {
       });
     }
 
-    static createGroupRoomInfo(roomid) {
+    static createGroupRoomInfo(roomid, type) {
       return {type, roomid};
     }
 

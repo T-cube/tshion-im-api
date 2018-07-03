@@ -226,7 +226,7 @@ prototype.deviceToken = function(msg, session, next) {
     session.set('deviceToken', deviceToken);
     // console.log('.........', client, deviceToken, '.............');
     if (!deviceToken) return;
-    self.app.onlineRedis.getChannelId(session, session.uid, function(err, cid) {
+    self.app.rpc.account.accountRemote.getChannelId(session, session.uid, function(err, cid) {
 
       self.app.rpc.account.accountRemote.saveDeviceToken(null, { uid, cid, client, deviceToken, brand }, function(err, value) {
         if (err) console.error(err);

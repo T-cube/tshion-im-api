@@ -12,7 +12,7 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
-          User.user(req.params.user_id).then(user => {
+          User.user(req.params.user_id, req.user._id).then(user => {
             res.sendJson(user);
           }).catch(next);
         }
