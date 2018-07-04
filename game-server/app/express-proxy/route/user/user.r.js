@@ -151,7 +151,7 @@ module.exports = function(app) {
                 if (err) {
                   console.error('notify error:', err);
                 }
-            });
+              });
           }).catch(next);
         }
       },

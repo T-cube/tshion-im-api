@@ -69,6 +69,8 @@ module.exports = function(app) {
       if (cid) {
         query[`room.${uid}`] = cid;
       }
+
+      query['type'] = {'$ne': 'group'};
       return RoomCollection.find(query).sort({ last_active: -1 }).toArray().then(docs => docs);
     }
   };

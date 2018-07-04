@@ -80,10 +80,13 @@ module.exports = function(app) {
           let body = req.body;
           let user = req.user;
 
-          let { members = [] } = body;
+          let { members } = body;
           body.creator = user._id;
 
+          if(!members) members = [];
+          if(members.indexOf(',')) members = members.split(',');
           // if (!~members.indexOf(user._id.toHexString())) members.push(user._id);
+
 
           console.log('body:', req.body);
           new Group(body).save(members).then(newGroup => {
@@ -94,6 +97,17 @@ module.exports = function(app) {
               Member.addMany(members, group)
             ]).then(() => {
               res.sendJson(newGroup);
+
+              members.map(member => {
+                req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.join', {
+                  group: newGroup._id,
+                  type: 'add'
+                }, member, function(err) {
+                  if (err) {
+                    console.error('notify error:', err);
+                  }
+                });
+              });
             });
           }).catch(([errSetting, memberError]) => {
             console.log(memberError, errSetting);
@@ -113,6 +127,10 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           let { members } = req.body;
+
+          if(members.indexOf(',')) members = members.split(',');
+
+
           let { group_id } = req.params;
           let user = req.user;
 
@@ -123,6 +141,18 @@ module.exports = function(app) {
 
             Member.addMany(members, group_id).then(result => {
               res.sendJson(result);
+
+              members.map(member => {
+                req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.join', {
+                  group: group_id,
+                  type: 'add'
+                }, member, function(err) {
+                  if (err) {
+                    console.error('notify error:', err);
+                  }
+                });
+              });
+
             }).catch(next);
           });
         }
