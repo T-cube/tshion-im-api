@@ -200,7 +200,7 @@ prototype.sendGroup = function(msg, session, next) {
       param = Object.assign(param, result);
       self.app.rpc.channel.channelRemote.cahnnelPushMessageByUids(session, param, uids, function(err, offlines) {
 
-        next(null, { route: param.route, mag, param });
+        next(null, { route: param.route, msg, param });
 
         self.app.rpc.push.pushRemote.pushMessageMany(null, param, uids, () => {});
 

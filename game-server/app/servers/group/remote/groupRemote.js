@@ -18,8 +18,8 @@ prototype.getMemberIds = function(group, uid, cb) {
     if (!member) return cb('user not in the group');
 
     return this.Member.getMembersByGroupId(group).then(members => {
-      let uids = members.map(mem => mem._id.toHexString());
-
+      let uids = members.map(mem => mem.uid.toHexString());
+      console.log(uids);
       cb(null, uids);
     });
   }).catch(cb);

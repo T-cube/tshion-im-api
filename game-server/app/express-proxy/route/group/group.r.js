@@ -30,6 +30,7 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
+          console.log(req.params.group_id);
           Group.info(req.params.group_id).then(info => {
             res.sendJson(info);
           }).catch(next);
