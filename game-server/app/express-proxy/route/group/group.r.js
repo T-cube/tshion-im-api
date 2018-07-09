@@ -118,6 +118,29 @@ module.exports = function(app) {
       }
     },
     put: {
+      'modify/:group_id/name': {
+        docs: {
+          name: '修改群名称',
+          params: [
+            {param: 'group_id', type:'String'},
+            {key: 'name', type: 'String'}
+          ]
+        },
+        method(req,res,next) {
+          var user = req.user;
+          var group_id = req.params.group_id;
+
+          Group.findGroupByIdAndOwner(group_id, user._id).then(group=>{
+            if(!group){
+              return ext(req.apiError(400, 'cant only midify by owner'));
+            }
+
+            Group.modifyGroupName(group_id, req.body.name).then(result=>{
+              res.sendJson(result);
+            });
+          }).catch(next);
+        }
+      },
       'member/add/:group_id': {
         docs: {
           name: '群组添加成员',

@@ -200,3 +200,28 @@ returns
     "message": ""
 }
 ```
+
+## modify group name
+PUT /api/group/modify/:group_id/name
+
+aram|name|type|des
+-----|----|----|---
+param|group_id|String|group _id string
+key|name|String|new Group name
+
+returns
+```json
+{
+    "status": 200,
+    "data": {
+        "_id" : "5b3df077f52ebda500b30966",
+        "name" : "black JJ的群",
+        "creator" : "5af2f1171a8c960351f3ccdf",
+        "owner" : "5af2f1171a8c960351f3ccdf",
+        "roomid" : "19a2b9f582103a6b520923553935c3cecf413166",
+        "create_at" : "2018-07-05T10:18:31.542Z",
+        "update_at" : "2018-07-05T10:18:31.542Z",
+    },
+    "message": ""
+}
+```
