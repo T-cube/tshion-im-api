@@ -167,14 +167,16 @@ module.exports = function(app) {
             Member.addMany(members, group_id).then(result => {
               res.sendJson(result);
 
-              members.map(member => {
-                req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.join', {
-                  group: group_id,
-                  type: 'add'
-                }, member, function(err) {
-                  if (err) {
-                    console.error('notify error:', err);
-                  }
+              Member.getMembers(group_id).then(results=>{
+                results.map(member => {
+                  req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.join', {
+                    group: group_id,
+                    type: 'add'
+                  }, member.uid.toHexString(), function(err) {
+                    if (err) {
+                      console.error('notify error:', err);
+                    }
+                  });
                 });
               });
 
