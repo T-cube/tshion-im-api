@@ -171,7 +171,7 @@ module.exports = function(app) {
           throw new Error('members out of limit, max member number is 100');
         }
 
-        return Promise.all(ids.map(user => Member._findOne({uid: user}, {_id: 1}))).then(exists=>{
+        return Promise.all(ids.map(user => Member._findOne({uid: user, group}, {_id: 1}))).then(exists=>{
           let _ids = [];
           exists.forEach((exist,index)=>{
             if(!exist) _ids.push(ids[index]);

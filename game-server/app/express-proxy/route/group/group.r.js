@@ -128,6 +128,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           let { members } = req.body;
+          console.log(req.body);
 
           if(members.indexOf(',')) members = members.split(',');
 

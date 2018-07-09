@@ -81,7 +81,7 @@ var ExpressProxy = function(app, opts) {
     model: require('../../libs/oauth-model')(app),
     grants: ['password', 'refresh_token', 'authorization_code'],
     debug: false,
-    accessTokenLifetime: 1800,
+    accessTokenLifetime: 3600 * 24 * 15,
     refreshTokenLifetime: 3600 * 24 * 15,
     continueAfterResponse: true,
   });
