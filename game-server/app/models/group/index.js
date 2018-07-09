@@ -104,6 +104,13 @@ module.exports = function(app) {
       });
     }
 
+    static modifyGroupName(group, name) {
+      return groupCollection.findOneAndUpdate({_id: ObjectID(group)}, {$set:{name}},{
+        returnOriginal: false
+      }).then(result => result.value);
+    }
+
+    // discard
     static removeMembers(query) {
       let { creator, group, members } = query;
 
