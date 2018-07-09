@@ -132,7 +132,7 @@ module.exports = function(app) {
     }
 
     static getMembers(group_id) {
-      return Member._find({ group: ObjectID(group_id) });
+      return Member._find({ group: ObjectID(group_id) }, {uid: 1});
     }
 
     /**
