@@ -168,6 +168,7 @@ module.exports = function(app) {
               res.sendJson(result);
 
               Member.getMembers(group_id).then(results=>{
+                console.log(results);
                 results.map(member => {
                   req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.join', {
                     group: group_id,
