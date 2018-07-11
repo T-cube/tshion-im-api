@@ -51,7 +51,8 @@ module.exports = function (app) {
     }
 
     static saveOfflineMessages(msgs) {
-      return OfflineMessageCollection.insert(msgs);
+      // console.log(msgs);
+      return OfflineMessageCollection.insertMany(msgs);
     }
 
     /**

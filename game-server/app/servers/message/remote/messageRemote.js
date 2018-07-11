@@ -33,9 +33,11 @@ prototype.saveOfflineMessage = function(msg, cb) {
 };
 
 prototype.saveOfflineMessages = function(msg, uids, cb) {
+  // console.log(uids);
   let msgs = uids.map(uid => {
-    msg.target = uid;
-    return new this.Message(msg);
+    var message = JSON.parse(JSON.stringify(msg));
+    message.target = uid;
+    return new this.Message(message).msg;
   });
 
   this.Message.saveOfflineMessages(msgs).then(cb).catch(cb);
