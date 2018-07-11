@@ -15,10 +15,13 @@ module.exports = function(app) {
           ]
         },
         method(req, res, next) {
+          var user = req.user;
           console.log('::::::::::::::::::::---------------', req.params, req.query);
           Message.getList(Object.assign(req.params, req.query)).then(result => {
             // console.log(123,result.list.length)
             res.sendJson(result);
+
+            Message.deleteOfflineMessage({roomid: req.params.roomid, target: user._id.toHexString()});
           }).catch(next);
         }
       },
