@@ -39,6 +39,10 @@ module.exports = function (app) {
                         }
                         results.push(group);
                       }
+
+                      if (results.length) {
+                        results.sort((a, b) => b.message.timestamp - a.message.timestamp);
+                      }
                     });
 
                     res.sendJson(results);
