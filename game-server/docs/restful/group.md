@@ -204,7 +204,7 @@ returns
 ## modify group name
 PUT /api/group/modify/:group_id/name
 
-aram|name|type|des
+param|name|type|des
 -----|----|----|---
 param|group_id|String|group _id string
 key|name|String|new Group name
@@ -223,5 +223,39 @@ returns
         "update_at" : "2018-07-05T10:18:31.542Z",
     },
     "message": ""
+}
+```
+
+## get session list
+GET /api/group/session/all
+
+returns
+```json
+{
+    "status": 200,
+    "data": [
+        {
+            "_id": "5b3b4582626cbc81f8bebe4e",
+            "name": "群名称",
+            "creator": "5af2f2521a8c960351f3cce4",
+            "owner": "5af2f2521a8c960351f3cce4",
+            "roomid": "5b367128ed63c5d1e722df5c65205baeae455bee",
+            "create_at": "2018-07-03T09:44:34.955Z",
+            "update_at": "2018-07-03T09:44:34.955Z",
+            "message": {
+                "_id": "5b3f0bdfa62b34da41161c21",
+                "content": "哦哦哦哦哦",
+                "from": "5af2f1171a8c960351f3ccdf",
+                "roomid": "5b367128ed63c5d1e722df5c65205baeae455bee",
+                "route": "onChat.group",
+                "group": "5b3b4582626cbc81f8bebe4e",
+                "timestamp": 1530858463872,
+                "type": "text",
+                "__route__": "chat.chatHandler.sendGroup"
+            },
+            "_offline_count": 0
+        },
+    ],
+    "messsage": ""
 }
 ```
