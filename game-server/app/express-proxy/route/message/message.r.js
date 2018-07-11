@@ -62,9 +62,13 @@ module.exports = function(app) {
           ],
         },
         method(req, res, next) {
+          var user = req.user;
+
           Message.getNewLyList(Object.assign(req.params, req.query)).then(result => {
             // console.log(result)
             res.sendJson(result);
+
+            Message.deleteOfflineMessage({roomid: req.params.roomid, target: user._id.toHexString()});
           }).catch(next);
         }
       }
