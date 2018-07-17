@@ -1,7 +1,7 @@
 'use strict';
 const _ = require('../../../libs/util'),
   schema = require('./schema');
-module.exports = function (app) {
+module.exports = function(app) {
   const MessageCollection = app
     .db
     .collection('message');
@@ -76,39 +76,39 @@ module.exports = function (app) {
         } || {
           roomid
         }, {})
-          .sort({timestamp: -1})
+          .sort({ timestamp: -1 })
           .limit(pagesize)
           .toArray()
           .then(docs => {
-            // console.log(docs);
-            return {
-              list: docs,
-              // list: docs.reverse(),
-              last: docs.length && docs[docs.length - 1].timestamp || 0
-            };
-          })
+          // console.log(docs);
+          return {
+            list: docs,
+            // list: docs.reverse(),
+            last: docs.length && docs[docs.length - 1].timestamp || 0
+          };
+        })
       ]).then(results => {
         return results[0];
       });
     }
 
     static getMessage(_id) {
-      return MessageCollection.findOne({_id: ObjectID(_id)});
+      return MessageCollection.findOne({ _id: ObjectID(_id) });
     }
 
-    static getNewLyList({roomid, index}) {
+    static getNewLyList({ roomid, index }) {
       // console.log(index);
       if (!index)
         return Message.getList(roomid);
 
       // console.log(arguments);
       return MessageCollection.find({
-        roomid,
-        timestamp: {
-          $gt: parseInt(index)
-        }
-      }, {})
-        .sort({timestamp: 1})
+          roomid,
+          timestamp: {
+            $gt: parseInt(index)
+          }
+        }, {})
+        .sort({ timestamp: 1 })
         .toArray()
         .then(docs => docs.reverse());
     }
@@ -124,13 +124,13 @@ module.exports = function (app) {
         }
       }, {
         count: 0
-      }, function (curr, result) {
+      }, function(curr, result) {
         result.count++;
       }, true);
     }
 
     static offlineMessageCount(query) {
-      let {target} = query;
+      let { target } = query;
       // return OfflineMessageCollection.aggregate({
       //
       // })
@@ -141,7 +141,7 @@ module.exports = function (app) {
         target
       }, {
         count: 0
-      }, function (curr, result) {
+      }, function(curr, result) {
         result.count++;
       }, true);
     }
@@ -149,14 +149,14 @@ module.exports = function (app) {
     static getOfflineMessage(query) {
       return OfflineMessageCollection
         .find(query)
-        .sort({timestamp: -1})
+        .sort({ timestamp: -1 })
         .limit(150)
         .toArray();
     }
 
     static getLastMessageByRommids(roomids) {
       return Promise
-        .all(roomids.map(roomid => MessageCollection.find({roomid}).limit(1).sort({timestamp: -1}).toArray()))
+        .all(roomids.map(roomid => MessageCollection.find({ roomid }).limit(1).sort({ timestamp: -1 }).toArray()))
         .then(results => {
           var messages = results.map(result => result[0]);
           return messages;
@@ -165,7 +165,7 @@ module.exports = function (app) {
 
     static getLastMessage(rooms, self) {
       return Promise
-        .all(rooms.map(room => MessageCollection.find({roomid: room.roomid}).limit(1).sort({timestamp: -1}).toArray()))
+        .all(rooms.map(room => MessageCollection.find({ roomid: room.roomid }).limit(1).sort({ timestamp: -1 }).toArray()))
         .then(results => {
           let r = results.map((messages, index) => {
             let room = rooms[index];
@@ -181,15 +181,30 @@ module.exports = function (app) {
         });
     }
     static deleteOfflineMessage(query) {
-      let {roomid, target} = query;
+      let { roomid, target } = query;
       console.log(query, '................');
       return OfflineMessageCollection
-        .count({roomid, target})
+        .count({ roomid, target })
         .then(count => {
           return OfflineMessageCollection
-            .remove({roomid, target})
+            .remove({ roomid, target })
             .then(() => count);
         });
     }
+
+    static getOfflineMessageRoomsByTarget(target) {
+      return OfflineMessageCollection.group({
+        roomid: 1,
+        from: 1
+      }, {
+        target,
+        group: { '$exists': false }
+      }, {
+        _offline_count: 0
+      }, function(curr, result) {
+        result._offline_count++;
+      }, true);
+    }
   };
+
 };
