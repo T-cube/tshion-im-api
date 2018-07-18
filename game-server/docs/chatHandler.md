@@ -43,6 +43,7 @@ on 'joinRoom' event receive data
 *user send a message for one by one*
 ```javascript
 {
+  msg_id: Number | String, //
   target: String,
   roomid: String,
   content: String,    // optional, if type text

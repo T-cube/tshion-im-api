@@ -247,7 +247,7 @@ prototype.deviceToken = function(msg, session, next) {
  */
 prototype.send = function(msg, session, next) {
   let self = this;
-  let { target, roomid, content, type, from_name } = msg;
+  let { target, roomid, content, type, from_name, msg_id } = msg;
 
   if (type == 'text') {
     content = content.replace(/&nbsp;/g, ' ');
