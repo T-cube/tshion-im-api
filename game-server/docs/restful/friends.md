@@ -90,6 +90,35 @@ param|user_id|String|user id
 
 [discard]GET /user/friends/info/:user_id
 
+returns
+```js
+{
+    "status": 200,
+    "data": [
+        {
+            "_id": "5b28dc31c12fcb2623e24fc3",
+            "email": "",
+            "mobile": "98935954",
+            "name": "233",
+            "avatar": "http://cdn-public-test.tlifang.com/upload/avatar/84e37fd9-f7a9-4bd6-8fe1-1a6c992263ac.jpg",
+            "sex": "M",
+            "nickname": "",
+            "showname": "233"
+        },
+        {
+            "_id": "5b28dd9cc12fcb2623e24fcb",
+            "email": "",
+            "mobile": "15605925013",
+            "name": "土豆和花生",
+            "avatar": "http://cdn-public-test.tlifang.com/upload/avatar/15980690-f31a-4505-bc7f-83d6d3e5d695.jpg",
+            "sex": "M",
+            "nickname": "",
+            "showname": "土豆和花生"
+        }
+    ]
+}
+```
+
 param|name|type|des
 -----|----|----|---
 param|user_id|String|target user id
