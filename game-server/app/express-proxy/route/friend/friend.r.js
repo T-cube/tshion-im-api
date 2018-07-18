@@ -1,6 +1,7 @@
 module.exports = function(app) {
 
   const User = require('../../../models/user')(app);
+  const Room = require('../../../models/room')(app);
 
   return {
     get: {
@@ -13,7 +14,14 @@ module.exports = function(app) {
           var user = req.user;
 
           User.getAllFriendsInfo(user._id).then(list => {
-            res.sendJson(list);
+            return Room.getUserRoomMap(user._id.toHexString()).then(rooms => {
+              var result = rooms.map(room => {
+                var friend = list.find(item => ~room.members.indexOf(item._id.toString()));
+                friend.roomid = room.roomid;
+                return friend;
+              });
+              res.sendJson(result);
+            });
           }).catch(next);
         }
       }
