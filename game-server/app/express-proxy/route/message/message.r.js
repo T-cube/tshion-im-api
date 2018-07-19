@@ -21,8 +21,23 @@ module.exports = function(app) {
             // console.log(123,result.list.length)
             res.sendJson(result);
 
-            Message.deleteOfflineMessage({roomid: req.params.roomid, target: user._id.toHexString()});
+            Message.deleteOfflineMessage({
+              roomid: req.params.roomid,
+              target: user._id.toHexString()
+            });
           }).catch(next);
+        }
+      },
+      'offline/history/:roomid': {
+        docs: {
+          name: '获取分页离线消息',
+          params: [
+            { param: 'pagesize', type: 'Number' },
+            { query: 'last', type: 'Number' }
+          ]
+        },
+        method(req, res, next) {
+
         }
       },
       'offline/new/:roomid': {
@@ -68,7 +83,7 @@ module.exports = function(app) {
             // console.log(result)
             res.sendJson(result);
 
-            Message.deleteOfflineMessage({roomid: req.params.roomid, target: user._id.toHexString()});
+            Message.deleteOfflineMessage({ roomid: req.params.roomid, target: user._id.toHexString() });
           }).catch(next);
         }
       }

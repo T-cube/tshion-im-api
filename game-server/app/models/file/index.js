@@ -55,6 +55,11 @@ module.exports = function(app) {
       return qiniu.makeLink.apply(qiniu, arguments);
     }
 
+
+    static streamSaveCdn({ savekey = uuidv4(), stream, folder, rename }) {
+      return qiniu.streamUpload(savekey, stream, folder, rename).then(result => ({ result, uuid: savekey }));
+    }
+
     /**
      * upload file to cdn
      * @param {Object} options

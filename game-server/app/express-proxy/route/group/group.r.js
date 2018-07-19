@@ -1,11 +1,16 @@
 'use strict';
 
-module.exports = function (app) {
+module.exports = function(app) {
   const Group = require('../../../models/group')(app);
   const Setting = require('../../../models/group/setting')(app);
   const Member = require('../../../models/group/member')(app);
   const User = require('../../../models/user')(app);
   const Message = require('../../../models/message')(app);
+  const File = require('../../../models/file')(app);
+
+  const ObjectID = app.get('ObjectID');
+  const drawer = require('../../../vendor/drawer')();
+  const config = require('../../../../config/config');
 
   return {
     get: {
@@ -123,7 +128,7 @@ module.exports = function (app) {
         },
         method(req, res, next) {
           let user = req.user;
-          let {member_id} = req.params;
+          let { member_id } = req.params;
           Member
             .getMemberInfo(member_id)
             .then(info => {
@@ -158,7 +163,7 @@ module.exports = function (app) {
           let body = req.body;
           let user = req.user;
 
-          let {members} = body;
+          let { members } = body;
           body.creator = user._id;
 
           if (!members)
@@ -175,25 +180,52 @@ module.exports = function (app) {
               var group = newGroup._id;
 
               return Promise.all([
-                new Setting({group}).save(),
+                new Setting({ group }).save(),
                 Member.addMany(members, group)
               ]).then(() => {
-                res.sendJson(newGroup);
+                var uids = members.map(member => ObjectID(member));
+                return User.findMany({ _id: { $in: uids } }).then(users => {
+                  var imgs = users.map(user => user.avatar + '?imageView2/0/w/80/h/80/q/96');
 
-                members.map(member => {
-                  req
-                    .pomelo
-                    .rpc
-                    .push
-                    .pushRemote
-                    .notifyClient(null, 'group.join', {
-                      group: newGroup._id,
-                      type: 'add'
-                    }, member, function (err) {
-                      if (err) {
-                        console.error('notify error:', err);
+                  return drawer.puzzle.apply(drawer, imgs).then(result => {
+                    return File.streamSaveCdn({ stream: result.stream }).then(data => {
+                      var cache = {
+                        filename: `${data.uuid}.png`,
+                        hash: data.result.hash,
+                        mimeType: 'image/png',
+                        extensions: 'png',
+                        cdn: data.result,
+                        url: `${data.result.server_url}/${data.result.key}`
                       }
-                    });
+
+                      return new File(cache).saveCache().then(cacheFile => {
+                        cache.copy = cacheFile._id;
+                        return new File(cache).save().then(file => {
+                          var url = config.apiUrl + 'file/image/view/' + file._id.toHexString();
+                          return Group.modifyGroupAvatar(group, url).then(result => {
+                            res.sendJson(result)
+
+
+                            members.forEach(member => {
+                              req
+                                .pomelo
+                                .rpc
+                                .push
+                                .pushRemote
+                                .notifyClient(null, 'group.join', {
+                                  group: newGroup._id,
+                                  type: 'add'
+                                }, member, function(err) {
+                                  if (err) {
+                                    console.error('notify error:', err);
+                                  }
+                                });
+                            });
+                          });
+                        });
+                      })
+                    })
+                  })
                 });
               });
             })
@@ -252,13 +284,13 @@ module.exports = function (app) {
           ]
         },
         method(req, res, next) {
-          let {members} = req.body;
+          let { members } = req.body;
           console.log(req.body);
 
           if (members.indexOf(','))
             members = members.split(',');
 
-          let {group_id} = req.params;
+          let { group_id } = req.params;
           let user = req.user;
 
           Group
@@ -288,7 +320,7 @@ module.exports = function (app) {
                           .notifyClient(null, 'group.join', {
                             group: group_id,
                             type: 'add'
-                          }, member.uid.toHexString(), function (err) {
+                          }, member.uid.toHexString(), function(err) {
                             if (err) {
                               console.error('notify error:', err);
                             }
@@ -317,8 +349,8 @@ module.exports = function (app) {
           ]
         },
         method(req, res, next) {
-          let {members} = req.body;
-          let {group_id} = req.params;
+          let { members } = req.body;
+          let { group_id } = req.params;
           let user = req.user;
 
           Group

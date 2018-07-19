@@ -37,7 +37,7 @@ module.exports = function(app) {
     }
 
     static findGroupByIdAndOwner(_id, owner) {
-      return groupCollection.findOne({_id: ObjectID(_id), owner: ObjectID(owner)});
+      return groupCollection.findOne({ _id: ObjectID(_id), owner: ObjectID(owner) });
     }
 
     static findOne(query) {
@@ -105,7 +105,13 @@ module.exports = function(app) {
     }
 
     static modifyGroupName(group, name) {
-      return groupCollection.findOneAndUpdate({_id: ObjectID(group)}, {$set:{name}},{
+      return groupCollection.findOneAndUpdate({ _id: ObjectID(group) }, { $set: { name } }, {
+        returnOriginal: false
+      }).then(result => result.value);
+    }
+
+    static modifyGroupAvatar(group, avatar) {
+      return groupCollection.findOneAndUpdate({ _id: ObjectID(group) }, { $set: { avatar } }, {
         returnOriginal: false
       }).then(result => result.value);
     }
