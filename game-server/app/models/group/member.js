@@ -55,7 +55,7 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static findMemberByUidAndGroupId(uid, group) {
-      return groupMemberCollection.findOne({uid: ObjectID(uid), group: ObjectID(group)});
+      return groupMemberCollection.findOne({ uid: ObjectID(uid), group: ObjectID(group) });
     }
 
     /**
@@ -132,7 +132,7 @@ module.exports = function(app) {
     }
 
     static getMembers(group_id) {
-      return Member._find({ group: ObjectID(group_id) }, {uid: 1});
+      return Member._find({ group: ObjectID(group_id) }, { uid: 1 });
     }
 
     /**
@@ -142,7 +142,7 @@ module.exports = function(app) {
      */
     static deleteMembers(memberIds) {
       let ids = memberIds.map(_id => ObjectID(_id ? _id : undefined));
-      return Member._find({type:'owner', _id: {$in: ids}}).then(members=>{
+      return Member._find({ type: 'owner', _id: { $in: ids } }).then(members => {
         if (members.length) throw new Error('cannot remove owner from group');
 
         return groupMemberCollection.deleteMany({ _id: { $in: ids } }).then(result => result.deletedCount);
@@ -171,13 +171,13 @@ module.exports = function(app) {
           throw new Error('members out of limit, max member number is 100');
         }
 
-        return Promise.all(ids.map(user => Member._findOne({uid: user, group}, {_id: 1}))).then(exists=>{
+        return Promise.all(ids.map(user => Member._findOne({ uid: user, group }, { _id: 1 }))).then(exists => {
           let _ids = [];
-          exists.forEach((exist,index)=>{
-            if(!exist) _ids.push(ids[index]);
+          exists.forEach((exist, index) => {
+            if (!exist) _ids.push(ids[index]);
           });
 
-          if(!_ids.length) return [];
+          if (!_ids.length) return [];
 
           return User.findMany({ _id: { $in: _ids } }).then(members => {
             return Member._insertMany(members.map(member => {
