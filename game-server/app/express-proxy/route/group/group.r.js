@@ -185,7 +185,7 @@ module.exports = function(app) {
               ]).then(() => {
                 var uids = members.map(member => ObjectID(member));
                 return User.findMany({ _id: { $in: uids } }).then(users => {
-                  var imgs = users.map(user => user.avatar + '?imageView2/0/w/80/h/80/q/96');
+                  var imgs = users.map(user => (user.avatar || 'http://cdn-public-test.tlifang.com/upload/admin/avatar/jxk9mhivn706mxYmVl.png') + '?imageView2/0/w/80/h/80/q/96');
 
                   return drawer.puzzle.apply(drawer, imgs).then(result => {
                     return File.streamSaveCdn({ stream: result.stream }).then(data => {
