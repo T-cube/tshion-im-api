@@ -185,7 +185,7 @@ module.exports = function(app) {
                 Member.addMany(members, group)
               ]).then(() => {
                 var uids = members.map(member => ObjectID(member));
-                uids.push(user._id);
+                uids.unshift(user._id);
                 return User.findMany({ _id: { $in: uids } }).then(users => {
                   var imgs = users.map(u => (u.avatar || 'http://cdn-public-test.tlifang.com/upload/admin/avatar/jxk9mhivn706mxYmVl.png') + '?imageView2/0/w/80/h/80/q/96');
 
