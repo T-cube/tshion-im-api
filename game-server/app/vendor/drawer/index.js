@@ -27,7 +27,6 @@ class Drawer {
   }
 
   puzzle() {
-    console.log(arguments);
     var args = Array.prototype.slice.call(arguments, 0, 4);
     var imageLength = args.length;
     var tmpId = this.tmpId++;
@@ -55,7 +54,6 @@ class Drawer {
         });
       })));
     }
-    console.log(promises);
     return Promise.all(promises).then(() => {
       this.tmpMap.set(tmpId, tmp);
       var drawWidth = (width - 10) / 2,

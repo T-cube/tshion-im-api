@@ -198,7 +198,8 @@ prototype.sendGroup = function(msg, session, next) {
       if (err) return next(err);
 
       param = Object.assign(param, result);
-      self.app.rpc.channel.channelRemote.cahnnelPushMessageByUids(session, param, uids, function(err, offlines) {
+      var receivers = uids.map(id => id !== from);
+      self.app.rpc.channel.channelRemote.cahnnelPushMessageByUids(session, param, receivers, function(err, offlines) {
 
         // console.log('offline uses : =========',offlines);
         next(null, { route: param.route, msg, param });
