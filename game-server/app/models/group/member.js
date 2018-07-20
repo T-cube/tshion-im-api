@@ -159,14 +159,14 @@ module.exports = function(app) {
       let ids = memberIds.sort().map(_id => ObjectID(_id));
 
       group = ObjectID(group);
-      console.log('ids', ids);
+      // console.log('ids', ids);
 
       if (ids.length > 20) {
         return Promise.reject(new Error('add max 20 members once'));
       }
 
       return Member.memberCount(group).then(member_count => {
-        console.log('member_count', member_count);
+        // console.log('member_count', member_count);
         if ((member_count + ids.length) > 100) {
           throw new Error('members out of limit, max member number is 100');
         }
