@@ -190,6 +190,8 @@ module.exports = function(app) {
 
                   return drawer.puzzle.apply(drawer, imgs).then(result => {
                     return File.streamSaveCdn({ stream: result.stream }).then(data => {
+                      drawer.cleartTmp(result.tmpId);
+
                       var cache = {
                         filename: `${data.uuid}.png`,
                         hash: data.result.hash,
@@ -203,8 +205,8 @@ module.exports = function(app) {
                         cache.copy = cacheFile._id;
                         return new File(cache).save().then(file => {
                           var url = config.apiUrl + 'file/image/view/' + file._id.toHexString();
-                          return Group.modifyGroupAvatar(group, url).then(result => {
-                            res.sendJson(result)
+                          return Group.modifyGroupAvatar(group, url).then(nextGroup => {
+                            res.sendJson(nextGroup)
 
 
                             members.forEach(member => {
