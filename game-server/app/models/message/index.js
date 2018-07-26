@@ -55,6 +55,14 @@ module.exports = function(app) {
       return OfflineMessageCollection.insertMany(msgs);
     }
 
+    static getAllOffline(roomid, target) {
+      return OfflineMessageCollection
+        .find({ roomid, target })
+        .sort({ timestamp: -1 })
+        .toArray();
+
+    }
+
     /**
      * 获取消息列表
      * @param {*} query
