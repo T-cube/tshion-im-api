@@ -56,10 +56,14 @@ module.exports = function(app) {
     }
 
     static getAllOffline(roomid, target) {
+      // return OfflineMessageCollection.findAndModify({ roomid, target }, [['timestamp', -1]], {}, { remove: true });
       return OfflineMessageCollection
         .find({ roomid, target })
         .sort({ timestamp: -1 })
-        .toArray();
+        .toArray().then(result => {
+          return OfflineMessageCollection
+            .deleteMany({ target, roomid }).then(() => result);
+        });
 
     }
 
