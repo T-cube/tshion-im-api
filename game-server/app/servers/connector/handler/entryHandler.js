@@ -22,6 +22,7 @@ class entryHandler {
    * @return {Void}
    */
   enter(msg, session, next) {
+    console.log(session.__session__.__socket__.on)
     let self = this;
     let { cid, init_token, client } = msg;
     // console.log('msg',msg)
