@@ -111,7 +111,7 @@ module.exports = function(app) {
     },
     post: {
       'device-token': {
-        docsL {
+        docs: {
           name: '保存设备推送号',
           params: [
             { key: 'deviceToken', type: 'String' },
