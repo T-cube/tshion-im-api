@@ -125,7 +125,7 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
 
   var channelId = this.userChannelMap.get(target);
   var channel = this.channelService.getChannel(channelId);
-  console.log(target, channel, this.userChannelMap);
+  // console.log(target, channel, this.userChannelMap);
 
   if (!channel) {
     return cb('user offline');
@@ -146,7 +146,9 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
     return cb('user offline');
   }
 
-  this.channelService.pushMessageByUids(params, clients);
+  this.channelService.pushMessageByUids(params, clients, function(err, result) {
+    console.log('push here!!!!!!!!!:', err, result);
+  });
   cb();
 };
 
