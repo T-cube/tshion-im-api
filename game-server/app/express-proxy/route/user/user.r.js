@@ -2,6 +2,8 @@
 
 module.exports = function(app) {
   const User = require('../../../models/user')(app);
+  const Account = require('../../../models/account')(app);
+
   return {
     get: {
       ':user_id': {
@@ -108,6 +110,29 @@ module.exports = function(app) {
       }
     },
     post: {
+      'device-token': {
+        docsL {
+          name: '保存设备推送号',
+          params: [
+            { key: 'deviceToken', type: 'String' },
+            { key: 'client', type: 'String' },
+            { key: 'brand', type: 'String' },
+          ]
+        },
+        method(req, res, next) {
+          var { deviceToken, client, brand } = req.body;
+          var user = req.user;
+
+          new Account({
+            uid: user._id.toHexString(),
+            client,
+            deviceToken,
+            brand
+          }).saveDeviceToken().then(value => {
+            res.sendJson(value);
+          }).catch(next);
+        }
+      },
       'friend/group': {
         docs: {
           name: '创建好友分组',
@@ -143,9 +168,10 @@ module.exports = function(app) {
             res.sendJson(request);
             // var { from, user_id: target } = req.body;
             req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
-              request: request._id,
-              from: user._id.toHexString(),
-              type: request.update_at ? 'update' : 'new' },
+                request: request._id,
+                from: user._id.toHexString(),
+                type: request.update_at ? 'update' : 'new'
+              },
               user_id,
               function(err) {
                 if (err) {
@@ -180,8 +206,8 @@ module.exports = function(app) {
               receiver: result.receiver,
               from: result.from,
               type: status
-            }, result.from, function(err){
-              if(err) {
+            }, result.from, function(err) {
+              if (err) {
                 console.error('resolve notify error:', err);
               }
             });
