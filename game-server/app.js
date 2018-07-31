@@ -34,8 +34,8 @@ co(function*() {
       useProtobuf: true,
       heartbeats: true,
       closeTimeout: 60 * 1000,
-      // heartbeatTimeout: 60 * 1000,
-      // heartbeatInterval: 25 * 1000,
+      heartbeatTimeout: 60 * 1000,
+      heartbeatInterval: 25 * 1000,
     });
     // filter configures
     app.filter(pomelo.timeout());
