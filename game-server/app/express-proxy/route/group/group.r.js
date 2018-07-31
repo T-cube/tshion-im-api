@@ -291,6 +291,7 @@ module.exports = function(app) {
           let body = req.body;
           let user = req.user;
 
+          let group_id = req.params.group_id;
           let { members } = body;
           body.creator = user._id;
 
