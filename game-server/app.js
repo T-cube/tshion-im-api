@@ -33,9 +33,9 @@ co(function*() {
       // transports: ['polling-xhr','websocket', 'polling',],
       useProtobuf: true,
       heartbeats: true,
-      closeTimeout: 60 * 1000,
-      heartbeatTimeout: 60 * 1000,
-      heartbeatInterval: 25 * 1000,
+      closeTimeout: 100,
+      heartbeatTimeout: 100,
+      heartbeatInterval: 100,
     });
     // filter configures
     app.filter(pomelo.timeout());

@@ -269,7 +269,7 @@ prototype.send = function(msg, session, next) {
     result.from_name = from_name;
     param = Object.assign(param, result);
     self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
-      console.log('???????????????/', err)
+      // console.log('???????????????/', err)
       if (err == 'user offline') {
         self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
           err && console.error(err);

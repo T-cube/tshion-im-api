@@ -70,7 +70,7 @@ prototype.get = function(channelId, flag) {
 
 prototype.getUserChannelId = function(uid, cb) {
   let [user] = uid.split('*');
-  console.log('getUserChannelId:::::::::', user, this.userChannelMap);
+  // console.log('getUserChannelId:::::::::', user, this.userChannelMap);
   let channelId = this.userChannelMap.get(user);
   cb(null, channelId);
 };
@@ -131,10 +131,10 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
     return cb('user offline');
   }
   var { loginMap } = channel;
-  console.log(target, loginMap);
+  // console.log(target, loginMap);
   var loginer = loginMap.get(target);
 
-  console.log('loginer::::::::::,', loginer);
+  // console.log('loginer::::::::::,', loginer);
 
   var clients = [];
   for (let uid in loginer) {

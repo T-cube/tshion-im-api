@@ -111,26 +111,26 @@ module.exports = function(app) {
           let message = this._generateMessageIOS(notification);
 
           apnService.send(message, iosTokens).then(result => {
-            console.log('.................:', result);
+            // console.log('.................:', result);
             console.log('sent:', result.sent.length);
             console.log('failed:', result.failed.length);
-            console.log(result.failed);
+            // console.log(result.failed);
             resolve(result);
           });
         } else resolve(null);
       }),
       new Promise((resolve, reject) => {
         if (androidTokens.length) {
-          console.log(notification);
-          console.log('androidTokens:--------', androidTokens);
+          // console.log(notification);
+          // console.log('androidTokens:--------', androidTokens);
           return resolve(GeTui.sendToRegId(androidTokens, notification));
         } else resolve(null);
       }),
       new Promise((resolve, reject) => {
         if (xiaomiTokens.length) {
           let ns = this._generateMessageAndroid(notification);
-          console.log('androidTokens:--------', xiaomiTokens);
-          console.log('.......ns', ns);
+          // console.log('androidTokens:--------', xiaomiTokens);
+          // console.log('.......ns', ns);
           // let message = {
           //   msg_content: ns.alert,
           //   title: ns.title,
@@ -158,10 +158,10 @@ module.exports = function(app) {
         } else resolve(null);
       })
     ]).then(() => {
-      console.log('push done -----------------');
+      // console.log('push done -----------------');
       return this._emitNextNotification(uid);
     }).catch(error => {
-      console.error(error);
+      // console.error(error);
       return this._emitNextNotification(uid);
     });
   };
