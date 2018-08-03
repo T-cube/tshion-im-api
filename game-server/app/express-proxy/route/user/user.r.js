@@ -247,6 +247,12 @@ module.exports = function(app) {
 
           User.deleteFriend(user._id, friend_id).then(() => {
             res.sendJson('ok');
+
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friend.delete', {
+              friend: user._id.toHexString()
+            }, friend_id, function(err) {
+              console.error('notifi error:', err);
+            });
           }).catch(next);
         }
       },
