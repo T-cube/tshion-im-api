@@ -532,10 +532,9 @@ module.exports = function(app) {
         if (!result)
           return [];
         return User
-          ._getFriendsInfo(result.members)
+          ._getFriendsInfo(result.members, user)
           .then(members => {
             const uid = user.toString();
-            console.log(uid)
             return Promise.all(members.map(member => {
               return Room.findRoom({
                 members: {
@@ -562,7 +561,8 @@ module.exports = function(app) {
      * @param {Array} ids
      * @returns {Promise}
      */
-    static _getFriendsInfo(ids) {
+    static _getFriendsInfo(ids, user) {
+      user = ObjectID(user);
       return User
         ._getUserInfoByIds(ids)
         .then(users => {
@@ -571,7 +571,8 @@ module.exports = function(app) {
           return friendInfoCollection.find({
               friend: {
                 $in: query
-              }
+              },
+              user
             }, {
               nickname: 1,
               setting: 1
@@ -601,7 +602,7 @@ module.exports = function(app) {
       return friendCollection
         .findOne({ user: ObjectID(user_id) })
         .then(result => {
-          return User._getFriendsInfo(result.friends);
+          return User._getFriendsInfo(result.friends, user_id);
         });
     }
 
