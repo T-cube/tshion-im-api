@@ -15,6 +15,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           User.user(req.params.user_id, req.user._id).then(user => {
+            user.showname = user.nickname || user.name;
             res.sendJson(user);
           }).catch(next);
         }
