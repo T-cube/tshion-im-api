@@ -234,6 +234,22 @@ module.exports = function(app) {
       }
     },
     delete: {
+      'friend/:friend_id': {
+        doc: {
+          name: '删除好友',
+          params: [
+            { param: 'friend_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          var friend_id = req.params.friend_id;
+
+          User.deleteFriend(user._id, friend_id).then(() => {
+            res.sendJson('ok');
+          }).catch(next);
+        }
+      },
       'friend-request/:request_id': {
         docs: {
           name: '删除好友请求',

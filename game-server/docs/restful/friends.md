@@ -17,6 +17,7 @@ param|name|type|des
 -----|----|----|---
 param|user_id|String|target user id
 
+
 ## 发送添加好友请求
 POST /user/friend-request
 
@@ -138,6 +139,14 @@ param|name|type|des
 -----|----|----|---
 param|friend_id|String|friend id
 key|nickname|String|friend nickname you want to set
+
+## 删除好友
+DELETE /user/friend/:friend_id
+
+param|name|type|des
+-----|----|----|---
+param|friend_id|String|friend id
+
 
 ## 创建好友分组
 

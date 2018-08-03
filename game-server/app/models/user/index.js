@@ -2,7 +2,7 @@
 const _ = require('../../../libs/util');
 const FriendInfoSchema = require('./friend-info');
 
-module.exports = function (app) {
+module.exports = function(app) {
   const Room = require('../room')(app);
 
   const ObjectID = app.get('ObjectID');
@@ -71,10 +71,10 @@ module.exports = function (app) {
      */
     static findMany(query, fields) {
       return userCollection.find(query, Object.assign({
-        name: 1,
-        avatar: 1
-      }, fields))
-        .sort({_id: 1})
+          name: 1,
+          avatar: 1
+        }, fields))
+        .sort({ _id: 1 })
         .toArray();
     }
 
@@ -83,7 +83,7 @@ module.exports = function (app) {
      * @param {*} param0
      * @param {String} param0.user 发起查找的用户
      */
-    static find({name, mobile, email, keyword, user}) {
+    static find({ name, mobile, email, keyword, user }) {
       var query = {};
       var $or = [];
       if (name) {
@@ -143,7 +143,7 @@ module.exports = function (app) {
         return Promise.resolve([]);
 
       return friendCollection
-        .findOne({user: ObjectID(user)})
+        .findOne({ user: ObjectID(user) })
         .then(doc => {
           let friends = [];
           if (doc) {
@@ -151,18 +151,18 @@ module.exports = function (app) {
           }
           query['$nor'] = [];
           if (friends.length) {
-            query['$nor'] = friends.map(_id => ({_id}));
+            query['$nor'] = friends.map(_id => ({ _id }));
           }
 
-          query['$nor'].push({_id: ObjectID(user)});
+          query['$nor'].push({ _id: ObjectID(user) });
           return userCollection
             .find(query, {
-            avatar: 1,
-            email: 1,
-            mobile: 1,
-            name: 1,
-            sex: 1
-          })
+              avatar: 1,
+              email: 1,
+              mobile: 1,
+              name: 1,
+              sex: 1
+            })
             .toArray();
         });
     }
@@ -171,23 +171,23 @@ module.exports = function (app) {
      * 发送添加好友请求
      * @param {*} param0
      */
-    static sendRequest({user_id, from, mark}) {
+    static sendRequest({ user_id, from, mark }) {
       return requestCollection
-        .findOne({receiver: user_id, from, status: STATUS_FRIEND_REQUEST_AGREE})
+        .findOne({ receiver: user_id, from, status: STATUS_FRIEND_REQUEST_AGREE })
         .then(doc => {
           if (doc)
             return null;
 
           let receiver = ObjectID(user_id);
           return requestCollection
-            .findOne({receiver, from})
+            .findOne({ receiver, from })
             .then(doc => {
               if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT))
                 return User._updateFriendRequest({
                   receiver,
                   from,
                   status: doc.status
-                }, {mark, update_at: new Date});
+                }, { mark, update_at: new Date });
               let data = {
                 receiver,
                 from,
@@ -212,7 +212,7 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static deleteRequest(request_id, receiver) {
-      return requestCollection.remove({_id: ObjectID(request_id), receiver});
+      return requestCollection.remove({ _id: ObjectID(request_id), receiver });
     }
 
     /**
@@ -245,7 +245,7 @@ module.exports = function (app) {
 
       return requestCollection
         .find(query)
-        .sort({create_at: -1, update_at: -1})
+        .sort({ create_at: -1, update_at: -1 })
         .skip(page * pagesize)
         .limit(pagesize)
         .toArray()
@@ -253,10 +253,10 @@ module.exports = function (app) {
           let froms = docs.map(doc => ObjectID(doc.from));
 
           return userCollection.find({
-            _id: {
-              $in: froms
-            }
-          }, {
+              _id: {
+                $in: froms
+              }
+            }, {
               name: 1,
               avatar: 1,
               mobile: 1
@@ -281,7 +281,7 @@ module.exports = function (app) {
       return User._updateFriendRequest({
         _id: ObjectID(request_id),
         receiver
-      }, {status: STATUS_FRIEND_REQUEST_REJECT});
+      }, { status: STATUS_FRIEND_REQUEST_REJECT });
     }
 
     /**
@@ -348,8 +348,10 @@ module.exports = function (app) {
         friend
       };
 
+      var friendInfo = new FriendInfoSchema({ nickname: '' });
+
       return friendInfoCollection.findOneAndUpdate(query, {
-        $set: Object.assign(query, {nickname: ''})
+        $set: Object.assign(query, friendInfo)
       }, {
         upsert: true,
         returnOriginal: false
@@ -369,7 +371,7 @@ module.exports = function (app) {
         user: ObjectID(user)
       }, {
         $set: FriendInfoSchema(info)
-      }, {returnOriginal: false});
+      }, { returnOriginal: false });
     }
 
     /**
@@ -379,13 +381,13 @@ module.exports = function (app) {
      * @returns {Promise}
      */
     static _agreeFriendRequest(request_id, receiver) {
-      return requestCollection.findOne({_id: ObjectID(request_id), receiver}).then(request => {
+      return requestCollection.findOne({ _id: ObjectID(request_id), receiver }).then(request => {
         if (!request)
           throw new Error('request not found');
 
-        let {from: user_a, receiver: user_b} = request;
+        let { from: user_a, receiver: user_b } = request;
         user_a = ObjectID(user_a),
-        user_b = ObjectID(user_b);
+          user_b = ObjectID(user_b);
 
         let promise_a = User._addFriend({
           user: user_a
@@ -407,7 +409,7 @@ module.exports = function (app) {
 
         let promise_request = User._updateFriendRequest({
           _id: ObjectID(request_id)
-        }, {status: STATUS_FRIEND_REQUEST_AGREE});
+        }, { status: STATUS_FRIEND_REQUEST_AGREE });
 
         return Promise
           .all([
@@ -443,7 +445,7 @@ module.exports = function (app) {
         return User
           ._agreeFriendRequest(request_id, receiver)
           .then(result => {
-            let {from, receiver} = result;
+            let { from, receiver } = result;
             const roomInfo = Room.createRoomInfo(from, receiver)
 
             return new Room(roomInfo)
@@ -457,7 +459,7 @@ module.exports = function (app) {
     }
 
     static _countFriendGroup(user_id) {
-      return friendGroupCollection.count({user: ObjectID(user_id)});
+      return friendGroupCollection.count({ user: ObjectID(user_id) });
     }
 
     /**
@@ -526,7 +528,7 @@ module.exports = function (app) {
      * @param {*} group_id
      */
     static getGroupFriendsInfo(group_id, user) {
-      return friendGroupCollection.findOne({_id: ObjectID(group_id), user: ObjectID(user)}).then(result => {
+      return friendGroupCollection.findOne({ _id: ObjectID(group_id), user: ObjectID(user) }).then(result => {
         if (!result)
           return [];
         return User
@@ -567,10 +569,10 @@ module.exports = function (app) {
           let query = users.map(member => member._id);
 
           return friendInfoCollection.find({
-            friend: {
-              $in: query
-            }
-          }, {
+              friend: {
+                $in: query
+              }
+            }, {
               nickname: 1,
               setting: 1
             })
@@ -583,9 +585,8 @@ module.exports = function (app) {
                   return member;
 
                 return Object.assign(member, friend, {
-                  showname: friend.nickname
-                    ? friend.nickname
-                    : member.name
+                  showname: friend.nickname ?
+                    friend.nickname : member.name
                 });
               });
             })
@@ -598,7 +599,7 @@ module.exports = function (app) {
      */
     static getAllFriendsInfo(user_id) {
       return friendCollection
-        .findOne({user: ObjectID(user_id)})
+        .findOne({ user: ObjectID(user_id) })
         .then(result => {
           return User._getFriendsInfo(result.friends);
         });
@@ -610,15 +611,32 @@ module.exports = function (app) {
      */
     static getFriends(user_id) {
       return Promise.all([
-        friendCollection.findOne({user: ObjectID(user_id)}),
+        friendCollection.findOne({ user: ObjectID(user_id) }),
         User.getFriendGroupList(user_id)
       ]).then(([friends, groups]) => {
         if (!friends) {
-          return {groups: []};
+          return { groups: [] };
         }
         friends.groups = groups;
         return friends;
       })
+    }
+
+
+    /**
+     * 删除指定好友
+     * @param {String} user_id
+     * @param {String} friend_id
+     * @returns {Promise<any[]>}
+     */
+    static deleteFriend(user_id, friend_id) {
+      var user = ObjectID(user_id);
+      var friend = ObjectID(friend_id);
+      return Promise.all(
+        friendCollection.findOneAndUpdate({ user }, { '$pull': { friends: friend } }),
+        friendGroupCollection.findOneAndUpdate({ user, type: 'default' }, { '$pull': { members: friend } }),
+        friendInfoCollection.findOneAndDelete({ user, friend })
+      );
     }
   };
 };

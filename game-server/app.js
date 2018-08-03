@@ -61,9 +61,6 @@ co(function*() {
   throw e;
 });
 
-
-
-
 process.on('uncaughtException', function(err) {
   console.error('Caught exception: ' + err.stack);
 });
