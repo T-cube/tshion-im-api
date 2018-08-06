@@ -4,7 +4,7 @@ const SchemaObject = require('schema-object');
 
 const FriendInfoSchema = new SchemaObject({
   nickname: { type: String, default: '' },
-  setting: new SchemaObject({
+  settings: new SchemaObject({
     not_distub: { type: Number, default: 0, enum: [0, 1] },
     block: { type: Number, default: 0, enum: [0, 1] }
   })
