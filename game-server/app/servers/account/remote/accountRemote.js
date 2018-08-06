@@ -106,6 +106,21 @@ prototype.revokeDeviceToken = function(info, cb) {
   self.Account.delDeviceToken(info).then(result => cb(null, result)).catch(cb);
 };
 
+prototype.isBlocked = function(user, friend, cb) {
+  this.User.getFriendInfo(user, friend).then(info => {
+    if (!info) {
+      cb(null, false);
+    }
+
+    var status = (info.settings || {}).block;
+    if (status == 1) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }).catch(cb);
+}
+
 prototype.findFriends = function(uid) {
 
 };

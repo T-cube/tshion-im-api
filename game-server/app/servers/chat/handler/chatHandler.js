@@ -268,20 +268,33 @@ prototype.send = function(msg, session, next) {
 
     result.from_name = from_name;
     param = Object.assign(param, result);
-    self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
-      // console.log('???????????????/', err)
-      if (err == 'user offline') {
-        self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-          err && console.error(err);
-          next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
-        });
-      } else {
-        next(null, { route: param.route, msg: param });
-      };
-    });
 
-    self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
-      if (err) console.warn(err);
+    self.app.rpc.account.accountRemote.isBlocked(null, target, from, function(err, isBlock) {
+      if (err) {
+        console.error(err);
+      }
+
+      if (isBlock) {
+        next(null, { route: param.route, msg: param, code: 400, error: 'user blocked' });
+      } else {
+
+        self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
+          // console.log('???????????????/', err)
+          if (err == 'user offline') {
+            self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+              err && console.error(err);
+              next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
+            });
+          } else {
+            next(null, { route: param.route, msg: param });
+          };
+        });
+
+        self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
+          if (err) console.warn(err);
+        });
+
+      }
     });
 
     self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {

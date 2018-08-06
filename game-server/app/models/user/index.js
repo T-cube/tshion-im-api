@@ -642,5 +642,32 @@ module.exports = function(app) {
         friendInfoCollection.findOneAndDelete({ user: friend, friend: user })
       );
     }
+
+    /**
+     * get one friend info
+     * @param {String} user
+     * @param {String} friend
+     * @returns {Promise}
+     */
+    static getFriendInfo(user, friend) {
+      return friendInfoCollection.findOne({ user: ObjectID(user), friend: ObjectID(friend) });
+    }
+
+    /**
+     * change one friend block status
+     * @param {String} user
+     * @param {String} friend
+     * @param {Number} status
+     * @returns {Promise}
+     */
+    static changeFriendBlockMode(user, friend, status) {
+      return friendInfoCollection.findOneAndUpdate({
+        user: ObjectID(user),
+        friend: ObjectID(friend)
+      }, { $set: { 'settings.block': status } }, {
+        returnOriginal: false,
+        upsert: false
+      });
+    }
   };
 };
