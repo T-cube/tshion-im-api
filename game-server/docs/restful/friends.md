@@ -148,6 +148,13 @@ param|name|type|des
 param|friend_id|String|friend id
 
 
+## 屏蔽好友
+PUT /user/friend.block/:friend_id
+
+param|name|type|des
+-----|----|----|---
+param|friend_id|String|friend id
+
 ## 创建好友分组
 
 ## 获取好友分组列表
