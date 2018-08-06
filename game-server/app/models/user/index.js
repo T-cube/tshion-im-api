@@ -574,16 +574,20 @@ module.exports = function(app) {
               },
               user
             }, {
+              friend: 1,
               nickname: 1,
               setting: 1
             })
             .toArray()
             .then(friends => {
-              return users.map((member, index) => {
-                let friend = friends[index];
-                delete friend._id;
+              return users.map((member) => {
+                friends.find(console.log)
+                let friend = friends.find(fr => { console.log(fr); return fr.friend.equals(member._id) });
                 if (!friend)
                   return member;
+
+                delete friend._id;
+                // delete friend.friend;
 
                 return Object.assign(member, friend, {
                   showname: friend.nickname ?

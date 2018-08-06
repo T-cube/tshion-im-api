@@ -18,6 +18,7 @@ module.exports = function(app) {
               var result = rooms.map(room => {
                 var friend = list.find(item => ~room.members.indexOf(item._id.toString()));
                 friend.roomid = room.roomid;
+                delete friend.friend;
                 return friend;
               });
               res.sendJson(result);
