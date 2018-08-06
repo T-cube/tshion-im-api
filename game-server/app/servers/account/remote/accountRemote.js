@@ -121,6 +121,12 @@ prototype.isBlocked = function(user, friend, cb) {
   }).catch(cb);
 }
 
+prototype.getFriendInfo = function(user, friend, cb) {
+  this.User.getFriendInfo(user, friend).then(info => {
+    cb(null, info);
+  }).catch(cb);
+}
+
 prototype.findFriends = function(uid) {
 
 };

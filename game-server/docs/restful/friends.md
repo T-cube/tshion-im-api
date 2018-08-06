@@ -149,7 +149,14 @@ param|friend_id|String|friend id
 
 
 ## 屏蔽好友
-PUT /user/friend.block/:friend_id
+PUT /user/friend/block/:friend_id
+
+param|name|type|des
+-----|----|----|---
+param|friend_id|String|friend id
+
+## 好友免打扰
+PUT /user/friend/distub/:friend_id
 
 param|name|type|des
 -----|----|----|---

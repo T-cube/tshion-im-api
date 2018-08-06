@@ -217,6 +217,31 @@ module.exports = function(app) {
       }
     },
     put: {
+      'friend/distub/:friend_id': {
+        docs: {
+          name: '好友免打扰',
+          params: [
+            { param: 'friend_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          var { friend_id } = req.params;
+
+          User.getFriendInfo(user._id, friend_id).then(friend => {
+            if (!friend) {
+              return next(req.apiError(400, 'wrong friend_id'));
+            }
+
+            var status = (friend.settings || {}).not_distub;
+
+            return User.changeFriendDistubMode(user._id, friend_id, status == 1 ? 0 : 1).then(() => {
+              res.sendJson(200);
+            });
+
+          }).catch(next);
+        }
+      },
       'friend/block/:friend_id': {
         docs: {
           name: '屏蔽好友',

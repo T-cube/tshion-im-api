@@ -269,12 +269,13 @@ prototype.send = function(msg, session, next) {
     result.from_name = from_name;
     param = Object.assign(param, result);
 
-    self.app.rpc.account.accountRemote.isBlocked(null, target, from, function(err, isBlock) {
+    self.app.rpc.account.accountRemote.getFriendInfo(null, target, from, function(err, friend) {
       if (err) {
         console.error(err);
       }
 
-      if (isBlock) {
+      var { block, not_distub } = (friend.settings || {});
+      if (block == 1) {
         next(null, { route: param.route, msg: param, code: 400, error: 'user blocked' });
       } else {
 
@@ -290,9 +291,12 @@ prototype.send = function(msg, session, next) {
           };
         });
 
-        self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
-          if (err) console.warn(err);
-        });
+
+        if (not_distub != 1) {
+          self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
+            if (err) console.warn(err);
+          });
+        }
 
       }
     });

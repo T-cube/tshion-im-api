@@ -669,5 +669,15 @@ module.exports = function(app) {
         upsert: false
       });
     }
+
+    static changeFriendDistubMode(user, friend, status) {
+      return friendInfoCollection.findOneAndUpdate({
+        user: ObjectID(user),
+        friend: ObjectID(friend)
+      }, { $set: { 'settings.not_distub': status } }, {
+        returnOriginal: false,
+        upsert: false
+      });
+    }
   };
 };
