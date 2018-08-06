@@ -17,7 +17,8 @@ document
   friend: ObjectID
   nickname: String
   setting: Object{
-
+    not_distub : 0 || 1,
+    block: 0 || 1
   }
 }
 ```
