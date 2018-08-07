@@ -411,9 +411,15 @@ module.exports = function(app) {
       },
       'quit/:group_id': {
         docs: {
-          name: '退出群组'
+          name: '退出群组',
+          params: [
+            { param: 'group_id', type: 'String' }
+          ]
         },
-        method(req, res, next) {}
+        method(req, res, next) {
+          var user = req.user;
+          var group_id = req.params.group_id;
+        }
       }
     }
   };

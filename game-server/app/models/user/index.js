@@ -637,14 +637,14 @@ module.exports = function(app) {
     static deleteFriend(user_id, friend_id) {
       var user = ObjectID(user_id);
       var friend = ObjectID(friend_id);
-      return Promise.all(
+      return Promise.all([
         friendCollection.findOneAndUpdate({ user }, { '$pull': { friends: friend } }),
         friendCollection.findOneAndUpdate({ user: friend }, { '$pull': { friends: user } }),
         friendGroupCollection.findOneAndUpdate({ user, type: 'default' }, { '$pull': { members: friend } }),
         friendGroupCollection.findOneAndUpdate({ user: friend, type: 'default' }, { '$pull': { members: user } }),
         friendInfoCollection.findOneAndDelete({ user, friend }),
         friendInfoCollection.findOneAndDelete({ user: friend, friend: user })
-      );
+      ]);
     }
 
     /**
