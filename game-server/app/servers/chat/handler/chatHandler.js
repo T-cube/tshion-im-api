@@ -174,15 +174,15 @@ prototype.removeGroupMember = function(msg, session, next) {
  * @param {Function} next
  */
 prototype.sendGroup = function(msg, session, next) {
-  let self = this;
-  let { roomid, content, type, from_name, group } = msg;
+  var self = this;
+  var { roomid, content, type, from_name, group } = msg;
 
   if (type == 'text') {
     content = content.replace(/&nbsp;/g, ' ');
     if (_.isBlank(content)) return next({ code: 400, error: 'content can not be blank' });
   }
 
-  let [from] = session.uid.split('*');
+  var [from] = session.uid.split('*');
   var param = Object.assign(msg, {
     route: 'onChat.group',
     roomid,
@@ -194,8 +194,10 @@ prototype.sendGroup = function(msg, session, next) {
 
     result.from_name = from_name;
 
-    self.app.rpc.group.groupRemote.getMemberIds(null, group, from, function(err, uids) {
+    self.app.rpc.group.groupRemote.getMembers(null, group, from, function(err, members) {
       if (err) return next(err);
+
+      var uids = members.map(member => member.uid.toHexString());
 
       param = Object.assign(param, result);
       var receivers = uids.filter(id => id !== from);
@@ -204,7 +206,13 @@ prototype.sendGroup = function(msg, session, next) {
         // console.log('offline uses : =========',offlines);
         next(null, { route: param.route, msg, param });
 
-        self.app.rpc.push.pushRemote.pushMessageMany(null, param, uids, () => {});
+        var pushs = members.reduce(function(curr, member) {
+          if (member.not_distub != 1) {
+            curr.push(member.uid.toHexString());
+          }
+          return curr;
+        }, []);
+        self.app.rpc.push.pushRemote.pushMessageMany(null, param, pushs, () => {});
 
         self.app.rpc.message.messageRemote.saveOfflineMessages(null, param, offlines, () => {});
 

@@ -576,7 +576,7 @@ module.exports = function(app) {
             }, {
               friend: 1,
               nickname: 1,
-              setting: 1
+              settings: 1
             })
             .toArray()
             .then(friends => {

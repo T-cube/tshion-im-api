@@ -241,6 +241,33 @@ module.exports = function(app) {
       }
     },
     put: {
+      'distub/:group_id': {
+        docs: {
+          name: '群消息免打扰',
+          params: [
+            { param: 'group_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          var group_id = req.params.group_id;
+
+          Member.findMemberByUidAndGroupId(user._id, group_id).then(member => {
+            if (!member) {
+              return next(req.apiError(400, 'wrong group_id'));
+            }
+
+            var status = member.settings.not_distub;
+
+            return Member.updateById(member._id, {
+              'settings.not_distub': status == 1 ? 0 : 1
+            }).then(result => {
+              res.sendJson(result);
+            });
+
+          }).catch(next);
+        }
+      },
       'modify/:group_id/name': {
         docs: {
           name: '修改群名称',
