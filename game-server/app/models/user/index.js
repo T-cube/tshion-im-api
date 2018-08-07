@@ -606,6 +606,7 @@ module.exports = function(app) {
       return friendCollection
         .findOne({ user: ObjectID(user_id) })
         .then(result => {
+          if (!result) return [];
           return User._getFriendsInfo(result.friends, user_id);
         });
     }
