@@ -1,5 +1,12 @@
 # http-message-api
 
+## 获取所有离线消息
+GET /message/offline/history/:roomid/all
+
+param|name|type|des
+-----|----|----|---
+param|roomid|String|offline message target room id
+
 ## 获取离线消息
 GET /message/offline/new/:roomid
 

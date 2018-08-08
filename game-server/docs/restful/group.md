@@ -259,3 +259,10 @@ returns
     "messsage": ""
 }
 ```
+
+## 群消息免打扰
+PUT /api/group/distub/:group_id
+
+param|name|type|des
+-----|----|----|---
+param|group_id|String|group _id string

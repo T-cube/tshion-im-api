@@ -115,7 +115,7 @@ module.exports = function(app) {
     static updateById(_id, data) {
       let query = { _id: ObjectID(_id) };
 
-      return Setting._update(query, { $set: data });
+      return Member._update(query, { $set: data }, { upsert: false });
     }
 
     static _insertMany(members) {

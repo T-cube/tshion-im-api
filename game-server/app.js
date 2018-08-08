@@ -29,9 +29,9 @@ co(function*() {
     app.set('connectorConfig', {
       connector: pomelo.connectors.sioconnector,
       // 'websocket', 'polling-xhr', 'polling-jsonp', 'polling'
-      transports: ['websocket','polling-xhr', 'polling',],
+      transports: ['websocket', 'polling-xhr', 'polling', ],
       // transports: ['polling-xhr','websocket', 'polling',],
-      // useProtobuf: true,
+      useProtobuf: true,
       heartbeats: true,
       closeTimeout: 60 * 1000,
       heartbeatTimeout: 60 * 1000,
@@ -60,9 +60,6 @@ co(function*() {
 }).catch(e => {
   throw e;
 });
-
-
-
 
 process.on('uncaughtException', function(err) {
   console.error('Caught exception: ' + err.stack);
