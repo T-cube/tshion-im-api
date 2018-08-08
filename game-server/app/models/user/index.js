@@ -177,6 +177,7 @@ module.exports = function(app) {
         friendCollection.findOne({ user: ObjectID(from), friend: ObjectID(user_id) })
       ])
         .then(([req, friend]) => {
+          console.log(req, request);
           if (req && friend)
             return null;
 
