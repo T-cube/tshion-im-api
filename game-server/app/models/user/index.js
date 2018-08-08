@@ -172,10 +172,12 @@ module.exports = function(app) {
      * @param {*} param0
      */
     static sendRequest({ user_id, from, mark }) {
-      return requestCollection
-        .findOne({ receiver: user_id, from, status: STATUS_FRIEND_REQUEST_AGREE })
-        .then(doc => {
-          if (doc)
+      return Promise.all([
+        requestCollection.findOne({ receiver: user_id, from, status: STATUS_FRIEND_REQUEST_AGREE }),
+        friendCollection.findOne({ user: ObjectID(from), friend: ObjectID(user_id) })
+      ])
+        .then(([req, friend]) => {
+          if (req && friend)
             return null;
 
           let receiver = ObjectID(user_id);
