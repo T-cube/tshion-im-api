@@ -178,8 +178,9 @@ module.exports = function(app) {
       ])
         .then(([req, friend]) => {
           console.log(req, friend);
-          if (req && friend)
+          if (req && friend) {
             return null;
+          }
 
           let receiver = ObjectID(user_id);
           return requestCollection
@@ -189,8 +190,8 @@ module.exports = function(app) {
                 return User._updateFriendRequest({
                   receiver,
                   from,
-                  status: req ? STATUS_FRIEND_REQUEST_PADDING : doc.status
-                }, { mark, update_at: new Date });
+                  status: doc.status
+                }, { mark, update_at: new Date, status: req ? STATUS_FRIEND_REQUEST_PADDING : doc.status });
 
               } else {
 
