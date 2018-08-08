@@ -184,25 +184,29 @@ module.exports = function(app) {
           return requestCollection
             .findOne({ receiver, from })
             .then(doc => {
-              if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT))
+              if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT)) {
                 return User._updateFriendRequest({
                   receiver,
                   from,
-                  status: doc.status
+                  status: req ? STATUS_FRIEND_REQUEST_PADDING : doc.status
                 }, { mark, update_at: new Date });
-              let data = {
-                receiver,
-                from,
-                mark,
-                create_at: new Date,
-                status: STATUS_FRIEND_REQUEST_PADDING
-              };
-              return requestCollection
-                .insertOne(data)
-                .then(value => {
-                  data._id = value.insertedId;
-                  return data;
-                });
+
+              } else {
+
+                let data = {
+                  receiver,
+                  from,
+                  mark,
+                  create_at: new Date,
+                  status: STATUS_FRIEND_REQUEST_PADDING
+                };
+                return requestCollection
+                  .insertOne(data)
+                  .then(value => {
+                    data._id = value.insertedId;
+                    return data;
+                  });
+              }
             });
         });
     }
