@@ -1,5 +1,5 @@
 'use strict';
-
+console.log(process);
 var pomelo = require('pomelo');
 var routeUtil = require('./app/util/routeUtil');
 var fs = require('fs');
