@@ -273,3 +273,11 @@ DELETE /api/group/quit/:group_id
 param|name|type|des
 -----|----|----|---
 param|group_id|String|group _id string
+
+## 删除一个群成员
+DELETE /api/group/member
+
+param|name|type|des
+-----|----|----|---
+key|group_id|String|group _id string
+key|member|String|user _id string who should be delete

@@ -382,9 +382,56 @@ module.exports = function(app) {
       }
     },
     delete: {
-      'member/:group_id': {
+      'member': {
         docs: {
-          name: '删除群组成员',
+          name: '删除一个群成员',
+          params: [
+            { key: 'group_id', type: 'String' },
+            { key: 'member', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+
+          var { group_id, member } = req.body;
+
+          Group
+            .findGroupByIdAndOwner(group_id, user._id)
+            .then(group => {
+              if (!group) {
+                return next(req.apiError(400, 'cant remove member by not a owner'));
+              }
+
+              return Group.quit(member, group_id).then(result => {
+                if (!result) {
+                  return next(req.apiError(400, 'wrong group id'));
+                }
+
+                res.sendJson(result);
+
+                Member.getMembersByGroupId(group_id).then(members => {
+                  var data = {
+                    group: group_id,
+                    user: user._id.toHexString()
+                  };
+                  members.forEach(member => {
+                    if (member.status == 'normal') {
+                      req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.member.delete', {
+                        group: group_id,
+                        user: member
+                      }, member.uid.toHexString(), function(err) {
+                        console.log("notify error:", err);
+                      });
+                    }
+                  });
+                });
+              });
+            }).catch(next);
+        }
+      },
+      'members': {
+        docs: {
+          name: '删除多个群组成员',
           params: [
             {
               param: 'group_id',
@@ -442,10 +489,10 @@ module.exports = function(app) {
               };
               members.forEach(member => {
                 if (member.status == 'normal') {
-                  req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.quit', {
+                  req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.member.quit', {
                     group: group_id,
                     user: user._id.toHexString()
-                  }, uids, function(err) {
+                  }, member.uid.toHexString(), function(err) {
                     console.log("notify error:", err);
                   });
                 }
