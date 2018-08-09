@@ -76,7 +76,7 @@ module.exports = function(app) {
               return Member.getMembersByUid(user._id).then(members => {
                 var result = groups.map(group => {
                   var member = members.find(item => item.group.equals(group._id));
-                  group.settings = Object.assign(group.settings, member.settings);
+                  group.settings = Object.assign((group.settings || {}), member.settings);
                   return group;
                 });
 
