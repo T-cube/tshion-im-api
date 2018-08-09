@@ -257,7 +257,7 @@ module.exports = function(app) {
               return next(req.apiError(400, 'wrong group_id'));
             }
 
-            var status = member.settings.not_distub;
+            var status = (member.settings || {}).not_distub;
 
             return Member.updateById(member._id, {
               'settings.not_distub': status == 1 ? 0 : 1
