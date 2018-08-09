@@ -435,7 +435,7 @@ module.exports = function(app) {
             }
             res.sendJson(result);
 
-            Group.getMembersByGroupId(group_id).then(members => {
+            Member.getMembersByGroupId(group_id).then(members => {
               var data = {
                 group: group_id,
                 user: user._id.toHexString()
