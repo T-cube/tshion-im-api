@@ -22,7 +22,7 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           Group
-            .getListByUid(user._id)
+            .getUserGroupListByUid(user._id)
             .then(groups => {
               let roomids = groups.map(group => group.roomid);
               return Message
@@ -70,13 +70,13 @@ module.exports = function(app) {
         method(req, res, next) {
           let user = req.user;
           Group
-            .getListByUid(user._id)
+            .getUserGroupListByUid(user._id)
             .then(groups => {
 
               return Member.getMembersByUid(user._id).then(members => {
                 var result = groups.map(group => {
                   var member = members.find(item => item.group.equals(group._id));
-                  group.settings = member.settings;
+                  group.settings = Object.assign(group.settings, member.settings);
                   return group;
                 });
 
@@ -428,6 +428,13 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           var group_id = req.params.group_id;
+
+          Group.quit(user._id, group_id).then(result => {
+            if (!result) {
+              return next(req.apiError(400, 'wrong group id'));
+            }
+            res.sendJson(result);
+          }).catch(next);
         }
       }
     }

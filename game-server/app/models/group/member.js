@@ -10,8 +10,12 @@ module.exports = function(app) {
 
   const defaultInfo = {
     type: 'normal',
-    status: 'normal',
-    create_at: new Date
+    status: 'normal', // normal, quitted
+    create_at: new Date,
+    settings: {
+      not_distub: 0,
+      block: 0
+    }
   };
 
   return class Member {
@@ -46,6 +50,10 @@ module.exports = function(app) {
      */
     static findGroupByUid(uid) {
       return groupMemberCollection.find({ uid: ObjectID(uid) }, { group: 1 }).toArray();
+    }
+
+    static findUserGroupByUid(uid) {
+      return groupMemberCollection.find({ uid: ObjectID(uid), status: 'normal' }, { group: 1 }).toArray();
     }
 
     /**
@@ -141,7 +149,7 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static getMembersByUid(uid) {
-      return groupMemberCollection.find({ uid: ObjectID(uid) }).toArray();
+      return groupMemberCollection.find({ uid: ObjectID(uid), status: 'normal' }).toArray();
     }
 
     /**
@@ -155,6 +163,15 @@ module.exports = function(app) {
         if (members.length) throw new Error('cannot remove owner from group');
 
         return groupMemberCollection.deleteMany({ _id: { $in: ids } }).then(result => result.deletedCount);
+      });
+    }
+
+    static quitGroup(uid, group) {
+      return this.findOneAndUpdate({ uid, group }, { $set: { status: 'quitted' } }, {
+        returnOriginal: false,
+        upsert: false
+      }).then(result => {
+        return result.value;
       });
     }
 
