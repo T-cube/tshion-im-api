@@ -72,7 +72,16 @@ module.exports = function(app) {
           Group
             .getListByUid(user._id)
             .then(groups => {
-              res.sendJson(groups);
+
+              return Member.getMembersByUid(user._id).then(members => {
+                var result = groups.map(group => {
+                  var member = members.find(item => item.group.equals(group._id));
+                  group.settings = member.settings;
+                  return group;
+                });
+
+                res.sendJson(result);
+              });
             })
             .catch(next);
         }

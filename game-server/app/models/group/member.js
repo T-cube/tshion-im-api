@@ -136,6 +136,15 @@ module.exports = function(app) {
     }
 
     /**
+     * get user members
+     * @param {any} uid
+     * @returns {Promise}
+     */
+    static getMembersByUid(uid) {
+      return groupMemberCollection.find({ uid: ObjectID(uid) }).toArray();
+    }
+
+    /**
      * delete group members
      * @param {Array} memberIds
      * @returns {Promise}
