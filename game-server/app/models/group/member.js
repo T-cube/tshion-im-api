@@ -167,7 +167,7 @@ module.exports = function(app) {
     }
 
     static quitGroup(uid, group) {
-      return this.findOneAndUpdate({ uid, group }, { $set: { status: 'quitted' } }, {
+      return groupMemberCollection.findOneAndUpdate({ uid, group }, { $set: { status: 'quitted' } }, {
         returnOriginal: false,
         upsert: false
       }).then(result => {
