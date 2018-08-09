@@ -434,6 +434,23 @@ module.exports = function(app) {
               return next(req.apiError(400, 'wrong group id'));
             }
             res.sendJson(result);
+
+            Group.getMembersByGroupId(group_id).then(members => {
+              var data = {
+                group: group_id,
+                user: user._id.toHexString()
+              };
+              members.forEach(member => {
+                if (member.status == 'normal') {
+                  req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.quit', {
+                    group: group_id,
+                    user: user._id.toHexString()
+                  }, uids, function(err) {
+                    console.log("notify error:", err);
+                  });
+                }
+              });
+            });
           }).catch(next);
         }
       }
