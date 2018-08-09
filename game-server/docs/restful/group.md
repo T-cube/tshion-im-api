@@ -266,3 +266,10 @@ PUT /api/group/distub/:group_id
 param|name|type|des
 -----|----|----|---
 param|group_id|String|group _id string
+
+## 退群
+DELETE /api/group/quit/:group_id
+
+param|name|type|des
+-----|----|----|---
+param|group_id|String|group _id string
