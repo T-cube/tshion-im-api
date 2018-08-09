@@ -241,6 +241,33 @@ module.exports = function(app) {
       }
     },
     put: {
+      'distub/:group_id': {
+        docs: {
+          name: '群消息免打扰',
+          params: [
+            { param: 'group_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          var group_id = req.params.group_id;
+
+          Member.findMemberByUidAndGroupId(user._id, group_id).then(member => {
+            if (!member) {
+              return next(req.apiError(400, 'wrong group_id'));
+            }
+
+            var status = member.settings.not_distub;
+
+            return Member.updateById(member._id, {
+              'settings.not_distub': status == 1 ? 0 : 1
+            }).then(result => {
+              res.sendJson(result);
+            });
+
+          }).catch(next);
+        }
+      },
       'modify/:group_id/name': {
         docs: {
           name: '修改群名称',
@@ -291,44 +318,52 @@ module.exports = function(app) {
           let body = req.body;
           let user = req.user;
 
+          let group_id = req.params.group_id;
           let { members } = body;
           body.creator = user._id;
 
           if (!members)
             members = [];
-          if (members.indexOf(','))
+          if (members.indexOf(',')>0)
             members = members.split(',');
 
           // if (!~members.indexOf(user._id.toHexString())) members.push(user._id);
 
           console.log('body:', req.body);
-          new Group(body)
-            .save(members)
-            .then(newGroup => {
-              var group = newGroup._id;
+          Member
+            .findMemberByUidAndGroupId(user._id, group_id)
+            .then(member => {
+              if (!member)
+                return next(req.apiError(400, 'cant add member by not a member in the group'));
+              if (members instanceof String)
+                members = [members];
 
-              return Promise.all([
-                new Setting({ group }).save(),
-                Member.addMany(members, group)
-              ]).then(() => {
-                res.sendJson(newGroup);
+              return Member
+                .addMany(members, group_id)
+                .then(result => {
+                  res.sendJson(result);
 
-                members.map(member => {
-                  req
-                    .pomelo
-                    .rpc
-                    .push
-                    .pushRemote
-                    .notifyClient(null, 'group.join', {
-                      group: newGroup._id,
-                      type: 'add'
-                    }, member, function(err) {
-                      if (err) {
-                        console.error('notify error:', err);
-                      }
-                    });
-                });
-              });
+                  Member
+                    .getMembers(group_id)
+                    .then(results => {
+                      console.log(results);
+                      results.map(member => {
+                        req
+                          .pomelo
+                          .rpc
+                          .push
+                          .pushRemote
+                          .notifyClient(null, 'group.join', {
+                            group: group_id,
+                            type: 'add'
+                          }, member.uid.toHexString(), function(err) {
+                            if (err) {
+                              console.error('notify error:', err);
+                            }
+                          });
+                      });
+                    })
+                })
             })
             .catch((e) => {
               console.log(e);
@@ -376,9 +411,15 @@ module.exports = function(app) {
       },
       'quit/:group_id': {
         docs: {
-          name: '退出群组'
+          name: '退出群组',
+          params: [
+            { param: 'group_id', type: 'String' }
+          ]
         },
-        method(req, res, next) {}
+        method(req, res, next) {
+          var user = req.user;
+          var group_id = req.params.group_id;
+        }
       }
     }
   };

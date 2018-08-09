@@ -25,7 +25,7 @@ module.exports = class PomeloClient extends EventEmitter {
     this.setMaxListeners(1000);
   }
 
-  /**
+  /**cl
    * define a property
    * @param {String|Symbol} property
    */
@@ -94,7 +94,7 @@ module.exports = class PomeloClient extends EventEmitter {
       if (typeof data === 'string') {
         data = JSON.parse(data);
       }
-      console.log(data);
+      // console.log(data);
       if (data instanceof Array) {
         this.processMessageBatch(data);
       } else {

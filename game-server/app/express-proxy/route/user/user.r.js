@@ -2,6 +2,8 @@
 
 module.exports = function(app) {
   const User = require('../../../models/user')(app);
+  const Account = require('../../../models/account')(app);
+
   return {
     get: {
       ':user_id': {
@@ -13,6 +15,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           User.user(req.params.user_id, req.user._id).then(user => {
+            user.showname = user.nickname || user.name;
             res.sendJson(user);
           }).catch(next);
         }
@@ -108,6 +111,29 @@ module.exports = function(app) {
       }
     },
     post: {
+      'device-token': {
+        docs: {
+          name: '保存设备推送号',
+          params: [
+            { key: 'deviceToken', type: 'String' },
+            { key: 'client', type: 'String' },
+            { key: 'brand', type: 'String' },
+          ]
+        },
+        method(req, res, next) {
+          var { deviceToken, client, brand } = req.body;
+          var user = req.user;
+
+          new Account({
+            uid: user._id.toHexString(),
+            client,
+            deviceToken,
+            brand
+          }).saveDeviceToken().then(value => {
+            res.sendJson(value);
+          }).catch(next);
+        }
+      },
       'friend/group': {
         docs: {
           name: '创建好友分组',
@@ -142,16 +168,18 @@ module.exports = function(app) {
           User.sendRequest(Object.assign(req.body, { from: user._id })).then(request => {
             res.sendJson(request);
             // var { from, user_id: target } = req.body;
-            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
-              request: request._id,
-              from: user._id.toHexString(),
-              type: request.update_at ? 'update' : 'new' },
-              user_id,
-              function(err) {
-                if (err) {
-                  console.error('notify error:', err);
-                }
-              });
+            if (request)
+              req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friendRequest', {
+                  request: request._id,
+                  from: user._id.toHexString(),
+                  type: request.update_at ? 'update' : 'new'
+                },
+                user_id,
+                function(err) {
+                  if (err) {
+                    console.error('notify error:', err);
+                  }
+                });
           }).catch(next);
         }
       },
@@ -180,8 +208,8 @@ module.exports = function(app) {
               receiver: result.receiver,
               from: result.from,
               type: status
-            }, result.from, function(err){
-              if(err) {
+            }, result.from, function(err) {
+              if (err) {
                 console.error('resolve notify error:', err);
               }
             });
@@ -190,6 +218,53 @@ module.exports = function(app) {
       }
     },
     put: {
+      'friend/distub/:friend_id': {
+        docs: {
+          name: '好友免打扰',
+          params: [
+            { param: 'friend_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          var { friend_id } = req.params;
+
+          User.getFriendInfo(user._id, friend_id).then(friend => {
+            if (!friend) {
+              return next(req.apiError(400, 'wrong friend_id'));
+            }
+
+            var status = (friend.settings || {}).not_distub;
+
+            return User.changeFriendDistubMode(user._id, friend_id, status == 1 ? 0 : 1).then(() => {
+              res.sendJson(200);
+            });
+
+          }).catch(next);
+        }
+      },
+      'friend/block/:friend_id': {
+        docs: {
+          name: '屏蔽好友',
+          params: [
+            { param: 'friend_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          var { friend_id } = req.params;
+
+          User.getFriendInfo(user._id, friend_id).then(friend => {
+            if (!friend) {
+              return next(req.apiError(400, 'wrong friend_id'));
+            }
+            var status = (friend.settings || {}).block;
+            return User.changeFriendBlockMode(user._id, friend_id, status == 1 ? 0 : 1).then(() => {
+              res.sendJson(200);
+            }).catch(next);
+          }).catch(next);
+        }
+      },
       'friend/info/:friend_id': {
         docs: {
           name: '修改好友信息',
@@ -208,6 +283,28 @@ module.exports = function(app) {
       }
     },
     delete: {
+      'friend/:friend_id': {
+        doc: {
+          name: '删除好友',
+          params: [
+            { param: 'friend_id', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          var friend_id = req.params.friend_id;
+
+          User.deleteFriend(user._id, friend_id).then(() => {
+            res.sendJson('ok');
+
+            req.pomelo.rpc.push.pushRemote.notifyClient(null, 'friend.delete', {
+              friend: user._id.toHexString()
+            }, friend_id, function(err) {
+              console.error('notifi error:', err);
+            });
+          }).catch(next);
+        }
+      },
       'friend-request/:request_id': {
         docs: {
           name: '删除好友请求',

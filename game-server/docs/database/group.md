@@ -28,7 +28,7 @@ document
 
 # Collection chat.group.member
 document
-```
+```js
 {
   _id: ObjectId
   group: ObjectId
@@ -39,6 +39,10 @@ document
   update_at: Date
   type: Enum('normal', 'admin', 'owner')
   status: Enum('normal', 'frozen', 'block', 'nspeak')
-  level: Enum
+  // level: Enum,
+  settings: {
+    not_distub:  0 || 1
+    block: 0 || 1
+  }
 }
 ```

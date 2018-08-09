@@ -55,6 +55,18 @@ module.exports = function(app) {
       return OfflineMessageCollection.insertMany(msgs);
     }
 
+    static getAllOffline(roomid, target) {
+      // return OfflineMessageCollection.findAndModify({ roomid, target }, [['timestamp', -1]], {}, { remove: true });
+      return OfflineMessageCollection
+        .find({ roomid, target })
+        .sort({ timestamp: -1 })
+        .toArray().then(result => {
+          return OfflineMessageCollection
+            .deleteMany({ target, roomid }).then(() => result);
+        });
+
+    }
+
     /**
      * 获取消息列表
      * @param {*} query

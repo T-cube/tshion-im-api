@@ -174,15 +174,15 @@ prototype.removeGroupMember = function(msg, session, next) {
  * @param {Function} next
  */
 prototype.sendGroup = function(msg, session, next) {
-  let self = this;
-  let { roomid, content, type, from_name, group } = msg;
+  var self = this;
+  var { roomid, content, type, from_name, group } = msg;
 
   if (type == 'text') {
     content = content.replace(/&nbsp;/g, ' ');
     if (_.isBlank(content)) return next({ code: 400, error: 'content can not be blank' });
   }
 
-  let [from] = session.uid.split('*');
+  var [from] = session.uid.split('*');
   var param = Object.assign(msg, {
     route: 'onChat.group',
     roomid,
@@ -194,17 +194,25 @@ prototype.sendGroup = function(msg, session, next) {
 
     result.from_name = from_name;
 
-    self.app.rpc.group.groupRemote.getMemberIds(null, group, from, function(err, uids) {
+    self.app.rpc.group.groupRemote.getMembers(null, group, from, function(err, members) {
       if (err) return next(err);
 
+      var uids = members.map(member => member.uid.toHexString());
+
       param = Object.assign(param, result);
-      var receivers = uids.map(id => id !== from);
+      var receivers = uids.filter(id => id !== from);
       self.app.rpc.channel.channelRemote.cahnnelPushMessageByUids(session, param, receivers, function(err, offlines) {
 
         // console.log('offline uses : =========',offlines);
         next(null, { route: param.route, msg, param });
 
-        self.app.rpc.push.pushRemote.pushMessageMany(null, param, uids, () => {});
+        var pushs = members.reduce(function(curr, member) {
+          if (member.not_distub != 1) {
+            curr.push(member.uid.toHexString());
+          }
+          return curr;
+        }, []);
+        self.app.rpc.push.pushRemote.pushMessageMany(null, param, pushs, () => {});
 
         self.app.rpc.message.messageRemote.saveOfflineMessages(null, param, offlines, () => {});
 
@@ -268,19 +276,37 @@ prototype.send = function(msg, session, next) {
 
     result.from_name = from_name;
     param = Object.assign(param, result);
-    self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
-      if (err == 'user offline') {
-        self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
-          err && console.error(err);
-          next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
-        });
-      } else {
-        next(null, { route: param.route, msg: param });
-      };
-    });
 
-    self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
-      if (err) console.warn(err);
+    self.app.rpc.account.accountRemote.getFriendInfo(null, target, from, function(err, friend) {
+      if (err) {
+        console.error(err);
+      }
+
+      var { block, not_distub } = (friend.settings || {});
+      if (block == 1) {
+        next(null, { route: param.route, msg: param, code: 400, error: 'user blocked' });
+      } else {
+
+        self.app.rpc.channel.channelRemote.channelPushMessageByUid(session, param, target, function(err, res) {
+          // console.log('???????????????/', err)
+          if (err == 'user offline') {
+            self.app.rpc.message.messageRemote.saveOfflineMessage(null, param, function(err) {
+              err && console.error(err);
+              next(null, { route: param.route, msg: param, code: 404, error: 'user offline' });
+            });
+          } else {
+            next(null, { route: param.route, msg: param });
+          };
+        });
+
+
+        if (not_distub != 1) {
+          self.app.rpc.push.pushRemote.pushMessageOne(null, result, function(err, result) {
+            if (err) console.warn(err);
+          });
+        }
+
+      }
     });
 
     self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {

@@ -25,6 +25,16 @@ prototype.getMemberIds = function(group, uid, cb) {
   }).catch(cb);
 };
 
+prototype.getMembers = function(group, uid, cb) {
+  this.Member.findMemberByUidAndGroupId(uid, group).then(member => {
+    if (!member) return cb('user not in the group');
+
+    return this.Member.getMembersByGroupId(group).then(members => {
+      cb(null, members);
+    });
+  }).catch(next);
+}
+
 
 prototype.init = function(creator, group, members, cb) {
   let self = this;

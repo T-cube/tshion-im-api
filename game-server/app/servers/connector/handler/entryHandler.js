@@ -63,6 +63,10 @@ class entryHandler {
           }
         });
 
+        // console.log(session.__session__.__socket__)
+        // session.__session__.__socket__.on('disconnect', function() {
+        //   console.log('disconnect,disconnect,disconnect');
+        // })
         session.on('closed', onUserLeave.bind(null, self.app, session, userLeaveCallback.bind(self, client, uid, next)));
         //put user into channel
         self.app.rpc.chat.chatRemote.add(session,

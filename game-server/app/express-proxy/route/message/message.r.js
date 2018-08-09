@@ -28,6 +28,20 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
+      'offline/history/:roomid/all': {
+        docs: {
+          name: '获取所有离线消息',
+          params: [
+            { param: 'roomid', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+          Message.getAllOffline(req.params.roomid, user._id.toHexString()).then(result => {
+            res.sendJson(result);
+          }).catch(next);
+        }
+      },
       'offline/history/:roomid': {
         docs: {
           name: '获取分页离线消息',
@@ -49,7 +63,7 @@ module.exports = function(app) {
         },
         method(req, res, next) {
           const user = req.user;
-          Message.getList({ target: user._id.toHexString(), roomid: req.params.roomid }).then(result => {
+          Message.getOfflineMessage({ target: user._id.toHexString(), roomid: req.params.roomid }).then(result => {
             res.sendJson(result);
           }).catch(next);
         }
