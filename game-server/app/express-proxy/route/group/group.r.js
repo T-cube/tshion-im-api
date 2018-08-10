@@ -393,12 +393,11 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
 
-          var { group_id, member } = req.body;
+          var { group_id, member } = req.query;
 
           Group
             .findGroupByIdAndOwner(group_id, user._id)
             .then(group => {
-              console.log(group, group_id, user._id);
               if (!group) {
                 return next(req.apiError(400, 'cant remove member by not a owner'));
               }
