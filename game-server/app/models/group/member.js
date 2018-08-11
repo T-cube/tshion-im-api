@@ -116,7 +116,7 @@ module.exports = function(app) {
       return User.findUser({ _id: uid }, { avatar: 1, name: 1 }).then(user => {
         delete user._id;
         let query = { group: ObjectID(group), uid: ObjectID(uid) };
-        return this._update(query, { $set: Object.assign(this, user, { status: 'normal' }) }, { upsert: true });
+        return this._update(query, { $set: Object.assign(this, user, { status: 'normal' }) }, { upsert: true }).then(result => result.value);
       });
     }
 
@@ -127,7 +127,10 @@ module.exports = function(app) {
     }
 
     static _insertMany(members) {
-      return groupMemberCollection.insertMany(members).then(result => result.insertedIds);
+      return Promise.all(members.map(member => {
+        return new Member(member).save();
+      }));
+      // return groupMemberCollection.insertMany(members).then(result => result.insertedIds);
     }
 
     /**
@@ -197,7 +200,7 @@ module.exports = function(app) {
           throw new Error('members out of limit, max member number is 100');
         }
 
-        return Promise.all(ids.map(user => Member._findOne({ uid: user, group }, { _id: 1 }))).then(exists => {
+        return Promise.all(ids.map(user => Member._findOne({ uid: user, group, status: 'normal' }, { _id: 1 }))).then(exists => {
           let _ids = [];
           exists.forEach((exist, index) => {
             if (!exist) _ids.push(ids[index]);

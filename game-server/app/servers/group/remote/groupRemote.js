@@ -32,7 +32,8 @@ prototype.getMembers = function(group, uid, cb) {
     if (!member) return cb('user not in the group');
 
     return this.Member.getMembersByGroupId(group).then(members => {
-      cb(null, members);
+      var result = members.filter(member => member.status == 'normal');
+      cb(null, result);
     });
   }).catch(next);
 }
