@@ -8,3 +8,25 @@
   }
 }
 ```
+
+# group.member.delete
+```js
+{
+  route: 'group.member.delete'
+  data: {
+    group: String,
+    user: String
+  }
+}
+```
+
+# group.member.quit
+```js
+{
+  route: 'group.member.quit'
+  data: {
+    group: String,
+    user: String
+  }
+}
+```
