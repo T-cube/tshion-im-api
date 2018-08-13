@@ -35,7 +35,7 @@ prototype.getMembers = function(group, uid, cb) {
       var result = members.filter(member => member.status == 'normal');
       cb(null, result);
     });
-  }).catch(next);
+  }).catch(cb);
 }
 
 
