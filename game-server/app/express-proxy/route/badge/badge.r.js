@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function (app) {
+module.exports = function(app) {
   const Badger = require('../../../models/badge')(app);
   const Account = require('../../../models/account')(app);
   return {
@@ -10,7 +10,7 @@ module.exports = function (app) {
           params: [
             {
               param: 'uid',
-              type: String
+              type: 'String'
             }
           ]
         },
@@ -18,7 +18,7 @@ module.exports = function (app) {
           let uid = req.params.uid;
 
           Account
-            .getDeviceToken({uid})
+            .getDeviceToken({ uid })
             .then(results => {
               let tokens = results.map(result => result.deviceToken);
               res.sendJson(tokens);

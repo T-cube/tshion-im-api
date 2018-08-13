@@ -10,3 +10,12 @@
   }
 }
 ```
+
+```js
+{
+  route: 'friend.delete',
+  data: {
+    friend: String // delete friend id
+  }
+}
+```

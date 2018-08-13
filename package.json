@@ -8,7 +8,7 @@
     "start": "nodemon game-server/app",
     "installer": "npm install && cd game-server & npm install",
     "nodemon": "nodemon game-server/app",
-    "dev": "set NODE_ENV=development&&nodemon game-server/app",
+    "dev": "NODE_ENV=development & nodemon --watch game-server/ game-server/app ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "xuezi",

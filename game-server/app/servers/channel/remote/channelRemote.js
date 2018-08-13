@@ -70,7 +70,7 @@ prototype.get = function(channelId, flag) {
 
 prototype.getUserChannelId = function(uid, cb) {
   let [user] = uid.split('*');
-  console.log('getUserChannelId:::::::::', user, this.userChannelMap);
+  // console.log('getUserChannelId:::::::::', user, this.userChannelMap);
   let channelId = this.userChannelMap.get(user);
   cb(null, channelId);
 };
@@ -125,16 +125,16 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
 
   var channelId = this.userChannelMap.get(target);
   var channel = this.channelService.getChannel(channelId);
-  console.log(target, channel, this.userChannelMap);
+  // console.log(target, channel, this.userChannelMap);
 
   if (!channel) {
     return cb('user offline');
   }
   var { loginMap } = channel;
-  console.log(target, loginMap);
+  // console.log(target, loginMap);
   var loginer = loginMap.get(target);
 
-  console.log('loginer::::::::::,', loginer);
+  // console.log('loginer::::::::::,', loginer);
 
   var clients = [];
   for (let uid in loginer) {
@@ -146,7 +146,9 @@ prototype.channelPushMessageByUid = function(params, target, cb) {
     return cb('user offline');
   }
 
-  this.channelService.pushMessageByUids(params, clients);
+  this.channelService.pushMessageByUids(params, clients, function(err, result) {
+    console.log('push here!!!!!!!!!:', err, result);
+  });
   cb();
 };
 

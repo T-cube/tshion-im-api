@@ -15,11 +15,19 @@ module.exports = function(app) {
 
           User.getAllFriendsInfo(user._id).then(list => {
             return Room.getUserRoomMap(user._id.toHexString()).then(rooms => {
-              var result = rooms.map(room => {
-                var friend = list.find(item => ~room.members.indexOf(item._id.toString()));
+              var result = list.map(friend => {
+                var room = rooms.find(item => ~item.members.indexOf(friend._id.toHexString()));
+
                 friend.roomid = room.roomid;
+                delete friend.friend;
                 return friend;
               });
+              // var result = rooms.map(room => {
+              //   var friend = list.find(item => ~room.members.indexOf(item._id.toString()));
+              //   friend.roomid = room.roomid;
+              //   delete friend.friend;
+              //   return friend;
+              // });
               res.sendJson(result);
             });
           }).catch(next);
