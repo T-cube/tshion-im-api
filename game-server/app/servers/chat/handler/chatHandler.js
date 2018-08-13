@@ -196,8 +196,6 @@ prototype.sendGroup = function(msg, session, next) {
 
     self.app.rpc.group.groupRemote.getMembers(null, group, from, function(err, members) {
       if (err) return next(err);
-      console.log('members:::::::::::::', members);
-      console.log(typeof members[0].uid);
       var uids = members.map(member => member.uid);
 
       param = Object.assign(param, result);
@@ -209,7 +207,7 @@ prototype.sendGroup = function(msg, session, next) {
 
         var pushs = members.reduce(function(curr, member) {
           if (member.not_distub != 1) {
-            curr.push(member.uid.toHexString());
+            curr.push(member.uid);
           }
           return curr;
         }, []);
