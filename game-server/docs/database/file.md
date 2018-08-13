@@ -2,6 +2,7 @@
 document
 ```
 {
+  _id: ObjectId,
   copy: file.cache._id, // 缓存副本
   createAt: Timestamp,  // 创建时间
   duration: Number,     // 时长（音视频文件具有）
@@ -19,6 +20,7 @@ document
 document
 ```
 {
+  _id: ObjectId,
   cdn: {                // 七牛存储内容
     key: String,        // 七牛存储访问值key，
     hash: String,       // 七牛文件缓存hash
