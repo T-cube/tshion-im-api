@@ -113,7 +113,7 @@ module.exports = function(app) {
           apnService.send(message, iosTokens).then(result => {
             // console.log('.................:', result);
             console.log('sent:', result.sent.length);
-            console.log('failed:', result.failed.length);
+            console.log('failed:', result.failed.length, result.failed);
             // console.log(result.failed);
             resolve(result);
           });
