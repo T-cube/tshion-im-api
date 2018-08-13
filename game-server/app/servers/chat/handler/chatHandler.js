@@ -197,7 +197,8 @@ prototype.sendGroup = function(msg, session, next) {
     self.app.rpc.group.groupRemote.getMembers(null, group, from, function(err, members) {
       if (err) return next(err);
       console.log('members:::::::::::::', members);
-      var uids = members.map(member => member.uid.toHexString());
+      console.log(typeof members[0].uid);
+      var uids = members.map(member => member.uid);
 
       param = Object.assign(param, result);
       var receivers = uids.filter(id => id !== from);
