@@ -294,11 +294,11 @@ module.exports = function(app) {
           var user = req.user;
           var group_id = req.params.group_id;
 
-          Group
-            .findGroupByIdAndOwner(group_id, user._id)
+          Member
+            .findMemberByUidAndGroupId(user._id, group_id)
             .then(group => {
               if (!group) {
-                return ext(req.apiError(400, 'cant only midify by owner'));
+                return next(req.apiError(400, 'cant only midify by owner'));
               }
 
               Group
