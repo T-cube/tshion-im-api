@@ -333,7 +333,7 @@ module.exports = function(app) {
 
           if (!members)
             members = [];
-          if (members.indexOf(','))
+          if (members.indexOf(',') > 0)
             members = members.split(',');
 
           // if (!~members.indexOf(user._id.toHexString())) members.push(user._id);
