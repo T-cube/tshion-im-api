@@ -339,10 +339,9 @@ module.exports = function(app) {
           // if (!~members.indexOf(user._id.toHexString())) members.push(user._id);
 
           console.log('body:', req.body);
-          Group
-            .findGroupByIdAndOwner(group_id, user._id)
-            .then(group => {
-              if (!group)
+          Member.findMemberByUidAndGroupId(user._id, group_id)
+            .then(member => {
+              if (!member)
                 return next(req.apiError(400, 'cant add member by not a owner'));
               if (members instanceof String)
                 members = [members];
@@ -356,7 +355,7 @@ module.exports = function(app) {
                     .getMembers(group_id)
                     .then(results => {
                       console.log(results);
-                      results.map(member => {
+                      results.map(mem => {
                         req
                           .pomelo
                           .rpc
@@ -365,7 +364,7 @@ module.exports = function(app) {
                           .notifyClient(null, 'group.join', {
                             group: group_id,
                             type: 'add'
-                          }, member.uid.toHexString(), function(err) {
+                          }, mem.uid.toHexString(), function(err) {
                             if (err) {
                               console.error('notify error:', err);
                             }
