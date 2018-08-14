@@ -296,9 +296,9 @@ module.exports = function(app) {
 
           Member
             .findMemberByUidAndGroupId(user._id, group_id)
-            .then(group => {
-              if (!group) {
-                return next(req.apiError(400, 'cant only midify by owner'));
+            .then(member => {
+              if (!member) {
+                return next(req.apiError(400, 'cant only midify by member'));
               }
 
               Group
@@ -342,7 +342,7 @@ module.exports = function(app) {
           Member.findMemberByUidAndGroupId(user._id, group_id)
             .then(member => {
               if (!member)
-                return next(req.apiError(400, 'cant add member by not a owner'));
+                return next(req.apiError(400, 'cant add member by not a member'));
               if (members instanceof String)
                 members = [members];
 
