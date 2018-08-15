@@ -30,26 +30,42 @@ module.exports = function(app) {
                 .then(messages => {
                   return Message.offlineMessageCountByRoomids(user._id.toHexString(), roomids).then(counts => {
                     var results = [];
-                    messages.forEach((message, index) => {
-                      if (message) {
 
-                        var group = groups[index];
+                    counts.forEach(count => {
+                      if (count.count) {
+                        var group = groups.find(g => g.roomid == count.roomid);
+
+                        if (group) {
+                          group._offline_count = count.count;
+                        }
+                        var message = messages.find(m => m.roomid == count.roomid);
                         group.message = message;
 
-                        var count = counts.find(c => c.roomid == group.roomid);
-                        if (count) {
-                          group._offline_count = count.count;
-                        } else {
-                          group._offline_count = 0;
-                        }
-                        results.push(group);
+                        results.push(group)
                       }
+                    })
 
-                      if (results.length) {
-                        results.sort((a, b) => b.message.timestamp - a.message.timestamp);
-                      }
-                    });
+                    // messages.forEach((message, index) => {
 
+                    //   if (message) {
+
+                    //     var group = groups[index];
+                    //     group.message = message;
+
+                    //     var count = counts.find(c => c.roomid == group.roomid);
+                    //     if (count) {
+                    //       group._offline_count = count.count;
+                    //     } else {
+                    //       group._offline_count = 0;
+                    //     }
+                    //     results.push(group);
+                    //   }
+
+                    // });
+
+                    if (results.length) {
+                      results.sort((a, b) => b.message.timestamp - a.message.timestamp);
+                    }
                     res.sendJson(results);
                   });
                 });
