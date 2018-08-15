@@ -38,13 +38,16 @@ module.exports = function(app) {
                         if (group) {
                           group._offline_count = count.count;
                         }
-                        var message = messages.find(m => m.roomid == count.roomid);
+                        var message = messages.find(m => {
+                          if (m) {
+                            m.roomid == count.roomid
+                          }
+                        });
                         group.message = message;
 
                         results.push(group)
                       }
-                    })
-
+                    });
                     // messages.forEach((message, index) => {
 
                     //   if (message) {
