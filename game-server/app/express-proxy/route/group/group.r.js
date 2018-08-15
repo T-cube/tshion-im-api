@@ -40,7 +40,7 @@ module.exports = function(app) {
                         }
                         var message = messages.find(m => {
                           if (m) {
-                            m.roomid == count.roomid
+                            return m.roomid == count.roomid
                           }
                         });
                         group.message = message;
