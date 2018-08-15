@@ -323,6 +323,13 @@ module.exports = function(app) {
             }
           ]
         },
+        /**
+         * @description
+         * @author Xuezi
+         * @param {*} req
+         * @param {*} res
+         * @param {*} next
+         */
         method(req, res, next) {
           let body = req.body;
           let user = req.user;
@@ -331,10 +338,12 @@ module.exports = function(app) {
           let { members } = body;
           body.creator = user._id;
 
-          if (!members)
+          if (!members) {
             members = [];
-          if (members.indexOf(',') > 0)
+          }
+          if (members.indexOf(',') > 0) {
             members = members.split(',');
+          }
 
           // if (!~members.indexOf(user._id.toHexString())) members.push(user._id);
 
@@ -343,8 +352,9 @@ module.exports = function(app) {
             .then(member => {
               if (!member)
                 return next(req.apiError(400, 'cant add member by not a member'));
-              if (members instanceof String)
+              if (members instanceof String) {
                 members = [members];
+              }
 
               return Member
                 .addMany(members, group_id)
