@@ -10,8 +10,12 @@ module.exports = function(app) {
 
   const defaultInfo = {
     type: 'normal',
-    status: 'normal',
-    create_at: new Date
+    status: 'normal', // normal, quitted
+    create_at: new Date,
+    settings: {
+      not_distub: 0,
+      block: 0
+    }
   };
 
   return class Member {
@@ -46,6 +50,10 @@ module.exports = function(app) {
      */
     static findGroupByUid(uid) {
       return groupMemberCollection.find({ uid: ObjectID(uid) }, { group: 1 }).toArray();
+    }
+
+    static findUserGroupByUid(uid) {
+      return groupMemberCollection.find({ uid: ObjectID(uid), status: 'normal' }, { group: 1 }).toArray();
     }
 
     /**
@@ -108,7 +116,7 @@ module.exports = function(app) {
       return User.findUser({ _id: uid }, { avatar: 1, name: 1 }).then(user => {
         delete user._id;
         let query = { group: ObjectID(group), uid: ObjectID(uid) };
-        return this._update(query, { $set: Object.assign(this, user) }, { upsert: true });
+        return this._update(query, { $set: Object.assign(this, user, { status: 'normal' }) }, { upsert: true }).then(result => result.value);
       });
     }
 
@@ -119,7 +127,10 @@ module.exports = function(app) {
     }
 
     static _insertMany(members) {
-      return groupMemberCollection.insertMany(members).then(result => result.insertedIds);
+      return Promise.all(members.map(member => {
+        return new Member(member).save();
+      }));
+      // return groupMemberCollection.insertMany(members).then(result => result.insertedIds);
     }
 
     /**
@@ -136,6 +147,15 @@ module.exports = function(app) {
     }
 
     /**
+     * get user members
+     * @param {any} uid
+     * @returns {Promise}
+     */
+    static getMembersByUid(uid) {
+      return groupMemberCollection.find({ uid: ObjectID(uid), status: 'normal' }).toArray();
+    }
+
+    /**
      * delete group members
      * @param {Array} memberIds
      * @returns {Promise}
@@ -146,6 +166,15 @@ module.exports = function(app) {
         if (members.length) throw new Error('cannot remove owner from group');
 
         return groupMemberCollection.deleteMany({ _id: { $in: ids } }).then(result => result.deletedCount);
+      });
+    }
+
+    static quitGroup(uid, group) {
+      return groupMemberCollection.findOneAndUpdate({ uid, group }, { $set: { status: 'quitted' } }, {
+        returnOriginal: false,
+        upsert: false
+      }).then(result => {
+        return result.value;
       });
     }
 
@@ -171,7 +200,7 @@ module.exports = function(app) {
           throw new Error('members out of limit, max member number is 100');
         }
 
-        return Promise.all(ids.map(user => Member._findOne({ uid: user, group }, { _id: 1 }))).then(exists => {
+        return Promise.all(ids.map(user => Member._findOne({ uid: user, group, status: 'normal' }, { _id: 1 }))).then(exists => {
           let _ids = [];
           exists.forEach((exist, index) => {
             if (!exist) _ids.push(ids[index]);

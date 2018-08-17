@@ -22,7 +22,7 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           Group
-            .getListByUid(user._id)
+            .getUserGroupListByUid(user._id)
             .then(groups => {
               let roomids = groups.map(group => group.roomid);
               return Message
@@ -30,26 +30,45 @@ module.exports = function(app) {
                 .then(messages => {
                   return Message.offlineMessageCountByRoomids(user._id.toHexString(), roomids).then(counts => {
                     var results = [];
-                    messages.forEach((message, index) => {
-                      if (message) {
 
-                        var group = groups[index];
+                    counts.forEach(count => {
+                      if (count.count) {
+                        var group = groups.find(g => g.roomid == count.roomid);
+
+                        if (group) {
+                          group._offline_count = count.count;
+                        }
+                        var message = messages.find(m => {
+                          if (m) {
+                            return m.roomid == count.roomid
+                          }
+                        });
                         group.message = message;
 
-                        var count = counts.find(c => c.roomid == group.roomid);
-                        if (count) {
-                          group._offline_count = count.count;
-                        } else {
-                          group._offline_count = 0;
-                        }
-                        results.push(group);
-                      }
-
-                      if (results.length) {
-                        results.sort((a, b) => b.message.timestamp - a.message.timestamp);
+                        results.push(group)
                       }
                     });
+                    // messages.forEach((message, index) => {
 
+                    //   if (message) {
+
+                    //     var group = groups[index];
+                    //     group.message = message;
+
+                    //     var count = counts.find(c => c.roomid == group.roomid);
+                    //     if (count) {
+                    //       group._offline_count = count.count;
+                    //     } else {
+                    //       group._offline_count = 0;
+                    //     }
+                    //     results.push(group);
+                    //   }
+
+                    // });
+
+                    if (results.length) {
+                      results.sort((a, b) => b.message.timestamp - a.message.timestamp);
+                    }
                     res.sendJson(results);
                   });
                 });
@@ -70,9 +89,18 @@ module.exports = function(app) {
         method(req, res, next) {
           let user = req.user;
           Group
-            .getListByUid(user._id)
+            .getUserGroupListByUid(user._id)
             .then(groups => {
-              res.sendJson(groups);
+
+              return Member.getMembersByUid(user._id).then(members => {
+                var result = groups.map(group => {
+                  var member = members.find(item => item.group.equals(group._id));
+                  group.settings = Object.assign((group.settings || {}), member.settings);
+                  return group;
+                });
+
+                res.sendJson(result);
+              });
             })
             .catch(next);
         }
@@ -257,7 +285,7 @@ module.exports = function(app) {
               return next(req.apiError(400, 'wrong group_id'));
             }
 
-            var status = member.settings.not_distub;
+            var status = (member.settings || {}).not_distub;
 
             return Member.updateById(member._id, {
               'settings.not_distub': status == 1 ? 0 : 1
@@ -285,11 +313,11 @@ module.exports = function(app) {
           var user = req.user;
           var group_id = req.params.group_id;
 
-          Group
-            .findGroupByIdAndOwner(group_id, user._id)
-            .then(group => {
-              if (!group) {
-                return ext(req.apiError(400, 'cant only midify by owner'));
+          Member
+            .findMemberByUidAndGroupId(user._id, group_id)
+            .then(member => {
+              if (!member) {
+                return next(req.apiError(400, 'cant only midify by member'));
               }
 
               Group
@@ -314,6 +342,13 @@ module.exports = function(app) {
             }
           ]
         },
+        /**
+         * @description
+         * @author Xuezi
+         * @param {*} req
+         * @param {*} res
+         * @param {*} next
+         */
         method(req, res, next) {
           let body = req.body;
           let user = req.user;
@@ -322,22 +357,23 @@ module.exports = function(app) {
           let { members } = body;
           body.creator = user._id;
 
-          if (!members)
+          if (!members) {
             members = [];
-          if (members.indexOf(',')>0)
+          }
+          if (members.indexOf(',') > 0) {
             members = members.split(',');
+          }
 
           // if (!~members.indexOf(user._id.toHexString())) members.push(user._id);
 
           console.log('body:', req.body);
-          Member
-            .findMemberByUidAndGroupId(user._id, group_id)
+          Member.findMemberByUidAndGroupId(user._id, group_id)
             .then(member => {
               if (!member)
-                return next(req.apiError(400, 'cant add member by not a member in the group'));
-
-              if (members instanceof String)
+                return next(req.apiError(400, 'cant add member by not a member'));
+              if (members instanceof String) {
                 members = [members];
+              }
 
               return Member
                 .addMany(members, group_id)
@@ -348,7 +384,7 @@ module.exports = function(app) {
                     .getMembers(group_id)
                     .then(results => {
                       console.log(results);
-                      results.map(member => {
+                      results.map(mem => {
                         req
                           .pomelo
                           .rpc
@@ -357,7 +393,7 @@ module.exports = function(app) {
                           .notifyClient(null, 'group.join', {
                             group: group_id,
                             type: 'add'
-                          }, member.uid.toHexString(), function(err) {
+                          }, mem.uid.toHexString(), function(err) {
                             if (err) {
                               console.error('notify error:', err);
                             }
@@ -374,9 +410,56 @@ module.exports = function(app) {
       }
     },
     delete: {
-      'member/:group_id': {
+      'member': {
         docs: {
-          name: '删除群组成员',
+          name: '删除一个群成员',
+          params: [
+            { key: 'group_id', type: 'String' },
+            { key: 'member', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          var user = req.user;
+
+          var { group_id, member } = req.query;
+
+          Group
+            .findGroupByIdAndOwner(group_id, user._id)
+            .then(group => {
+              if (!group) {
+                return next(req.apiError(400, 'cant remove member by not a owner'));
+              }
+
+              return Group.quit(member, group_id).then(result => {
+                if (!result) {
+                  return next(req.apiError(400, 'wrong group id'));
+                }
+
+                res.sendJson(result);
+
+                Member.getMembersByGroupId(group_id).then(members => {
+                  var data = {
+                    group: group_id,
+                    user: user._id.toHexString()
+                  };
+                  members.forEach(member => {
+                    if (member.status == 'normal') {
+                      req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.member.delete', {
+                        group: group_id,
+                        user: member
+                      }, member.uid.toHexString(), function(err) {
+                        console.log("notify error:", err);
+                      });
+                    }
+                  });
+                });
+              });
+            }).catch(next);
+        }
+      },
+      'members': {
+        docs: {
+          name: '删除多个群组成员',
           params: [
             {
               param: 'group_id',
@@ -420,6 +503,30 @@ module.exports = function(app) {
         method(req, res, next) {
           var user = req.user;
           var group_id = req.params.group_id;
+
+          Group.quit(user._id, group_id).then(result => {
+            if (!result) {
+              return next(req.apiError(400, 'wrong group id'));
+            }
+            res.sendJson(result);
+
+            Member.getMembersByGroupId(group_id).then(members => {
+              var data = {
+                group: group_id,
+                user: user._id.toHexString()
+              };
+              members.forEach(member => {
+                if (member.status == 'normal') {
+                  req.pomelo.rpc.push.pushRemote.notifyClient(null, 'group.member.quit', {
+                    group: group_id,
+                    user: user._id.toHexString()
+                  }, member.uid.toHexString(), function(err) {
+                    console.log("notify error:", err);
+                  });
+                }
+              });
+            });
+          }).catch(next);
         }
       }
     }

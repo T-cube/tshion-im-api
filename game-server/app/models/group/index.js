@@ -50,9 +50,19 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static getListByUid(user_id) {
-      let uid = ObjectID(user_id);
+      var uid = ObjectID(user_id);
 
       return Member.findGroupByUid(uid).then(members => {
+        var group_ids = members.map(member => member.group);
+
+        return groupCollection.find({ _id: { $in: group_ids } }).toArray();
+      });
+    }
+
+    static getUserGroupListByUid(user_id) {
+      var uid = ObjectID(user_id);
+
+      return Member.findUserGroupByUid(uid).then(members => {
         var group_ids = members.map(member => member.group);
 
         return groupCollection.find({ _id: { $in: group_ids } }).toArray();
@@ -131,6 +141,20 @@ module.exports = function(app) {
           return result.value;
         });
       });
+
+    }
+
+    /**
+     * 退群
+     * @param {any} user_id
+     * @param {any} group_id
+     * @returns {Promise}
+     */
+    static quit(user_id, group_id) {
+      var uid = ObjectID(user_id);
+      var group = ObjectID(group_id);
+
+      return Member.quitGroup(uid, group);
     }
   };
 };

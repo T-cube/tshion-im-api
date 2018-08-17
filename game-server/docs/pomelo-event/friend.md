@@ -10,7 +10,7 @@
   }
 }
 ```
-
+# friend.delete
 ```js
 {
   route: 'friend.delete',

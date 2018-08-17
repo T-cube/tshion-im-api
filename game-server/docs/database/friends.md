@@ -2,9 +2,9 @@
 document
 ```
 {
-  _id: ObjectID
-  friends: ObjectID
-  user: ObjectID
+  _id: ObjectId
+  friends: ObjectId[]
+  user: ObjectId
 }
 ```
 
@@ -12,9 +12,9 @@ document
 document
 ```
 {
-  _id: ObjectID
-  user: ObjectID
-  friend: ObjectID
+  _id: ObjectId
+  user: ObjectId
+  friend: ObjectId
   nickname: String
   setting: Object{
     not_distub : 0 || 1,
@@ -27,10 +27,10 @@ document
 document
 ```
 {
-  _id: ObjectID
-  members: ObjectID[]
+  _id: ObjectId
+  members: ObjectId[]
   type: Enum['normal', 'default', 'custom']
-  user: ObjectID
+  user: ObjectId
   name: String
 }
 ```
@@ -39,9 +39,9 @@ document
 document
 ```
 {
-  _id: ObjectID
-  from: ObjectID
-  receiver: ObjectID
+  _id: ObjectId
+  from: ObjectId
+  receiver: ObjectId
   mark: String
   status: Enum
   create_at: Date

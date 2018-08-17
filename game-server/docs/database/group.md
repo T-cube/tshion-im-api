@@ -8,7 +8,8 @@ document
   owner: ObjectId
   roomid: String
   create_at: Date,
-  update_at: Date
+  update_at: Date,
+  avatar: String
 }
 ```
 

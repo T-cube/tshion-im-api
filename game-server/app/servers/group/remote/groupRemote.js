@@ -16,10 +16,12 @@ const prototype = groupRemote.prototype;
 prototype.getMemberIds = function(group, uid, cb) {
   this.Member.findMemberByUidAndGroupId(uid, group).then(member => {
     if (!member) return cb('user not in the group');
+    if (member.status != 'normal') cb('user not in the group');
 
     return this.Member.getMembersByGroupId(group).then(members => {
-      let uids = members.map(mem => mem.uid.toHexString());
-      console.log(uids);
+      let uids = members
+        .filter(mem => mem.status == 'normal')
+        .map(mem => mem.uid.toHexString());
       cb(null, uids);
     });
   }).catch(cb);
@@ -30,9 +32,10 @@ prototype.getMembers = function(group, uid, cb) {
     if (!member) return cb('user not in the group');
 
     return this.Member.getMembersByGroupId(group).then(members => {
-      cb(null, members);
+      var result = members.filter(member => member.status == 'normal');
+      cb(null, result);
     });
-  }).catch(next);
+  }).catch(cb);
 }
 
 
