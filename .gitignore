@@ -19,6 +19,6 @@ yarn.lock
 # game-server/app.js
 game-server/config/
 
-
+package.json
 package-lock.json
 pm2.json

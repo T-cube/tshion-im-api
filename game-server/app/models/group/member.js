@@ -116,7 +116,7 @@ module.exports = function(app) {
       return User.findUser({ _id: uid }, { avatar: 1, name: 1 }).then(user => {
         delete user._id;
         let query = { group: ObjectID(group), uid: ObjectID(uid) };
-        return this._update(query, { $set: Object.assign(this, user, { status: 'normal' }) }, { upsert: true }).then(result => result.value);
+        return this._update(query, { $set: Object.assign(this, user, { status: 'normal' }) }, { upsert: true });
       });
     }
 
