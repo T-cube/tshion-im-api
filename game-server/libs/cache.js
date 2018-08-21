@@ -1,5 +1,5 @@
 const redis = require('ym-redis').promiseRedis({
-  host: '192.168.1.18',
+  host: '127.0.0.1',
   port: 6379,
   db: 3,
   auth: null,
