@@ -371,10 +371,10 @@ module.exports = function(app) {
             .then(member => {
               if (!member)
                 return next(req.apiError(400, 'cant add member by not a member'));
-              if (members instanceof String) {
+              if (typeof(members)==='string') {
                 members = [members];
               }
-
+              
               return Member
                 .addMany(members, group_id)
                 .then(result => {
