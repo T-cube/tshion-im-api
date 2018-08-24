@@ -188,7 +188,7 @@ module.exports = function(app) {
 
     if (!isNaN(badge)) data.badge = badge;
     let notification = new apn.Notification(data);
-    notification.topic = 'com.dream.tillo';
+    notification.topic = 'com.beiyou.beichat';
 
     return notification;
   };
