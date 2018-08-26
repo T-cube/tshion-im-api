@@ -22,11 +22,11 @@ module.exports = function(app) {
   const provider = process.env.NODE_ENV === 'production' ? {
     cert: `${pem_dir}apn-cert.pem`,
     key: `${pem_dir}apn-key.pem`,
-    passphrase: '19901104'
+    passphrase: '123456'
   } : {
     cert: `${pem_dir}apn-dev-cert.pem`,
     key: `${pem_dir}apn-dev-key.pem`,
-    passphrase: '19901104'
+    passphrase: '123456'
   };
 
   const apnService = new apn.Provider(provider);
