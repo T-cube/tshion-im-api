@@ -3,6 +3,7 @@
 module.exports = function(app) {
   const ObjectID = app.get('ObjectID');
   const Feedback = require('../../../models/feedback')(app);
+  const User = require('../../../models/user')(app);
 
   return {
     get: {
@@ -38,13 +39,19 @@ module.exports = function(app) {
           }
           console.log('body:', req.body);
 
-          // res.sendJson(new Feedback(body).insertView());
-          Feedback
-            .insertView(body)
+          new Feedback(body)
+            .insertView()
             .then(result=>{
               res.sendJson(result);
             })
             .catch(next);
+
+          // Feedback
+          //   .insertView(body)
+          //   .then(result=>{
+          //     res.sendJson(result);
+          //   })
+          //   .catch(next);
         }
       }
     },
@@ -66,6 +73,7 @@ module.exports = function(app) {
           let user=req.user;
           let be_reported=req.params.be_reported;
           let message=req.body.message;
+          let findUser={_id:ObjectID(be_reported)};
 
           if(!message){
             return next(req.apiError(400,'lack message'));
@@ -74,12 +82,20 @@ module.exports = function(app) {
             return next(req.apiError(400,'lack be_reported'));
           }
 
-          Feedback
-            .insertReport(user._id,be_reported,message)
-            .then(result => {
-              res.sendJson(result);
-            })
-            .catch(next);
+          User
+            .findUser(findUser)
+            .then(user=>{
+              if (!user){
+                return next(req.apiError(400,'the user which was reported is non-existent'));
+              }
+
+              Feedback
+                .insertReport(user._id,be_reported,message)
+                .then(result=>{
+                  res.sendJson(result);
+                })
+                .catch(next);
+            });
         }
       }
     },
