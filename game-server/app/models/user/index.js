@@ -15,6 +15,7 @@ module.exports = function(app) {
   const friendCollection = db.collection('friend');
   const friendInfoCollection = db.collection('friend.info');
   const friendGroupCollection = db.collection('friend.group');
+  const sup_requestCollection = db.collection('friend.sup_request');
 
   const STATUS_FRIEND_REQUEST_PADDING = 'STATUS_FRIEND_REQUEST_PADDING';
   const STATUS_FRIEND_REQUEST_AGREE = 'STATUS_FRIEND_REQUEST_AGREE';
@@ -172,43 +173,72 @@ module.exports = function(app) {
      * @param {*} param0
      */
     static sendRequest({ user_id, from, mark }) {
-      return Promise.all([
-        requestCollection.findOne({ receiver: ObjectID(user_id), from: ObjectID(from), status: STATUS_FRIEND_REQUEST_AGREE }),
-        friendCollection.findOne({ user: ObjectID(from), friend: ObjectID(user_id) })
-      ])
-        .then(([req, friend]) => {
-          console.log(req, friend);
-          if (req && friend) {
-            return null;
+      let flag = false;
+      return friendCollection
+        .findOne({ user: ObjectID(from)})
+        .then( friends =>{
+          if(friends){
+            for(let i in friends.friends){
+              if(friends.friends[i] == user_id){
+                flag=true;
+              }
+            }
           }
 
-          let receiver = ObjectID(user_id);
-          return requestCollection
-            .findOne({ receiver, from })
-            .then(doc => {
-              if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT)) {
-                return User._updateFriendRequest({
-                  receiver,
-                  from,
-                  status: doc.status
-                }, { mark, update_at: new Date, status: req ? STATUS_FRIEND_REQUEST_PADDING : doc.status });
-
-              } else {
-
-                let data = {
-                  receiver,
-                  from,
-                  mark,
-                  create_at: new Date,
-                  status: STATUS_FRIEND_REQUEST_PADDING
-                };
-                return requestCollection
-                  .insertOne(data)
-                  .then(value => {
-                    data._id = value.insertedId;
-                    return data;
-                  });
+          return Promise.all([
+            requestCollection.findOne({ receiver: ObjectID(user_id), from: ObjectID(from), status: STATUS_FRIEND_REQUEST_AGREE }),
+            sup_requestCollection.findOne({ from: ObjectID(from), to: ObjectID(user_id) } )
+          ])
+            .then(([req, sup]) => {
+              console.log(req ,sup, flag);
+              if (sup || (req && flag)) {
+                return null;
               }
+
+              let sup_data = {
+                from,
+                to: ObjectID(user_id),
+                view_status: 0
+              };
+
+              return sup_requestCollection
+                .insertOne(sup_data)
+                .then(result => {
+                  return sup_requestCollection
+                    .find({view_status: 0})
+                    .count()
+                    .then(count => {
+                      let receiver = ObjectID(user_id);
+                      return requestCollection
+                        .findOne({ receiver, from })
+                        .then(doc => {
+                          if (doc && (doc.status != STATUS_FRIEND_REQUEST_IGNORE) && (doc.status != STATUS_FRIEND_REQUEST_REJECT)) {
+                            return User._updateFriendRequest({
+                              receiver,
+                              from,
+                              status: doc.status
+                            }, { mark, update_at: new Date, status: req ? STATUS_FRIEND_REQUEST_PADDING : doc.status });
+
+                          } else {
+
+                            let data = {
+                              receiver,
+                              from,
+                              mark,
+                              create_at: new Date,
+                              status: STATUS_FRIEND_REQUEST_PADDING
+                            };
+                            return requestCollection
+                              .insertOne(data)
+                              .then(value => {
+                                data._id = value.insertedId;
+                                data.count = count;
+                                return data;
+                              });
+                          }
+                        });
+                    });
+                });
             });
         });
     }
@@ -251,30 +281,34 @@ module.exports = function(app) {
       pagesize = parseInt(pagesize);
       page = parseInt(page);
 
-      return requestCollection
-        .find(query)
-        .sort({ create_at: -1, update_at: -1 })
-        .skip(page * pagesize)
-        .limit(pagesize)
-        .toArray()
-        .then(docs => {
-          let froms = docs.map(doc => ObjectID(doc.from));
-
-          return userCollection.find({
-              _id: {
-                $in: froms
-              }
-            }, {
-              name: 1,
-              avatar: 1,
-              mobile: 1
-            })
+      return sup_requestCollection
+        .update({view_status: 0},{$set:{view_status: 1}},{multi:true})
+        .then(result =>{
+          return requestCollection
+            .find(query)
+            .sort({ create_at: -1, update_at: -1 })
+            .skip(page * pagesize)
+            .limit(pagesize)
             .toArray()
-            .then(users => {
-              return docs.map((doc, index) => ({
-                ...users.find(user => user._id.toString() == doc.from),
-                ...doc
-              }));
+            .then(docs => {
+              let froms = docs.map(doc => ObjectID(doc.from));
+
+              return userCollection.find({
+                  _id: {
+                    $in: froms
+                  }
+                }, {
+                  name: 1,
+                  avatar: 1,
+                  mobile: 1
+                })
+                .toArray()
+                .then(users => {
+                  return docs.map((doc, index) => ({
+                    ...users.find(user => user._id.toString() == doc.from),
+                    ...doc
+                  }));
+                });
             });
         });
     }
@@ -447,19 +481,40 @@ module.exports = function(app) {
      * @returns {Promise}
      */
     static handleFriendRequest(status, request_id, receiver) {
-      if (status == 'reject')
-        return User._rejectFriendRequest(request_id, receiver);
+      if (status == 'reject') {
+        return requestCollection
+          .findOne({_id: ObjectID(request_id)})
+          .then(result =>{
+            let from = result.from;
+            let to = result.receiver;
+            return sup_requestCollection
+              .remove({from: from,to: to})
+              .then(result =>{
+                return User._rejectFriendRequest(request_id, receiver);
+              });
+          });
+      }
       if (status == 'agree') {
-        return User
-          ._agreeFriendRequest(request_id, receiver)
-          .then(result => {
-            let { from, receiver } = result;
-            const roomInfo = Room.createRoomInfo(from, receiver)
+        return requestCollection
+          .findOne({_id: ObjectID(request_id)})
+          .then(result =>{
+            let from = result.from;
+            let to = result.receiver;
+            return sup_requestCollection
+              .remove({from: from,to: to})
+              .then(result =>{
+                return User
+                  ._agreeFriendRequest(request_id, receiver)
+                  .then(result => {
+                    let { from, receiver } = result;
+                    const roomInfo = Room.createRoomInfo(from, receiver)
 
-            return new Room(roomInfo)
-              .save()
-              .then(() => {
-                return result;
+                    return new Room(roomInfo)
+                      .save()
+                      .then(() => {
+                        return result;
+                      });
+                  });
               });
           });
       }
