@@ -26,7 +26,7 @@ class entryHandler {
     let { cid, init_token, client } = msg;
 
     const db = self.app.db;
-    const sup_requestCollection = db.collection('friend.sup_request');
+    const sup_requestCollection = db.collection('friend');
     const ObjectID = self.app.get('ObjectID');
     // console.log('msg',msg)
     console.log('init_token::::::::::::', init_token);
@@ -106,16 +106,15 @@ class entryHandler {
                   });
                 }
               }).then(res => {
-                sup_requestCollection
-                  .find({to: ObjectID(uid), view_status: 0})
-                  .count()
-                  .then(count =>{
-                    self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function(err, status) {
-                      if (err) return next(err);
-                      res.count = count;console.log(res);
+                self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function(err, status) {
+                  if (err) return next(err);console.log(res);
+                  sup_requestCollection
+                    .count()
+                    .then(count =>{
+                      res.count = count;console.log('resresresres::::::::',res);
                       next(null, res);
                     });
-                  });
+                });
               }).catch(next);
             });
           });
