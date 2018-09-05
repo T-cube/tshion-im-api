@@ -205,7 +205,7 @@ module.exports = function(app) {
                 .insertOne(sup_data)
                 .then(result => {
                   return sup_requestCollection
-                    .find({view_status: 0})
+                    .find({to: sup_data.to, view_status: 0})
                     .count()
                     .then(count => {
                       let receiver = ObjectID(user_id);
@@ -282,7 +282,7 @@ module.exports = function(app) {
       page = parseInt(page);
 
       return sup_requestCollection
-        .update({view_status: 0},{$set:{view_status: 1}},{multi:true})
+        .update({to: ObjectID(query.receiver), view_status: 0},{$set:{view_status: 1}},{multi:true})
         .then(result =>{
           return requestCollection
             .find(query)

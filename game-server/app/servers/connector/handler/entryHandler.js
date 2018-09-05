@@ -24,6 +24,10 @@ class entryHandler {
   enter(msg, session, next) {
     let self = this;
     let { cid, init_token, client } = msg;
+
+    const db = self.app.db;
+    const sup_requestCollection = db.collection('friend.sup_request');
+    const ObjectID = self.app.get('ObjectID');
     // console.log('msg',msg)
     console.log('init_token::::::::::::', init_token);
     new Promise((resolve, reject) => {
@@ -102,10 +106,16 @@ class entryHandler {
                   });
                 }
               }).then(res => {
-                self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function(err, status) {
-                  if (err) return next(err);
-                  next(null, res);
-                });
+                sup_requestCollection
+                  .find({to: ObjectID(uid), view_status: 0})
+                  .count()
+                  .then(count =>{
+                    self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function(err, status) {
+                      if (err) return next(err);
+                      res.count = count;console.log(res);
+                      next(null, res);
+                    });
+                  });
               }).catch(next);
             });
           });
