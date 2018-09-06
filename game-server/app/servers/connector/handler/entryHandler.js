@@ -109,7 +109,7 @@ class entryHandler {
                 self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function(err, status) {
                   if (err) return next(err);console.log(res);
                   sup_requestCollection
-                    .find({to: ObjectID(uid),view_status: 0})
+                    .find({to: ObjectID(uid.substring(0,uid.length-4)),view_status: 0})
                     .count()
                     .then(count =>{
                       res.count = count;console.log('resresresres::::::::',res);
