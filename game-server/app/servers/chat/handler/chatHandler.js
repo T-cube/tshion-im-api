@@ -177,6 +177,10 @@ prototype.sendGroup = function(msg, session, next) {
   var self = this;
   var { roomid, content, type, from_name, group } = msg;
 
+  const db = self.app.db;
+  const groupMemberCollection = db.collection('chat.group.member');
+  const ObjectID = self.app.get('ObjectID');
+
   if (type == 'text') {
     content = content.replace(/&nbsp;/g, ' ');
     if (_.isBlank(content)) return next({ code: 400, error: 'content can not be blank' });
@@ -189,38 +193,48 @@ prototype.sendGroup = function(msg, session, next) {
     from
   });
 
-  self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
-    if (err) return next(err);
+  groupMemberCollection
+    .findOne({uid: ObjectID(from), group: ObjectID(group), status: 'quitted'})
+    .then(quit =>{
+      if(quit){
+        console.log('quit:::::::::::::::::::',quit);
+        return null;
+      }
 
-    result.from_name = from_name;
+      console.log('flag::::::::::::::::::::::::::::::::::::');
+      self.app.rpc.message.messageRemote.saveMessage(null, msg, (err, result) => {
+        if (err) return next(err);
 
-    self.app.rpc.group.groupRemote.getMembers(null, group, from, function(err, members) {
-      if (err) return next(err);
-      var uids = members.map(member => member.uid);
+        result.from_name = from_name;
 
-      param = Object.assign(param, result);
-      var receivers = uids.filter(id => id !== from);
-      self.app.rpc.channel.channelRemote.cahnnelPushMessageByUids(session, param, receivers, function(err, offlines) {
+        self.app.rpc.group.groupRemote.getMembers(null, group, from, function(err, members) {
+          if (err) return next(err);
+          var uids = members.map(member => member.uid);
 
-        // console.log('offline uses : =========',offlines);
-        next(null, { route: param.route, msg, param });
+          param = Object.assign(param, result);
+          var receivers = uids.filter(id => id !== from);
+          self.app.rpc.channel.channelRemote.cahnnelPushMessageByUids(session, param, receivers, function(err, offlines) {
 
-        var pushs = members.reduce(function(curr, member) {
-          if (member.not_distub != 1) {
-            curr.push(member.uid);
-          }
-          return curr;
-        }, []);
-        self.app.rpc.push.pushRemote.pushMessageMany(null, param, pushs, () => {});
+            // console.log('offline uses : =========',offlines);
+            next(null, { route: param.route, msg, param });
 
-        self.app.rpc.message.messageRemote.saveOfflineMessages(null, param, offlines, () => {});
+            var pushs = members.reduce(function(curr, member) {
+              if (member.not_distub != 1) {
+                curr.push(member.uid);
+              }
+              return curr;
+            }, []);
+            self.app.rpc.push.pushRemote.pushMessageMany(null, param, pushs, () => {});
 
-        self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
-          err && console.log(err);
+            self.app.rpc.message.messageRemote.saveOfflineMessages(null, param, offlines, () => {});
+
+            self.app.rpc.account.accountRemote.activeRoom(session, roomid, function(err) {
+              err && console.log(err);
+            });
+          });
         });
       });
     });
-  });
 };
 
 /**
