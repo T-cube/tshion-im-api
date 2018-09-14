@@ -108,8 +108,16 @@ class entryHandler {
               }).then(res => {
                 self.app.rpc.account.accountRemote.setChannelId(session, uid, cid, function(err, status) {
                   if (err) return next(err);console.log(res);
+                  if (uid.indexOf('*android')>=0){
+                    uid=uid.substring(0,uid.length-8);
+                  }else if(uid.indexOf('*ios')>=0){
+                    uid=uid.substring(0,uid.length-4);
+                  }else{
+                    console.log('uid is error');
+                    return;
+                  }
                   sup_requestCollection
-                    .find({to: ObjectID(uid.substring(0,uid.length-4)),view_status: 0})
+                    .find({to: ObjectID(uid),view_status: 0})
                     .count()
                     .then(count =>{
                       res.count = count;console.log('resresresres::::::::',res);
