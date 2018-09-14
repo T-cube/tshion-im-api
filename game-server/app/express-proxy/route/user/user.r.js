@@ -183,6 +183,39 @@ module.exports = function(app) {
           }).catch(next);
         }
       },
+      'room-request': {
+        docs: {
+          name: '邀请好友加入房间请求',
+          params: [
+            { key: 'user_id', type: 'String' },
+            { key: 'from', type: 'String' },
+            { key: 'message', type: 'String' }
+          ]
+        },
+        method(req, res, next) {
+          let user = req.user;
+          let { user_id, message } = req.body;
+          let self = user._id.toHexString();
+          if (self == user_id)
+            return next(req.apiError(400, 'can not add self as a friend '));
+
+          User.getFriendInfo(user._id, user_id).then(exist => {
+            res.sendJson(exist);
+            if (exist)
+              req.pomelo.rpc.push.pushRemote.notifyClient(null, 'roomRequest', {
+                  from: user._id.toHexString(),
+                  message: message,
+                  type: 'new'
+                },
+                user_id,
+                function(err) {
+                  if (err) {
+                    console.error('notify error:', err);
+                  }
+                });
+          }).catch(next);
+        }
+      },
       'friend-request/:status': {
         docs: {
           name: '接受/拒绝好友请求',
