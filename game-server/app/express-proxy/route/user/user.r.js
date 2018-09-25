@@ -189,13 +189,16 @@ module.exports = function(app) {
           params: [
             { key: 'user_id', type: 'String' },
             { key: 'from', type: 'String' },
-            { key: 'message', type: 'String' }
+            { key: 'message', type: 'String' },
+            { key: 'style', type: 'Number'} //style的取值，0代表语音，1代表视频
           ]
         },
         method(req, res, next) {
           let user = req.user;
-          let { user_id, message } = req.body;
+          let { user_id, message, style } = req.body;
           let self = user._id.toHexString();
+          if(!(style == 0 || style == 1))
+            return next(req.apiError(400, 'lack style or style is not properly '));
           if (self == user_id)
             return next(req.apiError(400, 'can not add self as a friend '));
 
@@ -204,6 +207,7 @@ module.exports = function(app) {
             if (exist)
               req.pomelo.rpc.push.pushRemote.notifyClient(null, 'roomRequest', {
                   from: user._id.toHexString(),
+                  style: style,
                   message: message,
                   type: 'new'
                 },
@@ -222,22 +226,30 @@ module.exports = function(app) {
           params: [
             { key: 'user_id', type: 'String' },
             { key: 'from', type: 'String' },
-            { key: 'message', type: 'String' }
+            { key: 'message', type: 'String' },
+            { key: 'style', type: 'Number'}, //style的取值，0代表语音，1代表视频
+            { key: 'choice', type: 'Number'} //choice的取值， 0代表接受，1代表拒绝
           ]
         },
         method(req, res, next) {
           let user = req.user;
-          let { user_id, message } = req.body;
+          let { user_id, message, style, choice } = req.body;
           let self = user._id.toHexString();
+          if(!(style == 0 || style == 1))
+            return next(req.apiError(400, 'lack style or style is not properly '));
+          if(!(choice == 0 || choice == 1))
+            return next(req.apiError(400, 'lack choice or choice is not properly '));
           if (self == user_id)
             return next(req.apiError(400, 'can not add self as a friend '));
 
-          User.getFriendInfo(user._id, user_id).then(exist => {
+          User.getFriendInfo(user._id, user_id).then(exist => {console.log(message);
             res.sendJson(exist);
             if (exist)
               req.pomelo.rpc.push.pushRemote.notifyClient(null, 'roomRequestFeedback', {
                   from: user._id.toHexString(),
                   message: message,
+                  style: style,
+                  choice: choice,
                   type: 'new'
                 },
                 user_id,
